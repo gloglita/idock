@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idock", "idock.vcxproj", "{C700037B-2465-E567-E746-C0549170C190}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "idock", "idock.vcxproj", "{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,14 +11,14 @@ Global
 		Release|x64 = Release|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{C700037B-2465-E567-E746-C0549170C190}.Debug|Win32.ActiveCfg = Debug|Win32
-		{C700037B-2465-E567-E746-C0549170C190}.Debug|Win32.Build.0 = Debug|Win32
-		{C700037B-2465-E567-E746-C0549170C190}.Debug|x64.ActiveCfg = Debug|x64
-		{C700037B-2465-E567-E746-C0549170C190}.Debug|x64.Build.0 = Debug|x64
-		{C700037B-2465-E567-E746-C0549170C190}.Release|Win32.ActiveCfg = Release|Win32
-		{C700037B-2465-E567-E746-C0549170C190}.Release|Win32.Build.0 = Release|Win32
-		{C700037B-2465-E567-E746-C0549170C190}.Release|x64.ActiveCfg = Release|x64
-		{C700037B-2465-E567-E746-C0549170C190}.Release|x64.Build.0 = Release|x64
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Debug|Win32.ActiveCfg = Debug|Win32
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Debug|Win32.Build.0 = Debug|Win32
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Debug|x64.ActiveCfg = Debug|x64
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Debug|x64.Build.0 = Debug|x64
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Release|Win32.ActiveCfg = Release|Win32
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Release|Win32.Build.0 = Release|Win32
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Release|x64.ActiveCfg = Release|x64
+		{1788CA7B-A0E5-68A6-AC5B-6E5A5C099837}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
