@@ -3,8 +3,6 @@ SRC = src
 OBJ = obj
 BIN = bin
 
-.SUFFIXES: .cpp .o
-
 $(OBJ)/%.o : $(SRC)/%.cpp 
 	$(CC) -o $@ -c $< 
 
