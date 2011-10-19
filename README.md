@@ -76,7 +76,7 @@ Jacky Lee (JackyLeeHongJian@Gmail.com)
 Logo
 ----
 
-![idock log](logo.png)
+![idock logo](https://github.com/HongjianLi/idock/raw/master/logo.png)
 
 Green grape is chosen as the logo for idock because it is the favorite fruit of the author.
 
