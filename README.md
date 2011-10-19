@@ -1,14 +1,14 @@
 idock
 =====
 
-idock is a multithreaded [virtual screening] tool for flexible ligand [docking](http://en.wikipedia.org/wiki/Docking_%28molecular%29) for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0].
 
 
 Features
 --------
 
 * idock invents its own thread pool in order to reuse threads and maintain a high CPU utilization throughout the entire screening procedure. The thread pool parallelizes the creation of grid maps and the execution of Monte Carlo tasks.
-* idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the C++11 standard, to avoid frequent memory reallocation.
+* idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
 
@@ -24,7 +24,7 @@ Tested platforms and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries](http://www.boost.org/). All the Boost versions newer than or euqal to 1.46.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
+idock depends on [Boost C++ Libraries]. All the Boost versions newer than or euqal to 1.46.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
 
 ### Compilation on Linux
 
@@ -62,7 +62,7 @@ Or one can instruct idock to load the options from a configuration file
 Documentation Creation
 ----------------------
 
-Documentations in both HTML and LaTeX formats can be esaily created by running [doxygen](www.doxygen.org)
+Documentations in both HTML and LaTeX formats can be esaily created by running [doxygen]
 
     doxygen idock.doxygen
 
@@ -93,7 +93,13 @@ Logo
 
 ![idock logo](https://github.com/HongjianLi/idock/raw/master/logo.png)
 
-Green grape is chosen as the logo for idock because it is the favorite fruit of the author.
+Green grape is chosen as the logo for idock because it is the author's favorite fruit.
 
 
 [virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
+[docking]: http://en.wikipedia.org/wiki/Docking_%28molecular%29
+[Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
+[C++11]: http://en.wikipedia.org/wiki/C%2B%2B11
+[Boost C++ Libraries]: http://www.boost.org/
+[doxygen]: http://www.doxygen.org
+
