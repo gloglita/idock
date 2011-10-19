@@ -1,7 +1,7 @@
 idock
 =====
 
-idock is a multithreaded virtual screening tool for flexible ligand docking for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under Apache License 2.0.
+idock is a multithreaded virtual screening tool for flexible ligand docking for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 
 Features
@@ -31,7 +31,7 @@ idock depends on [Boost C++ Libraries](http://www.boost.org/). All the Boost ver
 The Makefile uses GCC as the default compiler. One may modify the Makefile to use different compilation options or a different compiler.
 To compile, simply type
 
-    make
+    make -j
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
@@ -57,6 +57,21 @@ Or one can instruct idock to load the options from a configuration file
 
     cd examples/3KFN/4DX
     idock --config config.txt
+
+
+Documentation Creation
+----------------------
+
+Documentations in both HTML and LaTeX formats can be esaily created by running [doxygen](www.doxygen.org)
+
+    doxygen idock.doxygen
+
+The created documents will be placed in `doc` folder. To compile LaTeX files into PDF, one must have `pdflatex` installed.
+
+    cd doc/latex
+    make
+
+The generated PDF will be `refman.pdf`.
 
 
 Change Log
