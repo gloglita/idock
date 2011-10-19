@@ -1,7 +1,7 @@
 idock
 =====
 
-idock is a multithreaded virtual screening tool for flexible ligand docking for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
+idock is a multithreaded [virtual screening] tool for flexible ligand [docking](http://en.wikipedia.org/wiki/Docking_%28molecular%29) for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0.html).
 
 
 Features
@@ -95,3 +95,5 @@ Logo
 
 Green grape is chosen as the logo for idock because it is the favorite fruit of the author.
 
+
+[virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
