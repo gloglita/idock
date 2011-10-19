@@ -331,11 +331,11 @@ int main(int argc, char* argv[])
 				{
 					// Populate the grid map task container.
 					const size_t num_gm_tasks = b.num_probes[0];
-					vector<packaged_task<void> > gm_tasks;
+					ptr_vector<packaged_task<void> > gm_tasks;
 					gm_tasks.reserve(num_gm_tasks);
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
-						gm_tasks.push_back(packaged_task<void>(boost::bind(grid_maps_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
+						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_maps_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
 					}
 
 					// Run the grid map tasks in parallel.
@@ -368,12 +368,12 @@ int main(int argc, char* argv[])
 					result_containers[i].reserve(result::Max_Results);
 
 				// Populate the Monte Carlo task container.
-				vector<packaged_task<void> > mc_tasks;
+				ptr_vector<packaged_task<void> > mc_tasks;
 				mc_tasks.reserve(num_mc_tasks);
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					const size_t seed = eng();
-					mc_tasks.push_back(packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), (seed << 5) | static_cast<unsigned int>(i), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), (seed << 5) | static_cast<unsigned int>(i), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 				
 				// Run the Monte Carlo tasks in parallel.
