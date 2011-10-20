@@ -35,7 +35,7 @@ The Makefile uses GCC as the default compiler. To compile, simply type
 
 LLVM/CLANG is also supported, but the C++0x features are rather limited, so they are turned off in the Makefile.
 
-    make TOOLSET=clang -j
+    make -j TOOLSET=clang
 
 One may modify the Makefile to use a different compiler or different compilation options.
 
