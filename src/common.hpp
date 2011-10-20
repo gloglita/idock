@@ -41,7 +41,7 @@ namespace idock
 	/// Returns true if the absolute difference between two floating point values is within the constant tolerance.
 	inline bool eq(const fl a, const fl b)
 	{
-		return abs(a - b) < tolerance;
+		return fabs(a - b) < tolerance;
 	}
 
 	/// Returns the square of a generic value.

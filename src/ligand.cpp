@@ -88,7 +88,7 @@ namespace idock
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
 				const size_t t = f.heavy_atoms[i].xs;
-				if (find(atom_types.cbegin(), atom_types.cend(), t) == atom_types.end()) atom_types.push_back(t);
+				if (find(atom_types.begin(), atom_types.end(), t) == atom_types.end()) atom_types.push_back(t);
 			}
 		}
 		return atom_types;

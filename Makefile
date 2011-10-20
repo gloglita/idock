@@ -1,4 +1,9 @@
 CC = g++ -static -O3 -DNDEBUG -std=gnu++0x
+
+ifeq ($(TOOLSET), clang)
+  CC = clang++ -static -O3 -DNDEBUG -Wno-c++0x-extensions
+endif
+
 SRC = src
 OBJ = obj
 BIN = bin
