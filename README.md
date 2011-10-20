@@ -17,6 +17,7 @@ Tested platforms and compilers
 ------------------------------
 
 * Arch Linux 3.0.6 x64 and GCC 4.6.1
+* Arch Linux 3.0.6 x64 and LLVM/CLANG 2.9
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010
 
@@ -28,16 +29,23 @@ idock depends on [Boost C++ Libraries]. All the Boost versions newer than or euq
 
 ### Compilation on Linux
 
-The Makefile uses GCC as the default compiler. One may modify the Makefile to use different compilation options or a different compiler.
-To compile, simply type
+The Makefile uses GCC as the default compiler. To compile, simply type
 
     make -j
+
+LLVM/CLANG is also supported.
+
+    make TOOLSET=clang -j
+
+One may modify the Makefile to use a different compiler or different compilation options.
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
 ### Compilation on Windows
 
 Visual Studio 2010 solution and project files are provided. One may open `idock.sln` in Visual Studio and do a full rebuild.
+
+The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
 
 Usage
@@ -93,13 +101,14 @@ Logo
 
 ![idock logo](https://github.com/HongjianLi/idock/raw/master/logo.png)
 
-Green grape is chosen as the logo for idock because it is the author's favorite fruit.
+Green grape is chosen as the logo for idock because it is the author's favorite fruit. The logo image is collected from [Open Clip Art].
 
 
 [virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
-[docking]: http://en.wikipedia.org/wiki/Docking_%28molecular%29
+[docking]: http://en.wikipedia.org/wiki/Docking_(molecular)
 [Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
-[C++11]: http://en.wikipedia.org/wiki/C%2B%2B11
-[Boost C++ Libraries]: http://www.boost.org/
+[C++11]: http://en.wikipedia.org/wiki/C++11
+[Boost C++ Libraries]: http://www.boost.org
 [doxygen]: http://www.doxygen.org
+[Open Clip Art]: http://www.openclipart.org
 
