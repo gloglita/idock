@@ -33,7 +33,7 @@ The Makefile uses GCC as the default compiler. To compile, simply type
 
     make -j
 
-LLVM/CLANG is also supported.
+LLVM/CLANG is also supported, but the C++0x features are rather limited, so they are turned off in the Makefile.
 
     make TOOLSET=clang -j
 
@@ -43,7 +43,7 @@ The generated objects will be placed in the `obj` folder, and the generated exec
 
 ### Compilation on Windows
 
-Visual Studio 2010 solution and project files are provided. One may open `idock.sln` in Visual Studio and do a full rebuild.
+Visual Studio 2010 solution and project files are provided in the `msvc` folder. One may open `idock.sln` in Visual Studio and do a full rebuild. The project file uses Windows 7.1 SDK for compilation by default. One may revert it back to vc100.
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
