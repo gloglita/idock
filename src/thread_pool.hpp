@@ -19,7 +19,6 @@
 #ifndef IDOCK_THREAD_POOL_HPP
 #define IDOCK_THREAD_POOL_HPP
 
-#include <vector>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
@@ -28,7 +27,6 @@
 
 namespace idock
 {
-	using std::vector;
 	using boost::ptr_vector;
 	using boost::thread_group;
 	using boost::mutex;
