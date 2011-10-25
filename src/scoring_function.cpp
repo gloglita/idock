@@ -42,10 +42,10 @@ namespace idock
 			+  (-0.587439) * ((xs_hbond(t1, t2)) ? ((d >= 0) ? 0.0 : ((d <= -0.7) ? 1 : d * (-1.428571))): 0.0);
 	}
 
-	scoring_function::scoring_function() : prec(XS_TYPE_SIZE, vector<scoring_function_element>(static_cast<size_t>(Factor * Cutoff_Sqr) + 1, scoring_function_element()))
+	scoring_function::scoring_function() : triangular_matrix<vector<scoring_function_element> >(XS_TYPE_SIZE, vector<scoring_function_element>(static_cast<size_t>(Factor * Cutoff_Sqr) + 1, scoring_function_element()))
 	{
 		// Obtain the number of sampling points within [0, Cutoff].
-		const size_t n = prec(0, 0).size();
+		const size_t n = (*this)(0, 0).size();
 
 		vector<fl> rs(n, 0);
 		for (size_t i = 0; i < n; ++i)
@@ -56,7 +56,7 @@ namespace idock
 		for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
 		for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
 		{
-			vector<scoring_function_element>& p = prec(t1, t2);
+			vector<scoring_function_element>& p = (*this)(t1, t2);
 
 			// Calculate the value of scoring function evaluated at (t1, t2, d).
 			for (size_t i = 0; i < n; ++i)
@@ -77,6 +77,6 @@ namespace idock
 	scoring_function_element scoring_function::evaluate(const size_t type_pair_index, const fl r2) const
 	{
 		BOOST_ASSERT(r2 <= Cutoff_Sqr);
-		return prec[type_pair_index][static_cast<size_t>(Factor * r2)];
+		return (*this)[type_pair_index][static_cast<size_t>(Factor * r2)];
 	}
 }

@@ -38,12 +38,6 @@ namespace idock
 		/// Constructs a 3D array with specified sizes.
 		explicit array3d(const array<size_t, 3> n) : n(n), data(n[0] * n[1] * n[2]) {}
 
-		/// Returns the size of a certain dimension.
-		size_t dim(size_t i) const
-		{
-			return n[i];
-		}
-
 		/// Returns true if all the 3 dimensions are non-zero.
 		bool initialized() const
 		{

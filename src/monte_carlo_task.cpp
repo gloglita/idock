@@ -168,7 +168,7 @@ namespace idock
 				{
 					fl sum = 0;
 					for (size_t j = 0; j < num_variables; ++j)
-						sum += h(i, j) * g1(j);
+						sum += h[triangular_matrix_permissive_index(i, j)] * g1(j);
 					p(i) = -sum;
 				}
 
@@ -232,7 +232,7 @@ namespace idock
 				{
 					fl sum = 0;
 					for (size_t j = 0; j < num_variables; ++j)
-						sum += h(i, j) * y(j);
+						sum += h[triangular_matrix_permissive_index(i, j)] * y(j);
 					mhy(i) = -sum;
 				}
 				yhy = 0;

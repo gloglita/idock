@@ -24,7 +24,7 @@
 namespace idock
 {
 	/// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
-	inline size_t triangular_matrix_index_restrictive(const size_t i, const size_t j)
+	inline size_t triangular_matrix_restrictive_index(const size_t i, const size_t j)
 	{
 		BOOST_ASSERT(j < XS_TYPE_SIZE);
 		BOOST_ASSERT(i <= j);
@@ -32,9 +32,9 @@ namespace idock
 	}
 
 	/// Returns the flattened 1D index of a 2D index (i, j) where either i or j is the lowest dimension.
-	inline size_t triangular_matrix_index_permissive(const size_t i, const size_t j)
+	inline size_t triangular_matrix_permissive_index(const size_t i, const size_t j)
 	{
-		return (i <= j) ? triangular_matrix_index_restrictive(i, j) : triangular_matrix_index_restrictive(j, i);
+		return (i <= j) ? triangular_matrix_restrictive_index(i, j) : triangular_matrix_restrictive_index(j, i);
 	}
 
 	//	i j 0 1 2 3
@@ -50,10 +50,10 @@ namespace idock
 		/// Constructs a triangular matrix with specified 1D size and value to fill.
 		triangular_matrix(const size_t n, const T& filler_val) : vector<T>(n * (n+1) / 2, filler_val) {} 
 
-		/// Returns a mutable reference to the element at 2D index (i, j) where either i ors j is the lowest dimension.
+		/// Returns a mutable reference to the element at 2D index (i, j) where j is the lowest dimension.
 		T& operator()(const size_t i, const size_t j)
 		{
-			return (*this)[triangular_matrix_index_permissive(i, j)];
+			return (*this)[triangular_matrix_restrictive_index(i, j)];
 		}
 	};
 }

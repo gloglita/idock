@@ -236,7 +236,7 @@ namespace idock
 						const fl r2 = r.norm_sqr();
 						if (r2 < scoring_function::Cutoff_Sqr)
 						{
-							const size_t type_pair_index = triangular_matrix_index_permissive(f1.heavy_atoms[i1].xs, f2.heavy_atoms[i2].xs);
+							const size_t type_pair_index = triangular_matrix_permissive_index(f1.heavy_atoms[i1].xs, f2.heavy_atoms[i2].xs);
 							const scoring_function_element element = sf.evaluate(type_pair_index, r2);
 							e += element.e;
 							const vec3 derivative = element.dor * r;

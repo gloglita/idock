@@ -50,7 +50,7 @@ namespace idock
 					for (size_t i = 0; i < num_atom_types_to_populate; ++i)
 					{
 						const size_t t2 = atom_types_to_populate[i];
-						const size_t type_pair_index = triangular_matrix_index_permissive(t1, t2);
+						const size_t type_pair_index = triangular_matrix_permissive_index(t1, t2);
 						e[i] += sf.evaluate(type_pair_index, r2).e;
 					}
 				}

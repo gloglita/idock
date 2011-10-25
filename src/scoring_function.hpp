@@ -32,7 +32,7 @@ namespace idock
 	};
 
 	/// Represents a scoring function.
-	class scoring_function
+	class scoring_function : triangular_matrix<vector<scoring_function_element> >
 	{
 	public:
 		static const fl Cutoff; ///< Cutoff of a scoring function.
@@ -49,8 +49,6 @@ namespace idock
 	private:
 		static const fl Factor; ///< Scaling factor for r, i.e. distance between two atoms.
 		static const fl Factor_Inverse; ///< 1 / Factor.
-
-		triangular_matrix<vector<scoring_function_element> > prec; ///< Precalculated values of scoring function evaluated at all combinations of (t1, t2, r).
 	};
 }
 
