@@ -27,48 +27,46 @@ namespace idock
 	using boost::array;
 
 	/// Represents a vector of 3 floating point elements.
-	class vec3
+	class vec3 : private array<fl, 3>
 	{
 	public:
-		array<fl, 3> data; ///< Payload.
-
 		/// Constructs a vector with uninitialized values.
 		vec3() {}
 
 		/// Constructs a vector with specified values.
 		vec3(const fl d0, const fl d1, const fl d2)
 		{
-			data[0] = d0;
-			data[1] = d1;
-			data[2] = d2;
+			elems[0] = d0;
+			elems[1] = d1;
+			elems[2] = d2;
 		}
 
 		/// Assigns a value to all the 3 elements.
 		void assign(const fl s)
 		{
-			data[0] = s;
-			data[1] = s;
-			data[2] = s;
+			elems[0] = s;
+			elems[1] = s;
+			elems[2] = s;
 		}
 
 		/// Returns a constant reference to the element at index i.
 		const fl& operator[](const size_t i) const
 		{
 			BOOST_ASSERT(i < 3);
-			return data[i];
+			return elems[i];
 		}
 		
 		/// Returns a mutable reference to the element at index i.
 		fl& operator[](const size_t i)
 		{
 			BOOST_ASSERT(i < 3);
-			return data[i];
+			return elems[i];
 		}
 
 		/// Returns the square norm.
 		fl norm_sqr() const
 		{
-			return sqr(data[0]) + sqr(data[1]) + sqr(data[2]);
+			return sqr(elems[0]) + sqr(elems[1]) + sqr(elems[2]);
 		}
 
 		/// Returns the norm.
@@ -87,48 +85,48 @@ namespace idock
 		vec3 normalize() const
 		{
 			const fl factor = 1 / norm();
-			return vec3(factor * data[0], factor * data[1], factor * data[2]);
+			return vec3(factor * elems[0], factor * elems[1], factor * elems[2]);
 		}
 
 		/// Returns the dot product of the current vector and the given vector.
 		fl operator*(const vec3& v) const
 		{
-			return data[0] * v[0] + data[1] * v[1] + data[2] * v[2];
+			return elems[0] * v[0] + elems[1] * v[1] + elems[2] * v[2];
 		}
 
 		/// Returns the result of pairwise multiplication of the current vector and the given vector.
 		vec3 operator*(const array<size_t, 3>& v) const
 		{
-			return vec3(data[0] * v[0], data[1] * v[1], data[2] * v[2]);
+			return vec3(elems[0] * v[0], elems[1] * v[1], elems[2] * v[2]);
 		}
 
 		/// Returns the result of pairwise addition of the current vector and the given vector.
 		vec3 operator+(const vec3& v) const
 		{
-			return vec3(data[0] + v[0], data[1] + v[1], data[2] + v[2]);
+			return vec3(elems[0] + v[0], elems[1] + v[1], elems[2] + v[2]);
 		}
 
 		/// Returns the result of pairwise subtraction of the current vector and the given vector.
 		vec3 operator-(const vec3& v) const
 		{
-			return vec3(data[0] - v[0], data[1] - v[1], data[2] - v[2]);
+			return vec3(elems[0] - v[0], elems[1] - v[1], elems[2] - v[2]);
 		}
 
 		/// Pairwise add a given vector to the current vector.
 		const vec3& operator+=(const vec3& v)
 		{
-			data[0] += v[0];
-			data[1] += v[1];
-			data[2] += v[2];
+			elems[0] += v[0];
+			elems[1] += v[1];
+			elems[2] += v[2];
 			return *this;
 		}
 
 		/// Pairwise subtract a given vector from the current vector.
 		const vec3& operator-=(const vec3& v)
 		{
-			data[0] -= v[0];
-			data[1] -= v[1];
-			data[2] -= v[2];
+			elems[0] -= v[0];
+			elems[1] -= v[1];
+			elems[2] -= v[2];
 			return *this;
 		}
 	};
