@@ -13,11 +13,14 @@ Features
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
 
 
-Tested platforms and compilers
-------------------------------
+Tested operating systems and compilers
+--------------------------------------
 
-* Arch Linux 3.0.6 x64 and GCC 4.6.1
-* Arch Linux 3.0.6 x64 and LLVM/CLANG 2.9
+* Ubuntu 11.10 x86_64 and GCC 4.6.1
+* Ubuntu 11.10 x86_64 and CLANG 2.9
+* Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.0.5
+* Arch Linux 3.0.7 x86_64 and GCC 4.6.1
+* Arch Linux 3.0.7 x86_64 and CLANG 2.9
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010
 
@@ -33,9 +36,13 @@ The Makefile uses GCC as the default compiler. To compile, simply type
 
     make -j
 
-LLVM/CLANG is also supported, but the C++0x features are rather limited, so they are turned off in the Makefile.
+CLANG is also supported, but the C++0x features are rather limited, so they are turned off in the Makefile.
 
     make -j TOOLSET=clang
+
+Intel C++ Compiler is also supported.
+
+    make -j TOOLSET=intel-linux
 
 One may modify the Makefile to use a different compiler or different compilation options.
 
