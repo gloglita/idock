@@ -77,6 +77,6 @@ namespace idock
 	scoring_function_element scoring_function::evaluate(const size_t type_pair_index, const fl r2) const
 	{
 		BOOST_ASSERT(r2 <= Cutoff_Sqr);
-		return prec(type_pair_index)[static_cast<size_t>(Factor * r2)];
+		return prec[type_pair_index][static_cast<size_t>(Factor * r2)];
 	}
 }

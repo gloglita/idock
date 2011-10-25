@@ -19,15 +19,15 @@
 #ifndef IDOCK_MATRIX_HPP
 #define IDOCK_MATRIX_HPP
 
-#include "common.hpp"
+#include "atom_constants.hpp"
 
 namespace idock
 {
 	/// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
 	inline size_t triangular_matrix_index_restrictive(const size_t i, const size_t j)
 	{
-//		BOOST_ASSERT(j < XS_TYPE_SIZE);
-		BOOST_ASSERT(i <= j); 
+		BOOST_ASSERT(j < XS_TYPE_SIZE);
+		BOOST_ASSERT(i <= j);
 		return i + j * (j + 1) / 2; 
 	}
 
@@ -44,21 +44,17 @@ namespace idock
 	//	3	      9
 	/// Represents a generic triangular matrix.
 	template<typename T>
-	class triangular_matrix
+	class triangular_matrix : public vector<T>
 	{
 	public:
 		/// Constructs a triangular matrix with specified 1D size and value to fill.
-		triangular_matrix(const size_t n, const T& filler_val) : n(n), data(n * (n+1) / 2, filler_val) {} 
+		triangular_matrix(const size_t n, const T& filler_val) : vector<T>(n * (n+1) / 2, filler_val) {} 
 
-		/// Returns a constant reference to the element at 1D index i.
-		const T& operator()(const size_t i) const { return data[i]; }
-
-		/// Returns a mutable reference to the element at 2D index (i, j) where j is the lowest dimension.
-		T& operator()(const size_t i, const size_t j) { return data[triangular_matrix_index_restrictive(i, j)]; } 
-
-	private:
-		size_t n; ///< 1D size of triangular matrix.
-		vector<T> data; ///< Flattened 1D payload.
+		/// Returns a mutable reference to the element at 2D index (i, j) where either i ors j is the lowest dimension.
+		T& operator()(const size_t i, const size_t j)
+		{
+			return (*this)[triangular_matrix_index_permissive(i, j)];
+		}
 	};
 }
 
