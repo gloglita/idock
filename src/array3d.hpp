@@ -27,7 +27,7 @@ namespace idock
 {
 	/// Represents a generic 3D array.
 	template<typename T>
-	class array3d
+	class array3d : public vector<T>
 	{
 	public:
 		static const array<size_t, 3> Zero; ///< Used to initialize an empty 3D array.
@@ -36,7 +36,7 @@ namespace idock
 		array3d() : n(Zero) {}
 
 		/// Constructs a 3D array with specified sizes.
-		explicit array3d(const array<size_t, 3> n) : n(n), data(n[0] * n[1] * n[2]) {}
+		explicit array3d(const array<size_t, 3> n) : n(n), vector<T>(n[0] * n[1] * n[2]) {}
 
 		/// Returns true if all the 3 dimensions are non-zero.
 		bool initialized() const
@@ -50,13 +50,13 @@ namespace idock
 			this->n[0] = n[0];
 			this->n[1] = n[1];
 			this->n[2] = n[2];
-			data.resize(n[0] * n[1] * n[2]);
+			static_cast<vector<T>&>(*this).resize(n[0] * n[1] * n[2]);
 		}
 
 		/// Reeturns a constant reference to the element at index (i, j, k) where k is the lowest dimension.
 		const T& operator()(const size_t i, const size_t j, const size_t k) const
 		{
-			return data[n[2] * (n[1] * i + j) + k];
+			return (*this)[n[2] * (n[1] * i + j) + k];
 		}
 
 		/// Returns a mutable reference to the element at index (i, j, k) where k is the lowest dimension.
@@ -79,7 +79,6 @@ namespace idock
 
 	private:
 		array<size_t, 3> n; ///< The sizes of 3 dimensions.
-		vector<T> data; ///< Flattened 1D payload.
 	};
 
 	template<typename T>

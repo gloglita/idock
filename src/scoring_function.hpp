@@ -32,7 +32,7 @@ namespace idock
 	};
 
 	/// Represents a scoring function.
-	class scoring_function : triangular_matrix<vector<scoring_function_element> >
+	class scoring_function : private triangular_matrix<vector<scoring_function_element> >
 	{
 	public:
 		static const fl Cutoff; ///< Cutoff of a scoring function.
