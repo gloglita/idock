@@ -24,7 +24,7 @@
 namespace idock
 {
 	/// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
-	inline size_t triangular_matrix_index(const size_t i, const size_t j)
+	inline size_t triangular_matrix_index_restrictive(const size_t i, const size_t j)
 	{
 //		BOOST_ASSERT(j < XS_TYPE_SIZE);
 		BOOST_ASSERT(i <= j); 
@@ -34,7 +34,7 @@ namespace idock
 	/// Returns the flattened 1D index of a 2D index (i, j) where either i or j is the lowest dimension.
 	inline size_t triangular_matrix_index_permissive(const size_t i, const size_t j)
 	{
-		return (i <= j) ? triangular_matrix_index(i, j) : triangular_matrix_index(j, i);
+		return (i <= j) ? triangular_matrix_index_restrictive(i, j) : triangular_matrix_index_restrictive(j, i);
 	}
 
 	//	i j 0 1 2 3
@@ -50,20 +50,11 @@ namespace idock
 		/// Constructs a triangular matrix with specified 1D size and value to fill.
 		triangular_matrix(const size_t n, const T& filler_val) : n(n), data(n * (n+1) / 2, filler_val) {} 
 
-		/// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
-		size_t index(const size_t i, const size_t j) const { return triangular_matrix_index(i, j); }
-
-		/// Returns the flattened 1D index of a 2D index (i, j) where either i or j is the lowest dimension.
-		size_t index_permissive(const size_t i, const size_t j) const { return (i < j) ? index(i, j) : index(j, i); }
-
-		/// Returns a constant reference to the element at index i.
+		/// Returns a constant reference to the element at 1D index i.
 		const T& operator()(const size_t i) const { return data[i]; }
 
-		/// Returns a mutable reference to the element at index (i, j) where j is the lowest dimension.
-		T& operator()(const size_t i, const size_t j) { return data[index(i, j)]; } 
-
-		/// Returns 1D size of current triangular matrix.
-		size_t dim() const { return n; }
+		/// Returns a mutable reference to the element at 2D index (i, j) where j is the lowest dimension.
+		T& operator()(const size_t i, const size_t j) { return data[triangular_matrix_index_restrictive(i, j)]; } 
 
 	private:
 		size_t n; ///< 1D size of triangular matrix.

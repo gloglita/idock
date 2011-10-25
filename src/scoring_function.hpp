@@ -45,7 +45,6 @@ namespace idock
 		scoring_function();
 
 		scoring_function_element evaluate(const size_t type_pair_index, const fl r2) const;
-		size_t index_permissive(const size_t t1, const size_t t2) const;
 
 	private:
 		static const fl Factor; ///< Scaling factor for r, i.e. distance between two atoms.

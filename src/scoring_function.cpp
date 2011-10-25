@@ -79,9 +79,4 @@ namespace idock
 		BOOST_ASSERT(r2 <= Cutoff_Sqr);
 		return prec(type_pair_index)[static_cast<size_t>(Factor * r2)];
 	}
-
-	size_t scoring_function::index_permissive(const size_t t1, const size_t t2) const
-	{
-		return prec.index_permissive(t1, t2);
-	}
 }
