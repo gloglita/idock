@@ -34,3 +34,4 @@ _ReSharper*/
 *.sdf
 *.opensdf
 *.ipch
+/nbproject/private/
