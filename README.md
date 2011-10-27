@@ -92,9 +92,13 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.0 (2011-10-26)
+### 1.0 (2011-07-20)
 
-* First release.
+* First release on [CodePlex].
+
+### 1.1 (2011-11-20)
+
+* Added the --config program option.
 
 
 Contact Author
@@ -118,4 +122,4 @@ Green grape is chosen as the logo for idock because it is the author's favorite 
 [Boost C++ Libraries]: http://www.boost.org
 [doxygen]: http://www.doxygen.org
 [Open Clip Art]: http://www.openclipart.org
-
+[CodePlex]: http://idock.codeplex.com
