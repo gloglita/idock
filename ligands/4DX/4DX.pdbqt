@@ -1,0 +1,17 @@
+REMARK  1 active torsions:
+REMARK  status: ('A' for Active; 'I' for Inactive)
+REMARK    1  A    between atoms: XX_7  and  XX_8 
+ROOT
+ATOM      1  XX  LIG d   1       1.805   1.520  -0.131  0.00  0.00     0.012 C 
+ATOM      2  XX  LIG d   1       0.570   0.736   0.318  0.00  0.00     0.010 C 
+ATOM      3  XX  LIG d   1      -0.693   1.462  -0.149  0.00  0.00     0.007 C 
+ATOM      4  XX  LIG d   1      -1.927   0.677   0.299  0.00  0.00     0.001 C 
+ATOM      5  XX  LIG d   1      -1.890  -0.725  -0.312  0.00  0.00     0.002 C 
+ATOM      6  XX  LIG d   1      -0.627  -1.451   0.155  0.00  0.00     0.032 C 
+ATOM      7  XX  LIG d   1       0.608  -0.666  -0.293  0.00  0.00     0.121 C 
+ENDROOT
+BRANCH   7   8
+ATOM      8  XX  LIG d   1       1.788  -1.345   0.143  0.00  0.00    -0.395 OA
+ATOM      9  XX  LIG d   1       1.877  -2.242  -0.206  0.00  0.00     0.210 HD
+ENDBRANCH   7   8
+TORSDOF 1
