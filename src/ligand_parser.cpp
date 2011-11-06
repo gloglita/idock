@@ -148,7 +148,6 @@ namespace idock
 		{
 			frame& f = frames[k];
 			const size_t num_heavy_atoms = f.heavy_atoms.size();
-			const size_t num_hydrogens = f.hydrogens.size();
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
 				atom& a = f.heavy_atoms[i];

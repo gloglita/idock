@@ -375,7 +375,6 @@ namespace idock
 			const result& r = results[i];
 			out << "MODEL     " << setw(4) << (i + 1) << '\n'
 				<< "REMARK     FREE ENERGY PREDICATED BY IDOCK: " << setw(8) << r.e << " KCAL/MOL\n";
-			frame& f = frames.front();
 			for (size_t j = 0, frame = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 			{
 				const string& line = lines[j];
