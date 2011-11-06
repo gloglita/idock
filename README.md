@@ -13,22 +13,30 @@ Features
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
 
 
-Tested operating systems and compilers
---------------------------------------
+Supported operating systems and compilers
+-----------------------------------------
 
 * Ubuntu 11.10 x86_64 and GCC 4.6.1
 * Ubuntu 11.10 x86_64 and CLANG 2.9
-* Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.0.5
-* Arch Linux 3.0.7 x86_64 and GCC 4.6.1
-* Arch Linux 3.0.7 x86_64 and CLANG 2.9
+* Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.0.5.220
+* Arch Linux 3.1.0 x86_64 and GCC 4.6.2
+* Arch Linux 3.1.0 x86_64 and CLANG 2.9
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010
+* Windows 7 SP1 x64 and Intel C++ Compiler XE 12.1.1.258
+
+
+Unsupported operating systems and compilers
+-------------------------------------------
+
+* Solaris 11 Express 2010.11 x86_64 and GCC 3.4.3
+* Mac OS X Lion 10.7.0 and Xcode 4.2
 
 
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. All the Boost versions newer than or euqal to 1.46.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
+idock depends on [Boost C++ Libraries]. All the Boost versions newer than or euqal to 1.46.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, `Program Options`, and 'Date Time'.
 
 ### Compilation on Linux
 
