@@ -35,3 +35,5 @@ _ReSharper*/
 *.opensdf
 *.ipch
 /nbproject/private/
+log
+output
