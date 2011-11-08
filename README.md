@@ -29,28 +29,31 @@ Supported operating systems and compilers
 Unsupported operating systems and compilers
 -------------------------------------------
 
+* Windows 8 Developer Preview and Visual Studio 11 Developer Preview
 * Solaris 11 Express 2010.11 x86_64 and GCC 3.4.3
 * Mac OS X Lion 10.7.0 and Xcode 4.2
+* Mac OS X Lion 10.7.0 and GCC 4.6.1
+* Mac OS X Lion 10.7.0 and CLANG 3.0
 
 
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. All the Boost versions newer than or euqal to 1.46.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, `Program Options`, and 'Date Time'.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1 and 1.47.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
 
 ### Compilation on Linux
 
-The Makefile uses GCC as the default compiler. To compile, simply type
+The Makefile uses GCC as the default compiler. To compile, simply run
 
     make -j
 
-CLANG is also supported, but the C++0x features are rather limited, so they are turned off in the Makefile.
-
-    make -j TOOLSET=clang
-
-Intel C++ Compiler is also supported.
+Intel C++ Compiler is supported.
 
     make -j TOOLSET=intel-linux
+
+CLANG is also supported, but its C++0x features are rather limited, so they are turned off in the Makefile.
+
+    make -j TOOLSET=clang
 
 One may modify the Makefile to use a different compiler or different compilation options.
 
@@ -58,7 +61,7 @@ The generated objects will be placed in the `obj` folder, and the generated exec
 
 ### Compilation on Windows
 
-Visual Studio 2010 solution and project files are provided in the `msvc` folder. One may open `idock.sln` in Visual Studio and do a full rebuild. The project file uses Windows 7.1 SDK for compilation by default. One may revert it back to vc100.
+Visual Studio 2010 solution and project files are provided in the `msvc` folder. One may open `idock.sln` in Visual Studio and do a full rebuild. The project file uses Windows 7.1 SDK as platform toolset by default. One may revert it to vc100.
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
@@ -72,7 +75,7 @@ To display a full list of available options, simply run the program without argu
 
     idock
 
-The `examples` folder contains several testcases. One can supply the options from command line arguments
+The `examples` folder contains several use cases. One can supply the options from command line arguments
 
     idock --receptor receptors/3KFN.pdbqt --ligand_folder ligands/4DX --output_folder output --center_x 17.488 --center_y 5.151 --center_z 2.530 --size_x 20 --size_y 20 --size_z 18
 
@@ -87,7 +90,7 @@ Documentation Creation
 
 Documentations in both HTML and LaTeX formats can be esaily created by running [doxygen]
 
-    doxygen idock.doxygen
+    doxygen doxygen
 
 The created documents will be placed in `doc` folder. To compile LaTeX files into PDF, one must have `pdflatex` installed.
 
@@ -107,6 +110,7 @@ Change Log
 ### 1.1 (2011-11-20)
 
 * Added the --config program option.
+* Verbose output.
 
 
 Contact Author
