@@ -37,8 +37,6 @@ namespace idock
 			using namespace std;
 			cout.setf(ios::fixed, ios::floatfield);
 			file.setf(ios::fixed, ios::floatfield);
-			cout << setprecision(3);
-			file << setprecision(3);
 		}
 
 		/// Logs a generic left-value reference.

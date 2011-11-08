@@ -20,23 +20,29 @@
 
 namespace idock
 {
-	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(NULL), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), exiting(false)
+	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), hashes_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_hash_index(0), exiting(false)
 	{
 		// Create threads to call (*this)().
 		for (size_t i = 0; i < num_threads; ++i)
 			create_thread(boost::ref(*this));
 	}
 
-	void thread_pool::run(ptr_vector<packaged_task<void> >& tasks)
+	void thread_pool::run(ptr_vector<packaged_task<void> >& tasks, array<fl, num_hashes>& hashes)
 	{
+		// Initialize several task counters for scheduling.
 		tasks_ptr = &tasks;
 		num_tasks = tasks.size();
 		num_started_tasks = 0;
 		num_completed_tasks = 0;
+
+		// Initialize hash variables for displaying progress bar.
+		hashes_ptr = &hashes;
+		next_hash_index = 0;
+
+		// Notify the threads to run tasks.
 		task_incoming.notify_all();
 
 		// Wait until any thread becomes available.
-		// It is the responsibility of the caller to ensure all the tasks are completed at a desired synchronization point by calling unique_future<void>::get().
 		{
 			mutex::scoped_lock self_lk(self); // A scoped lock is a type associated to some mutex type whose objects do the locking/unlocking of a mutex on construction/destruction time.
 			while (num_completed_tasks + (num_threads - 1) < num_tasks)
@@ -79,6 +85,13 @@ namespace idock
 				{
 					mutex::scoped_lock self_lk(self);
 					++num_completed_tasks;
+
+					// Flush hashes if necessary.
+					while ((next_hash_index < num_hashes) && (num_completed_tasks >= (*hashes_ptr)[next_hash_index]))
+					{
+						std::cout << '#' << std::flush;
+						++next_hash_index;
+					}
 				}
 
 				// One task is completed. Notify the main thread.
@@ -87,10 +100,20 @@ namespace idock
 		} while (true);
 	}
 
-	void thread_pool::join()
+	void thread_pool::sync()
 	{
+		mutex::scoped_lock self_lk(self);
+		while (num_completed_tasks < num_tasks) // Wait until all the tasks are completed.
+			task_completion.wait(self_lk);
+	}
+
+	thread_pool::~thread_pool()
+	{
+		// Notify threads to exit from the loop back function.
 		exiting = true;
-		task_incoming.notify_all(); // Notify threads to exit from the loop back function.
-		join_all(); // Wait until all threads are joined.
+		task_incoming.notify_all();
+
+		// Wait until all threads are joined.
+		join_all();
 	}
 }

@@ -27,19 +27,19 @@
  * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
  *
  * \section availability Availability
- * idock is free and open source available at https://github.com/HongjianLi/idock under Apache License 2.0. Both x86 and x64 binaries for Linux and Windows are provided.
+ * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Both x86 and x64 binaries for Linux and Windows are provided.
  *
  * \section installation Installation
  * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is not supported at the moment.
  *
  * \subsection prepare_receptor Prepare receptor files in PDBQT format
- * pythonsh prepare_receptor4.py -r receptor.pdb -o receptor.pdbqt -A hydrogens -U nphs_lps_waters_deleteAltB
+ * pythonsh prepare_receptor4.py -r receptor.pdb
  *
  * \subsection prepare_ligand Prepare ligand files in PDBQT format
- * pythonsh prepare_ligand4.py -l ligand.pdb -o ligand.pdbqt -A hydrogens
+ * pythonsh prepare_ligand4.py -l ligand.pdb
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date October 18, 2011
+ * \date November 8, 2011
  *
  * Copyright (C) 2011 The Chinese University of Hong Kong.
  */
@@ -57,11 +57,10 @@
 
 int main(int argc, char* argv[])
 {
+	std::cout << "idock 1.1\n";
+
 	using namespace idock;
-
-	std::cout << "idock 1.0\n";
-
-	path receptor_path, ligand_folder_path, output_folder_path, log_path, config_path;
+	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	fl energy_range, grid_granularity;
@@ -74,41 +73,41 @@ int main(int argc, char* argv[])
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
 		const path default_log_path = "log";
-		const unsigned concurrency = boost::thread::hardware_concurrency();
-		const unsigned int default_num_threads = concurrency > 0 ? concurrency : 1;
+		const unsigned int concurrency = boost::thread::hardware_concurrency();
+		const unsigned int default_num_threads = concurrency ? concurrency : 1;
 		const size_t default_seed = random_seed();
 		const size_t default_num_mc_tasks = 32;
 		const size_t default_max_conformations = 9;
 		const fl default_energy_range = 3.0;
 		const fl default_grid_granularity = 0.15625;
 
-		options_description input_options("Input (required)");
+		options_description input_options("input (required)");
 		input_options.add_options()
 			("receptor", value<path>(&receptor_path)->required(), "receptor in PDBQT format")
 			("ligand_folder", value<path>(&ligand_folder_path)->required(), "folder of ligands in PDBQT format")
-			("center_x", value<fl>(&center_x)->required(), "X coordinate of the search space center")
-			("center_y", value<fl>(&center_y)->required(), "Y coordinate of the search space center")
-			("center_z", value<fl>(&center_z)->required(), "Z coordinate of the search space center")
-			("size_x", value<fl>(&size_x)->required(), "size in the X dimension (Angstroms)")
-			("size_y", value<fl>(&size_y)->required(), "size in the Y dimension (Angstroms)")
-			("size_z", value<fl>(&size_z)->required(), "size in the Z dimension (Angstroms)")
+			("center_x", value<fl>(&center_x)->required(), "x coordinate of the search space center")
+			("center_y", value<fl>(&center_y)->required(), "y coordinate of the search space center")
+			("center_z", value<fl>(&center_z)->required(), "z coordinate of the search space center")
+			("size_x", value<fl>(&size_x)->required(), "size in the x dimension in Angstrom")
+			("size_y", value<fl>(&size_y)->required(), "size in the y dimension in Angstrom")
+			("size_z", value<fl>(&size_z)->required(), "size in the z dimension in Angstrom")
 			;
 		
-		options_description output_options("Output (optional)");
+		options_description output_options("output (optional)");
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
 			("log", value<path>(&log_path)->default_value(default_log_path), "log file")
 			;
-		
-		options_description miscellaneous_options("Options (optional)");
+
+		options_description miscellaneous_options("options (optional)");
 		miscellaneous_options.add_options()
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
 			("conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
-			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference between the best binding mode and the worst one (kcal/mol)")
+			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference in kcal/mol between the best binding conformation and the worst one")
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
-			("config", value<path>(&config_path), "options can be loaded from a configuration file")
+			("config", value<path>(), "options can be loaded from a configuration file")
 			;
 		
 		options_description all_options;
@@ -125,16 +124,16 @@ int main(int argc, char* argv[])
 		try
 		{
 			variables_map vm;
-			store(parse_command_line(argc, argv, all_options, command_line_style::default_style), vm);
+			store(parse_command_line(argc, argv, all_options), vm);
 			variable_value config_value = vm["config"];
-			if (!config_value.empty())
+			if (!config_value.empty()) // If a configuration file is presented, parse it.
 			{
 				ifile config_file(config_value.as<path>());
 				store(parse_config_file(config_file, all_options), vm);
 			}
-			vm.notify();
+			vm.notify(); // Notify the user if there are any parsing errors.
 		}
-		catch (const error& e)
+		catch (const exception& e)
 		{
 			cerr << e.what() << '\n';
 			return 1;
@@ -143,24 +142,24 @@ int main(int argc, char* argv[])
 		// Validate receptor.
 		if (!exists(receptor_path))
 		{
-			cerr << "The receptor " << receptor_path << " does not exist.\n";
+			cerr << "Receptor " << receptor_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_regular_file(receptor_path))
 		{
-			cerr << "The receptor " << receptor_path << " is not a regular file.\n";
+			cerr << "Receptor " << receptor_path << " is not a regular file\n";
 			return 1;
 		}
 
 		// Validate ligand_folder.
 		if (!exists(ligand_folder_path))
 		{
-			cerr << "The ligand folder " << ligand_folder_path << " does not exist.\n";
+			cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_directory(ligand_folder_path))
 		{
-			cerr << "The ligand folder " << ligand_folder_path << " is not a directory.\n";
+			cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
 
@@ -169,10 +168,10 @@ int main(int argc, char* argv[])
 			size_y < box::Default_Partition_Granularity ||
 			size_z < box::Default_Partition_Granularity)
 		{
-			cerr << "Search space must be at least "
+			cerr << "Search space must be "
 				 << box::Default_Partition_Granularity << "A x "
 				 << box::Default_Partition_Granularity << "A x "
-				 << box::Default_Partition_Granularity << "A large.\n";
+				 << box::Default_Partition_Granularity << "A or larger\n";
 			return 1;
 		}
 
@@ -181,7 +180,7 @@ int main(int argc, char* argv[])
 		{
 			if (!is_directory(output_folder_path))
 			{
-				cerr << "The output folder " << output_folder_path << " is not a directory.\n";
+				cerr << "Output folder " << output_folder_path << " is not a directory\n";
 				return 1;
 			}
 		}
@@ -189,7 +188,7 @@ int main(int argc, char* argv[])
 		{
 			if (!create_directories(output_folder_path))
 			{
-				cerr << "Failed to create the output folder " << output_folder_path << ".\n";
+				cerr << "Failed to create output folder " << output_folder_path << '\n';
 				return 1;
 			}
 		}
@@ -197,27 +196,27 @@ int main(int argc, char* argv[])
 		// Validate miscellaneous options.
 		if (num_threads < 1)
 		{
-			cerr << "Option threads must be 1 or greater.\n";
+			cerr << "Option threads must be 1 or greater\n";
 			return 1;
 		}
 		if (num_mc_tasks < 1)
 		{
-			cerr << "Option tasks must be 1 or greater.\n";
+			cerr << "Option tasks must be 1 or greater\n";
 			return 1;
 		}
 		if (max_conformations < 1)
 		{
-			cerr << "Option modes must be 1 or greater.\n";
+			cerr << "Option modes must be 1 or greater\n";
 			return 1;
 		}
 		if (energy_range < 0)
 		{
-			cerr << "Option energy_range must be non-negative.\n";
+			cerr << "Option energy_range must be 0 or greater\n";
 			return 1;
 		}
 		if (grid_granularity <= 0)
 		{
-			cerr << "Option granularity must be positive.\n";
+			cerr << "Option granularity must be positive\n";
 			return 1;
 		}
 	}
@@ -225,86 +224,104 @@ int main(int argc, char* argv[])
 	try
 	{
 		// Initialize the log.
+		std::cout << "Logging to " << log_path.string() << '\n';
 		tee log(log_path);
 
 		// Initialize a Mersenne Twister random number generator.
-		log << "Using random seed " << seed << ".\n";
+		log << "Using random seed " << seed << '\n';
 		mt19937eng eng(seed);
 
 		// Precalculate the scoring function.
 		const scoring_function sf;
 
-		// Precalculate the sin function.
-		//const precalculation sin_prec(sin_wrapper(), -pi * 0.5, pi * 0.5);
-
-		// Initialize the box.
+		// Initialize the search space of cuboid shape.
 		const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 
-		log << "Parsing receptor " << receptor_path << ".\n";
+		// Parse the receptor.
+		log << "Parsing receptor " << receptor_path.string() << '\n';
 		const receptor rec = receptor_parser().parse(receptor_path);
 
-		// Find all the heavy receptor atoms that are within 8A of the box.
-		vector<size_t> receptor_atoms_within_cutoff;
-		receptor_atoms_within_cutoff.reserve(rec.atoms.size());
-		const size_t num_rec_atoms = rec.atoms.size();
-		for (size_t i = 0; i < num_rec_atoms; ++i)
-		{
-			const atom& a = rec.atoms[i];
-			if (b.within_cutoff(a.coordinate))
-				receptor_atoms_within_cutoff.push_back(i);
-		}
-		const size_t num_receptor_atoms_within_cutoff = receptor_atoms_within_cutoff.size();
-
-		// Allocate each nearby receptor atom to its corresponding partition.
+		// Divide the box into coarse-grained partitions for subsequent grid map creation.
 		array3d<vector<size_t> > partitions(b.num_partitions);
-		for (size_t x = 0; x < b.num_partitions[0]; ++x)
-		for (size_t y = 0; y < b.num_partitions[1]; ++y)
-		for (size_t z = 0; z < b.num_partitions[2]; ++z)
 		{
-			partitions(x, y, z).reserve(receptor_atoms_within_cutoff.size());
-			const array<size_t, 3> index1 = { x,     y,     z     };
-			const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
-			const vec3 corner1 = b.partition_corner1(index1);
-			const vec3 corner2 = b.partition_corner1(index2);
-			for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
+			// Find all the heavy receptor atoms that are within 8A of the box.
+			vector<size_t> receptor_atoms_within_cutoff;
+			receptor_atoms_within_cutoff.reserve(rec.atoms.size());
+			const size_t num_rec_atoms = rec.atoms.size();
+			for (size_t i = 0; i < num_rec_atoms; ++i)
 			{
-				const size_t i = receptor_atoms_within_cutoff[l];
-				if (b.within_cutoff(corner1, corner2, rec.atoms[i].coordinate))
-					partitions(x, y, z).push_back(i);
+				const atom& a = rec.atoms[i];
+				if (b.within_cutoff(a.coordinate))
+					receptor_atoms_within_cutoff.push_back(i);
+			}
+			const size_t num_receptor_atoms_within_cutoff = receptor_atoms_within_cutoff.size();
+
+			// Allocate each nearby receptor atom to its corresponding partition.
+			for (size_t x = 0; x < b.num_partitions[0]; ++x)
+			for (size_t y = 0; y < b.num_partitions[1]; ++y)
+			for (size_t z = 0; z < b.num_partitions[2]; ++z)
+			{
+				partitions(x, y, z).reserve(receptor_atoms_within_cutoff.size());
+				const array<size_t, 3> index1 = { x,     y,     z     };
+				const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
+				const vec3 corner1 = b.partition_corner1(index1);
+				const vec3 corner2 = b.partition_corner1(index2);
+				for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
+				{
+					const size_t i = receptor_atoms_within_cutoff[l];
+					if (b.within_cutoff(corner1, corner2, rec.atoms[i].coordinate))
+						partitions(x, y, z).push_back(i);
+				}
 			}
 		}
-		receptor_atoms_within_cutoff.clear();
+
+		// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
+		vector<array3d<fl> > grid_maps(XS_TYPE_SIZE);
+
+		// Initialize the hash values for displaying the progress bar.
+		const size_t num_gm_tasks = b.num_probes[0];
+		array<fl, num_hashes> gm_hashes, mc_hashes;
+		{
+			const fl num_hashes_inverse = static_cast<fl>(1) / num_hashes;
+			const fl gm_hash_step = num_gm_tasks * num_hashes_inverse;
+			const fl mc_hash_step = num_mc_tasks * num_hashes_inverse;
+			gm_hashes[0] = gm_hash_step - tolerance; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
+			mc_hashes[0] = mc_hash_step - tolerance;
+			for (size_t i = 1; i < num_hashes; ++i)
+			{
+				gm_hashes[i] = gm_hashes[i - 1] + gm_hash_step;
+				mc_hashes[i] = mc_hashes[i - 1] + mc_hash_step;
+			}
+		}
+
+		// Precalculate alpha values for determining step size in BFGS.
+		array<fl, num_alphas> alphas;
+		alphas[0] = 1;
+		for (size_t i = 1; i < num_alphas; ++i)
+		{
+			alphas[i] = alphas[i - 1] * 0.1;
+		}
 
 		// Initialize a ligand parser.
 		ligand_parser lig_parser;
 
-		// Initialize a vector of grid maps.
-		vector<array3d<fl> > grid_maps(XS_TYPE_SIZE);
-
-		// Precalculate alpha values for determining step size in BFGS.
-		const fl alpha_factor = 0.1;
-		const size_t num_alphas = 5;
-		vector<fl> alphas(num_alphas);
-		fl alpha = 1;
-		for (size_t i = 0; i < num_alphas; ++i)
-		{
-			alphas[i] = alpha;
-			alpha *= alpha_factor;
-		}
-
-		// Initialize a thread pool and create threads for later use.
+		// Initialize a thread pool and create worker threads for later use.
 		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand.\n";
 		thread_pool tp(num_threads);
 
 		// Perform docking for each file in the ligand folder.
-		log << "  index | free energy (kcal/mol) | #conformations | ligand\n";
-		size_t num_ligands = 0;
+		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);
+		size_t num_ligands = 0; // Ligand counter.
 		using namespace boost::filesystem;
 		const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 		for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
+			// Skip non-regular files such as "." and "..".
 			if (!is_regular_file(dir_iter->status())) continue;
+
+			// Increment the ligand counter.
 			++num_ligands;
+
 			try // The try-catch block ensures the remaining ligands will be docked should the current ligand fail.
 			{
 				const path ligand_path = dir_iter->path();
@@ -314,40 +331,43 @@ int main(int argc, char* argv[])
 				ligand lig = lig_parser.parse(ligand_path);
 
 				// Create grid maps on the fly if necessary.
-				const vector<size_t> atom_types = lig.get_atom_types();
-				const size_t num_atom_types = atom_types.size();
+				const vector<size_t> ligand_atom_types = lig.get_atom_types();
+				const size_t num_ligand_atom_types = ligand_atom_types.size();
 				vector<size_t> atom_types_to_populate;
-				atom_types_to_populate.reserve(num_atom_types);
-				for (size_t i = 0; i < num_atom_types; ++i)
+				atom_types_to_populate.reserve(num_ligand_atom_types);
+				for (size_t i = 0; i < num_ligand_atom_types; ++i)
 				{
-					const size_t t = atom_types[i];
+					const size_t t = ligand_atom_types[i];
 					BOOST_ASSERT(t < XS_TYPE_SIZE);
 					array3d<fl>& grid_map = grid_maps[t];
-					if (grid_map.initialized()) continue; // Type t has already been populated.
-					grid_map.resize(b.num_probes); // An exception may be thrown in case memory is full.
-					atom_types_to_populate.push_back(t);
+					if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
+					grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
+					atom_types_to_populate.push_back(t); // The grid map of XScore atom type t has not been populated and should be populated now.
 				}
-				if (!atom_types_to_populate.empty())
+				const size_t num_atom_types_to_populate = atom_types_to_populate.size();
+				if (num_atom_types_to_populate)
 				{
-					// Populate the grid map task container.
-					const size_t num_gm_tasks = b.num_probes[0];
+					// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
+					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    ";
+
+					// Populate the grid map task container. ptr_vector<T> is used rather than vector<T> in order to pass compilation by the clang compiler.
 					ptr_vector<packaged_task<void> > gm_tasks;
 					gm_tasks.reserve(num_gm_tasks);
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
-						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_maps_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
+						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
 					}
 
-					// Run the grid map tasks in parallel.
-					tp.run(gm_tasks);
+					// Run the grid map tasks in parallel and display the progress bar with hashes.
+					tp.run(gm_tasks, gm_hashes);
 
-					// Propagate possible exceptions thrown by grid_maps_task().
+					// Propagate possible exceptions thrown by grid_map_task().
 					for (size_t i = 0; i < num_gm_tasks; ++i)
 					{
 						unique_future<void> future = gm_tasks[i].get_future();
 						try
 						{
-							// If there is an exception thrown by the task, it will be rethrown by calling future.get().
+							// If there is an exception thrown by the task, it will be rethrown by calling future.get(), which implicitly calls wait().
 							future.get();
 						}
 						catch (const std::exception& e)
@@ -357,7 +377,17 @@ int main(int argc, char* argv[])
 						}
 						BOOST_ASSERT(future.is_ready());
 					}
+
+					// Make sure all the hashes are flushed.
+					tp.sync();
+
+					// Clear the current line and reset the cursor to the beginning.
+					std::cout << '\r' << std::setw(36) << '\r';
 				}
+
+				// Dump the ligand filename.
+				log << std::setw(7)  << num_ligands << "   "
+					<< std::setw(12) << ligand_filename.stem().string() << "   ";
 
 				// The number of iterations correlates to the complexity of ligand.
 				const size_t num_mc_iterations = 500 * lig.num_heavy_atoms;
@@ -376,20 +406,20 @@ int main(int argc, char* argv[])
 					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), (seed << 5) | static_cast<unsigned int>(i), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 				
-				// Run the Monte Carlo tasks in parallel.
-				tp.run(mc_tasks);
+				// Run the Monte Carlo tasks in parallel and display the progress bar with hashes.
+				tp.run(mc_tasks, mc_hashes);
 				
 				// Merge results from all the tasks into one single result container.
 				// Ligands with RMSD < 2.0 will be clustered into the same cluster.
 				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms);
 				ptr_vector<result> results;
+				results.reserve(result::Max_Results * num_mc_tasks);
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					unique_future<void> future = mc_tasks[i].get_future();
 					try
 					{
-						// If there is an exception thrown by the task, it will be rethrown by calling future.get().
-						// future.get() implicitly calls wait().
+						// If there is an exception thrown by the task, it will be rethrown by calling future.get(), which implicitly calls wait().
 						future.get();
 					}
 					catch (const std::exception& e)
@@ -404,23 +434,33 @@ int main(int argc, char* argv[])
 						add_to_result_container(results, task_results[j], required_square_error);
 				}
 
+				// Make sure all the hashes are flushed.
+				tp.sync();
+
+				// Reset the cursor to the beginning of the progress bar.
+				std::cout << "\b\b\b\b\b\b\b\b\b\b";
+
+				// Reprint the full progress bar.
+				log	<< "##########   ";
+
+				// If no conformation can be found, proceed with the next ligand.
 				const size_t num_results = results.size();
-				if (!num_results) // Possible when all the Monte Carlo tasks encounter an exception.
+				if (!num_results)
 				{
-					log << "No result for the current ligand " << ligand_filename << ".\n";
+					log	<< std::setw(4) << 0 << '\n';
 					continue;
 				}
 
 				// Adjust free energy relative to the best conformation and flexibility.
 				const result& best_result = results.front();
 				const fl best_result_intra_e = best_result.e - best_result.f;
-				for (size_t i = 0; i < num_results; i++)
+				for (size_t i = 0; i < num_results; ++i)
 					results[i].e = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
 
-				// Determine the number of conformations to output.
+				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
 				const fl energy_upper_bound = best_result.e + energy_range;
 				size_t num_conformations = 0;
-				for (size_t i = 0; i < num_results; i++)
+				for (size_t i = 0; i < num_results; ++i)
 				{
 					if (i == max_conformations || results[i].e > energy_upper_bound)
 					{
@@ -429,27 +469,30 @@ int main(int argc, char* argv[])
 					}
 				}
 
-				// Write the conformations to the output folder.
-				// Operator /= is overloaded to concatenate the output folder and the ligand filename.
-				// write_models can be a bottleneck for fast virtual screening. Setting --conformations 0 can disable output.
-				if (num_conformations)
-					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
+				// Flush the number of conformations to output.
+				log	<< std::setw(4) << num_conformations << "  ";
 
-				// Dump the ligand filename, predicated free energy, and number of conformations.
-				log << std::setw(7) << num_ligands << "   "
-					<< std::setw(11) << best_result.e << "              "
-					<< std::setw(14) << num_conformations << "   "
-					<< ligand_filename << '\n';
+				// Flush the free energies of the top 5 conformations.
+				if (num_conformations > 5) num_conformations = 5;
+				for (size_t i = 0; i < num_conformations; ++i)
+				{
+					log << ' ' << std::setw(6) << results[i].e;
+				}
+				log << '\n';
+
+				// Write the conformations to the output folder.
+				if (num_conformations)
+				{
+					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
+					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
+				}
 			}
 			catch (const std::exception& e)
 			{
 				log << e.what() << '\n';
-				continue; // Some other problem occurred. Skip the current ligand and proceed with the next one.
+				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
-
-		// Join the threads in the thread pool.
-		tp.join();
 	}
 	catch (const std::exception& e)
 	{

@@ -44,6 +44,7 @@ namespace idock
 		/// Constructs an empty scoring function.
 		scoring_function();
 
+		/// Evaluates the scoring function given (t1, t2, r2).
 		scoring_function_element evaluate(const size_t type_pair_index, const fl r2) const;
 
 	private:

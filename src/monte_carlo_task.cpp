@@ -21,7 +21,7 @@
 
 namespace idock
 {
-	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig_, const size_t seed, const size_t num_mc_iterations, const vector<fl>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl> >& grid_maps)
+	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig_, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl> >& grid_maps)
 	{
 		// Make a copy of the ligand.
 		ligand lig(lig_);

@@ -33,7 +33,7 @@ namespace idock
 	{
 	public:
 		/// Constructs a file reading error.
-		ifile_error(const path& file) : runtime_error("Error reading " + file.filename().string()) {}
+		ifile_error(const path& file) : runtime_error("Error reading file " + file.string()) {}
 	};
 
 	/// Represents a file writing error.
@@ -41,7 +41,7 @@ namespace idock
 	{
 	public:
 		/// Constructs a file writing error.
-		ofile_error(const path& file) : runtime_error("Error writing " + file.filename().string()) {}
+		ofile_error(const path& file) : runtime_error("Error writing file " + file.string()) {}
 	};
 
 	/// Represents a file reading stream.

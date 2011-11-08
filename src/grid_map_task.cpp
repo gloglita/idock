@@ -20,7 +20,7 @@
 
 namespace idock
 {
-	void grid_maps_task(vector<array3d<fl> >& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec, const array3d<vector<size_t> >& partitions)
+	void grid_map_task(vector<array3d<fl> >& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec, const array3d<vector<size_t> >& partitions)
 	{
 		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 		vector<fl> e(num_atom_types_to_populate);

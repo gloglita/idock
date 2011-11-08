@@ -7,4 +7,4 @@ center_z = 2.530
 size_x = 20
 size_y = 20
 size_z = 18
-
+granularity = 0.375

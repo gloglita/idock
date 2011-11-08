@@ -361,15 +361,16 @@ namespace idock
 
 	void ligand::write_models(const path& output_ligand, const ptr_vector<result>& results, const size_t num_conformations)
 	{
+		BOOST_ASSERT(num_conformations > 0);
 		BOOST_ASSERT(num_conformations <= results.size());
 
 		const size_t num_lines = lines.size();
 
-		// Dump binding modes to the output ligand file.
+		// Dump binding conformations to the output ligand file.
 		using namespace std;
 		ofile out(output_ligand); // Dumping starts. Open the file stream as late as possible.
 		out.setf(ios::fixed, ios::floatfield);
-		out << setprecision(3);
+		out << setprecision(2);
 		for (size_t i = 0; i < num_conformations; ++i)
 		{
 			const result& r = results[i];
