@@ -60,19 +60,19 @@ namespace idock
 		do // Threads loop inside.
 		{
 			// If there are no tasks to run, simply wait.
-			{				
+			{
 				mutex::scoped_lock self_lk(self); // A scoped lock is a type associated to some mutex type whose objects do the locking/unlocking of a mutex on construction/destruction time.
 				while ((!exiting) && (num_started_tasks == num_tasks))
 					task_incoming.wait(self_lk);
 				if (exiting) return; // The only exit of this function.
 			}
-			
+
 			// If there are tasks to run, loop until all the tasks are started.
 			do
 			{
 				// Fetch a task to run atomically.
 				// TODO: Consider using boost/atomic.hpp, i.e. atomic<size_t> num_started_tasks; num_started_tasks.fetch_add(1);
-				{					
+				{
 					mutex::scoped_lock self_lk(self);
 					if (num_started_tasks == num_tasks) break; // Break the loop when all the tasks are distributed.
 					task = &(*tasks_ptr)[num_started_tasks++];

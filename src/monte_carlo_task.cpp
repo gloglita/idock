@@ -85,7 +85,7 @@ namespace idock
 		//	}
 		//}
 		//bfgs_dump << '\n';
-		
+
 		// Initialize necessary variables for BFGS.
 		conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
 		fl e1, f1, e2, f2;
@@ -155,7 +155,7 @@ namespace idock
 
 			// Initialize the Hessian matrix to identity.
 			h = identity_hessian;
-			
+
 			// Given the mutated conformation c1, use BFGS to find a local minimum.
 			// The conformation of the local minimum is saved to c2, and its derivative is saved to g2.
 			// http://en.wikipedia.org/wiki/BFGS_method
@@ -258,7 +258,7 @@ namespace idock
 
 			// Dump e1.
 			//mc_dump << ',' << e1;
-		
+
 			// Accept c1 according to Metropolis critera.
 			const fl delta = e0 - e1;
 			if ((delta > 0) || (uniform_01_gen() < exp(delta)))

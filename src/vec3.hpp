@@ -55,7 +55,7 @@ namespace idock
 			BOOST_ASSERT(i < 3);
 			return elems[i];
 		}
-		
+
 		/// Returns a mutable reference to the element at index i.
 		fl& operator[](const size_t i)
 		{

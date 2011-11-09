@@ -33,13 +33,13 @@
  * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is not supported at the moment.
  *
  * \subsection prepare_receptor Prepare receptor files in PDBQT format
- * pythonsh prepare_receptor4.py -r receptor.pdb
+ * pythonsh prepare_receptor4.py -r receptor.pdb -A hydrogens -U nphs_lps_waters_deleteAltB
  *
  * \subsection prepare_ligand Prepare ligand files in PDBQT format
  * pythonsh prepare_ligand4.py -l ligand.pdb
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date November 8, 2011
+ * \date November 9, 2011
  *
  * Copyright (C) 2011 The Chinese University of Hong Kong.
  */
@@ -92,7 +92,7 @@ int main(int argc, char* argv[])
 			("size_y", value<fl>(&size_y)->required(), "size in the y dimension in Angstrom")
 			("size_z", value<fl>(&size_z)->required(), "size in the z dimension in Angstrom")
 			;
-		
+
 		options_description output_options("output (optional)");
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("config", value<path>(), "options can be loaded from a configuration file")
 			;
-		
+
 		options_description all_options;
 		all_options.add(input_options).add(output_options).add(miscellaneous_options);
 
@@ -342,13 +342,13 @@ int main(int argc, char* argv[])
 					array3d<fl>& grid_map = grid_maps[t];
 					if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
 					grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
-					atom_types_to_populate.push_back(t); // The grid map of XScore atom type t has not been populated and should be populated now.
+					atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
 				}
 				const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 				if (num_atom_types_to_populate)
 				{
 					// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    ";
+					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
 
 					// Populate the grid map task container. ptr_vector<T> is used rather than vector<T> in order to pass compilation by the clang compiler.
 					ptr_vector<packaged_task<void> > gm_tasks;
@@ -386,11 +386,11 @@ int main(int argc, char* argv[])
 				}
 
 				// Dump the ligand filename.
-				log << std::setw(7)  << num_ligands << "   "
-					<< std::setw(12) << ligand_filename.stem().string() << "   ";
+				log << std::setw(7) << num_ligands << " | " << std::setw(12) << ligand_filename.stem().string() << " | ";
+				std::cout << std::flush;
 
 				// The number of iterations correlates to the complexity of ligand.
-				const size_t num_mc_iterations = 500 * lig.num_heavy_atoms;
+				const size_t num_mc_iterations = 100 * lig.num_heavy_atoms;
 
 				// Create result containers. ptr_vector is used for fast sorting.
 				vector<ptr_vector<result> > result_containers(num_mc_tasks);
@@ -402,13 +402,13 @@ int main(int argc, char* argv[])
 				mc_tasks.reserve(num_mc_tasks);
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
-					const size_t seed = eng();
-					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), (seed << 5) | static_cast<unsigned int>(i), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
+					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
-				
+
 				// Run the Monte Carlo tasks in parallel and display the progress bar with hashes.
 				tp.run(mc_tasks, mc_hashes);
-				
+
 				// Merge results from all the tasks into one single result container.
 				// Ligands with RMSD < 2.0 will be clustered into the same cluster.
 				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms);
@@ -441,13 +441,13 @@ int main(int argc, char* argv[])
 				std::cout << "\b\b\b\b\b\b\b\b\b\b";
 
 				// Reprint the full progress bar.
-				log	<< "##########   ";
+				log << "########## | ";
 
-				// If no conformation can be found, proceed with the next ligand.
-				const size_t num_results = results.size();
-				if (!num_results)
+				// If no conformation can be found, skip the current ligand and proceed with the next one.
+				const size_t num_results = std::min(results.size(), max_conformations);
+				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >=1 is enforced when parsing command line arguments.
 				{
-					log	<< std::setw(4) << 0 << '\n';
+					log << std::setw(4) << 0 << '\n';
 					continue;
 				}
 
@@ -460,17 +460,10 @@ int main(int argc, char* argv[])
 				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
 				const fl energy_upper_bound = best_result.e + energy_range;
 				size_t num_conformations = 0;
-				for (size_t i = 0; i < num_results; ++i)
-				{
-					if (i == max_conformations || results[i].e > energy_upper_bound)
-					{
-						num_conformations = i;
-						break;
-					}
-				}
+				for (; (num_conformations < num_results) && (results[num_conformations].e <= energy_upper_bound); ++num_conformations);
 
 				// Flush the number of conformations to output.
-				log	<< std::setw(4) << num_conformations << "  ";
+				log << std::setw(4) << num_conformations << " |";
 
 				// Flush the free energies of the top 5 conformations.
 				if (num_conformations > 5) num_conformations = 5;

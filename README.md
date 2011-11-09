@@ -109,8 +109,8 @@ Change Log
 
 ### 1.1 (2011-11-20)
 
-* Added the --config program option.
-* Verbose output.
+* Added program option --config.
+* Added progress bar and verbose output.
 
 
 Contact Author

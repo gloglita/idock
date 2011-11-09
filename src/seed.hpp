@@ -49,7 +49,7 @@ namespace idock
 
 	/// Generates a random seed from current process ID and current time.
 	inline size_t random_seed()
-	{		
+	{
 		return static_cast<size_t>(pid() * (time(0))); // The return type of time(0) is size_t.
 	}
 }

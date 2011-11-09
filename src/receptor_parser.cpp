@@ -119,7 +119,7 @@ namespace idock
 				}
 			}
 		}
-		
+
 		// Construct a receptor from atoms.
 		return receptor(static_cast<vector<atom>&&>(atoms));
 	}

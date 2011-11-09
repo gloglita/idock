@@ -55,7 +55,7 @@ namespace idock
 			index -= 3;
 			return torsions[index];
 		}
-		
+
 		/// Returns a mutable reference to an element as if all the variables were flattened into a 1D array.
 		fl& operator()(const size_t index)
 		{

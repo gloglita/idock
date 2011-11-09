@@ -47,7 +47,7 @@ namespace idock
 			partition_size_inverse[i] = 1 / partition_size[i];
 		}
 	}
-	
+
 	bool box::within(const vec3& coordinate) const
 	{
 		for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
@@ -90,7 +90,7 @@ namespace idock
 
 	array<size_t, 3> box::grid_index(const vec3& coordinate) const
 	{
-		array<size_t, 3> index;		
+		array<size_t, 3> index;
 		for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
 		{
 			index[i] = static_cast<size_t>((coordinate[i] - corner1[i]) * grid_size_inverse[i]);

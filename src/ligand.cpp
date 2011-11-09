@@ -70,7 +70,7 @@ namespace idock
 		//	const size_t num_heavy_atoms = f.heavy_atoms.size();
 		//	for (size_t i = 0; i < num_heavy_atoms; ++i)
 		//	{
-		//		const atom& a = f.heavy_atoms[i];				
+		//		const atom& a = f.heavy_atoms[i];
 		//		dump << i << ',' << a.coordinate[0] << ',' << a.coordinate[1] << ',' << a.coordinate[2] << ',' << a.ad << ',' << a.xs << '\n';
 		//	}
 		//}
@@ -314,7 +314,7 @@ namespace idock
 		vector<vector<vec3> > hydrogens(num_frames);
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
-		const frame& root = frames.front();		
+		const frame& root = frames.front();
 		heavy_atoms.front().resize(root.heavy_atoms.size());
 		hydrogens.front().resize(root.hydrogens.size());
 

@@ -65,7 +65,7 @@ namespace idock
 		// If the container is not empty, find in a coordinate that is closest to the given newly found r.coordinate.
 		size_t index = 0;
 		fl best_sqrare_error = distance_sqr(r.heavy_atoms, results.front().heavy_atoms);
-		for (size_t i = 1; i < results.size(); ++i)	
+		for (size_t i = 1; i < results.size(); ++i)
 		{
 			const fl this_sqrare_error = distance_sqr(r.heavy_atoms, results[i].heavy_atoms);
 			if (this_sqrare_error < best_sqrare_error)

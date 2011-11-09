@@ -29,7 +29,7 @@ namespace idock
 	public:
 		/// Constructs a receptor by atoms.
 		explicit receptor(vector<atom>&& atoms_);
-		
+
 		vector<atom> atoms; ///< Receptor atoms.
 	};
 }

@@ -35,6 +35,6 @@ namespace idock
 		//	const atom& a = atoms[i];
 		//	dump << i << ',' << a.coordinate[0] << ',' << a.coordinate[1] << ',' << a.coordinate[2] << ',' << a.ad << ',' << a.xs << '\n';
 		//}
-		//dump.close();		
+		//dump.close();
 	}
 }

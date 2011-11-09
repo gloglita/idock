@@ -24,7 +24,7 @@ namespace idock
 	{
 		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 		vector<fl> e(num_atom_types_to_populate);
-		
+
 		// For each probe atom of the given X dimension value.
 		const size_t num_y_probes = b.num_probes[1];
 		const size_t num_z_probes = b.num_probes[2];

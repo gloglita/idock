@@ -1,4 +1,4 @@
-BOOST_ROOT = ~/boost_1_47_0
+BOOST_ROOT = $(HOME)/boost_1_47_0
 CC = g++ -static -O3 -DNDEBUG -std=gnu++0x
 
 ifeq ($(TOOLSET), clang)

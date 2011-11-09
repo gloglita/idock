@@ -28,7 +28,7 @@ namespace idock
 	{
 		BOOST_ASSERT(j < XS_TYPE_SIZE);
 		BOOST_ASSERT(i <= j);
-		return i + j * (j + 1) / 2; 
+		return i + j * (j + 1) / 2;
 	}
 
 	/// Returns the flattened 1D index of a 2D index (i, j) where either i or j is the lowest dimension.
