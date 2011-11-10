@@ -41,7 +41,7 @@ namespace idock
 			{
 				// The probability of (ad == AD_TYPE_C || AD_TYPE_A) is high, so consider them first.
 				case AD_TYPE_C	:
-				case AD_TYPE_A	: xs = XS_TYPE_C_H;	break;
+				case AD_TYPE_A	: xs = XS_TYPE_C_H; break;
 				case AD_TYPE_N	: xs = XS_TYPE_N_P; break;
 				case AD_TYPE_NA	: xs = XS_TYPE_N_A; break;
 				case AD_TYPE_OA	: xs = XS_TYPE_O_A; break;

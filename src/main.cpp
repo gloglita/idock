@@ -444,7 +444,7 @@ int main(int argc, char* argv[])
 				log << "########## | ";
 
 				// If no conformation can be found, skip the current ligand and proceed with the next one.
-				const size_t num_results = std::min(results.size(), max_conformations);
+				const size_t num_results = std::min<size_t>(results.size(), max_conformations);
 				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >=1 is enforced when parsing command line arguments.
 				{
 					log << std::setw(4) << 0 << '\n';

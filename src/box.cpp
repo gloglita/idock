@@ -62,7 +62,7 @@ namespace idock
 	bool box::within_cutoff(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
 	{
 		// Calculate the projection point of the given coordinate onto the surface of the given box.
-		vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.		
+		vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.
 		for (size_t i = 0; i < 3; ++i)
 		{
 			if (projection[i] < corner1[i]) projection[i] = corner1[i];

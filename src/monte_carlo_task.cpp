@@ -133,7 +133,7 @@ namespace idock
 				}
 				else // Mutate orientation.
 				{
-					c1.orientation = rotation_vector_to_quaternion(static_cast<fl>(0.01) * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation; 
+					c1.orientation = rotation_vector_to_quaternion(static_cast<fl>(0.01) * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation;
 					BOOST_ASSERT(quaternion_is_normalized(c1.orientation));
 				}
 				++num_mutations;
