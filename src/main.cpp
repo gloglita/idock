@@ -465,6 +465,13 @@ int main(int argc, char* argv[])
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
 
+				// Write the conformations to the output folder.
+				if (num_conformations)
+				{
+					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
+					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
+				}
+
 				// Flush the free energies of the top 5 conformations.
 				if (num_conformations > 5) num_conformations = 5;
 				for (size_t i = 0; i < num_conformations; ++i)
@@ -472,13 +479,6 @@ int main(int argc, char* argv[])
 					log << ' ' << std::setw(6) << results[i].e;
 				}
 				log << '\n';
-
-				// Write the conformations to the output folder.
-				if (num_conformations)
-				{
-					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
-					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
-				}
 			}
 			catch (const std::exception& e)
 			{
