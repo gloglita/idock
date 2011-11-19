@@ -275,11 +275,14 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
-		vector<array3d<fl> > grid_maps(XS_TYPE_SIZE);
+		// Reserve storage for task containers.
+		const size_t num_gm_tasks = b.num_probes[0];
+		ptr_vector<packaged_task<void> > gm_tasks; // ptr_vector<T> is used rather than vector<T> in order to pass compilation by the clang compiler.
+		ptr_vector<packaged_task<void> > mc_tasks;
+		gm_tasks.reserve(num_gm_tasks);
+		mc_tasks.reserve(num_mc_tasks);
 
 		// Initialize the hash values for displaying the progress bar.
-		const size_t num_gm_tasks = b.num_probes[0];
 		array<fl, num_hashes> gm_hashes, mc_hashes;
 		{
 			const fl num_hashes_inverse = static_cast<fl>(1) / num_hashes;
@@ -294,6 +297,14 @@ int main(int argc, char* argv[])
 			}
 		}
 
+		// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
+		const size_t max_results = 20;
+		vector<ptr_vector<result> > result_containers(num_mc_tasks);
+		for (size_t i = 0; i < num_mc_tasks; ++i)
+			result_containers[i].reserve(max_results);
+		ptr_vector<result> results;
+		results.reserve(max_results * num_mc_tasks);
+		
 		// Precalculate alpha values for determining step size in BFGS.
 		array<fl, num_alphas> alphas;
 		alphas[0] = 1;
@@ -301,6 +312,11 @@ int main(int argc, char* argv[])
 		{
 			alphas[i] = alphas[i - 1] * 0.1;
 		}
+
+		// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
+		vector<array3d<fl> > grid_maps(XS_TYPE_SIZE);
+		vector<size_t> atom_types_to_populate;
+		atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
 		// Initialize a ligand parser.
 		ligand_parser lig_parser;
@@ -312,11 +328,12 @@ int main(int argc, char* argv[])
 		// Perform docking for each file in the ligand folder.
 		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);
 		size_t num_ligands = 0; // Ligand counter.
+		size_t num_conformations; // Number of conformation to output.
 		using namespace boost::filesystem;
 		const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 		for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
-			// Skip non-regular files such as "." and "..".
+			// Skip non-regular files such as folders.
 			if (!is_regular_file(dir_iter->status())) continue;
 
 			// Increment the ligand counter.
@@ -333,8 +350,6 @@ int main(int argc, char* argv[])
 				// Create grid maps on the fly if necessary.
 				const vector<size_t> ligand_atom_types = lig.get_atom_types();
 				const size_t num_ligand_atom_types = ligand_atom_types.size();
-				vector<size_t> atom_types_to_populate;
-				atom_types_to_populate.reserve(num_ligand_atom_types);
 				for (size_t i = 0; i < num_ligand_atom_types; ++i)
 				{
 					const size_t t = ligand_atom_types[i];
@@ -350,15 +365,13 @@ int main(int argc, char* argv[])
 					// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
 					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
 
-					// Populate the grid map task container. ptr_vector<T> is used rather than vector<T> in order to pass compilation by the clang compiler.
-					ptr_vector<packaged_task<void> > gm_tasks;
-					gm_tasks.reserve(num_gm_tasks);
+					// Populate the grid map task container.
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
 						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
 					}
 
-					// Run the grid map tasks in parallel and display the progress bar with hashes.
+					// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
 					tp.run(gm_tasks, gm_hashes);
 
 					// Propagate possible exceptions thrown by grid_map_task().
@@ -378,8 +391,10 @@ int main(int argc, char* argv[])
 						BOOST_ASSERT(future.is_ready());
 					}
 
-					// Make sure all the hashes are flushed.
-					tp.sync();
+					// Block until all the grid map tasks are completed.
+					tp.hard_sync();
+					gm_tasks.clear();
+					atom_types_to_populate.clear();
 
 					// Clear the current line and reset the cursor to the beginning.
 					std::cout << '\r' << std::setw(36) << '\r';
@@ -392,28 +407,20 @@ int main(int argc, char* argv[])
 				// The number of iterations correlates to the complexity of ligand.
 				const size_t num_mc_iterations = 100 * lig.num_heavy_atoms;
 
-				// Create result containers. ptr_vector is used for fast sorting.
-				vector<ptr_vector<result> > result_containers(num_mc_tasks);
-				for (size_t i = 0; i < num_mc_tasks; ++i)
-					result_containers[i].reserve(result::Max_Results);
-
 				// Populate the Monte Carlo task container.
-				ptr_vector<packaged_task<void> > mc_tasks;
-				mc_tasks.reserve(num_mc_tasks);
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
+					result_containers[i].clear();
 					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
 					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 
-				// Run the Monte Carlo tasks in parallel and display the progress bar with hashes.
+				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
 				tp.run(mc_tasks, mc_hashes);
 
 				// Merge results from all the tasks into one single result container.
 				// Ligands with RMSD < 2.0 will be clustered into the same cluster.
 				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms);
-				ptr_vector<result> results;
-				results.reserve(result::Max_Results * num_mc_tasks);
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					unique_future<void> future = mc_tasks[i].get_future();
@@ -434,8 +441,9 @@ int main(int argc, char* argv[])
 						add_to_result_container(results, task_results[j], required_square_error);
 				}
 
-				// Make sure all the hashes are flushed.
-				tp.sync();
+				// Block until all the Monte Carlo tasks are completed.
+				tp.hard_sync();
+				mc_tasks.clear();
 
 				// Reset the cursor to the beginning of the progress bar.
 				std::cout << "\b\b\b\b\b\b\b\b\b\b";
@@ -459,8 +467,7 @@ int main(int argc, char* argv[])
 
 				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
 				const fl energy_upper_bound = best_result.e + energy_range;
-				size_t num_conformations = 0;
-				for (; (num_conformations < num_results) && (results[num_conformations].e <= energy_upper_bound); ++num_conformations);
+				for (num_conformations = 1; (num_conformations < num_results) && (results[num_conformations].e <= energy_upper_bound); ++num_conformations);
 
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
@@ -473,12 +480,15 @@ int main(int argc, char* argv[])
 				}
 
 				// Flush the free energies of the top 5 conformations.
-				if (num_conformations > 5) num_conformations = 5;
-				for (size_t i = 0; i < num_conformations; ++i)
+				const size_t num_energies = std::min<size_t>(num_conformations, 5);
+				for (size_t i = 0; i < num_energies; ++i)
 				{
 					log << ' ' << std::setw(6) << results[i].e;
 				}
 				log << '\n';
+
+				// Clear the results of the current ligand.
+				results.clear();
 			}
 			catch (const std::exception& e)
 			{

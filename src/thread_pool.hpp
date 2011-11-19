@@ -48,14 +48,17 @@ namespace idock
 		/// Constructs a thread pool with specified number of threads.
 		explicit thread_pool(const size_t num_threads);
 
-		/// Runs tasks in parallel.
+		/// Runs tasks in parallel asynchronously.
 		void run(ptr_vector<packaged_task<void> >& tasks, array<fl, num_hashes>& hashes);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
 
+		/// Blocks until any thread becomes available.
+		void soft_sync();
+
 		/// Blocks until all tasks are completed and the progress bar becomes full.
-		void sync();
+		void hard_sync();
 
 		/// Destructs a thread pool by joining all the threads.
 		~thread_pool();

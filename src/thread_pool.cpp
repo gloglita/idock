@@ -41,17 +41,6 @@ namespace idock
 
 		// Notify the threads to run tasks.
 		task_incoming.notify_all();
-
-		// Wait until any thread becomes available.
-		{
-			mutex::scoped_lock self_lk(self); // A scoped lock is a type associated to some mutex type whose objects do the locking/unlocking of a mutex on construction/destruction time.
-			while (num_completed_tasks + (num_threads - 1) < num_tasks)
-				// wait will atomically add the thread to the set of threads waiting on the condition variable, and unlock the mutex.
-				// When the thread is woken, the mutex will be locked again before the call to wait returns.
-				// This allows other threads to acquire the mutex in order to update the shared data,
-				// and ensures that the data associated with the condition is correctly synchronized.
-				task_completion.wait(self_lk); // Wait for tasks completion.
-		}
 	}
 
 	void thread_pool::operator()()
@@ -100,10 +89,17 @@ namespace idock
 		} while (true);
 	}
 
-	void thread_pool::sync()
+	void thread_pool::soft_sync()
 	{
 		mutex::scoped_lock self_lk(self);
-		while (num_completed_tasks < num_tasks) // Wait until all the tasks are completed.
+		while (num_completed_tasks + (num_threads - 1) < num_tasks)
+			task_completion.wait(self_lk);
+	}
+
+	void thread_pool::hard_sync()
+	{
+		mutex::scoped_lock self_lk(self);
+		while (num_completed_tasks < num_tasks)
 			task_completion.wait(self_lk);
 	}
 

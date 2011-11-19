@@ -267,7 +267,7 @@ namespace idock
 
 				// best_e is the best energy of all the conformations in the container.
 				// e1 will be saved if and only if it is even better than the best one.
-				if (e1 < best_e || results.size() < result::Max_Results)
+				if (e1 < best_e || results.size() < results.capacity())
 				{
 					add_to_result_container(results, lig.compose_result(e1, f1, c1), required_square_error);
 					if (e1 < best_e) best_e = e0;
