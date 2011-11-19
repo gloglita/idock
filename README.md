@@ -21,6 +21,7 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.0.5.220
 * Arch Linux 3.1.0 x86_64 and GCC 4.6.2
 * Arch Linux 3.1.0 x86_64 and CLANG 2.9
+* Oracle Solaris 11 11/11 and GCC 4.5.2
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010
 * Windows 7 SP1 x64 and Intel C++ Compiler XE 12.1.1.258
