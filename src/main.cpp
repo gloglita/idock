@@ -348,6 +348,7 @@ int main(int argc, char* argv[])
 				ligand lig = lig_parser.parse(ligand_path);
 
 				// Create grid maps on the fly if necessary.
+				BOOST_ASSERT(atom_types_to_populate.empty());
 				const vector<size_t> ligand_atom_types = lig.get_atom_types();
 				const size_t num_ligand_atom_types = ligand_atom_types.size();
 				for (size_t i = 0; i < num_ligand_atom_types; ++i)
@@ -366,6 +367,7 @@ int main(int argc, char* argv[])
 					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
 
 					// Populate the grid map task container.
+					BOOST_ASSERT(gm_tasks.empty());
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
 						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
@@ -408,6 +410,7 @@ int main(int argc, char* argv[])
 				const size_t num_mc_iterations = 100 * lig.num_heavy_atoms;
 
 				// Populate the Monte Carlo task container.
+				BOOST_ASSERT(mc_tasks.empty());
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					result_containers[i].clear();
@@ -419,8 +422,8 @@ int main(int argc, char* argv[])
 				tp.run(mc_tasks, mc_hashes);
 
 				// Merge results from all the tasks into one single result container.
-				// Ligands with RMSD < 2.0 will be clustered into the same cluster.
-				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms);
+				BOOST_ASSERT(results.empty());
+				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms); // Ligands with RMSD < 2.0 will be clustered into the same cluster.
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					unique_future<void> future = mc_tasks[i].get_future();
