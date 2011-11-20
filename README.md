@@ -40,7 +40,7 @@ Unsupported operating systems and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1 and 1.47.0 are tested. The Boost libraries required idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, and 1.48.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
 
 ### Compilation on Linux
 
@@ -62,7 +62,11 @@ The generated objects will be placed in the `obj` folder, and the generated exec
 
 ### Compilation on Windows
 
-Visual Studio 2010 solution and project files are provided in the `msvc` folder. One may open `idock.sln` in Visual Studio and do a full rebuild. The project file uses Windows 7.1 SDK as platform toolset by default. One may revert it to vc100.
+Visual Studio 2010 solution and project files are provided in the `msvc` folder. The project file uses Windows 7.1 SDK as platform toolset by default. One may revert it to vc100. To compile, simply run
+
+    msbuild /t:Build /p:Configuration=Release /m
+
+Or one may open `idock.sln` in Visual Studio 2010 and do a full rebuild.
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
@@ -136,3 +140,4 @@ Green grape is chosen as the logo for idock because it is the author's favorite 
 [doxygen]: http://www.doxygen.org
 [Open Clip Art]: http://www.openclipart.org
 [CodePlex]: http://idock.codeplex.com
+
