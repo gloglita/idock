@@ -48,13 +48,13 @@ The Makefile uses GCC as the default compiler. To compile, simply run
 
     make -j
 
-Intel C++ Compiler is supported.
-
-    make -j TOOLSET=intel-linux
-
-CLANG is also supported, but its C++0x features are rather limited, so they are turned off in the Makefile.
+CLANG is also supported.
 
     make -j TOOLSET=clang
+
+Intel C++ Compiler is also supported.
+
+    make -j TOOLSET=intel-linux
 
 One may modify the Makefile to use a different compiler or different compilation options.
 
