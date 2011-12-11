@@ -27,9 +27,9 @@ namespace idock
 
 // Choose the appropriate Mersenne Twister engine for random number generation on 32-bit or 64-bit platform.
 #if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
-		typedef boost::random::mt19937_64 mt19937eng;
+	typedef boost::random::mt19937_64 mt19937eng;
 #else
-		typedef boost::random::mt19937 mt19937eng;
+	typedef boost::random::mt19937 mt19937eng;
 #endif
 
 	const size_t num_alphas = 5; ///< Number of alpha values for determining step size in BFGS
