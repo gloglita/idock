@@ -11,6 +11,7 @@ Features
 * idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
+* idock can be used as a backend docking engine for [igrow].
 
 
 Supported operating systems and compilers
@@ -136,6 +137,7 @@ Green grape is chosen as the logo for idock because it is one of the author's fa
 [docking]: http://en.wikipedia.org/wiki/Docking_(molecular)
 [Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [C++11]: http://en.wikipedia.org/wiki/C++11
+[igrow]: https://github.com/HongjianLi/igrow
 [Boost C++ Libraries]: http://www.boost.org
 [doxygen]: http://www.doxygen.org
 [Open Clip Art]: http://www.openclipart.org
