@@ -32,7 +32,7 @@ namespace idock
 	using std::vector;
 	using std::string;
 
-	/// idock use double precision floating point computation by default.
+	/// idock uses double precision floating point computation by default.
 	/// This could possible be demoted to single precision for better performance.
 	typedef double fl;
 
