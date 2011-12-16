@@ -322,7 +322,7 @@ int main(int argc, char* argv[])
 		ligand_parser lig_parser;
 
 		// Initialize a thread pool and create worker threads for later use.
-		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand.\n";
+		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 		thread_pool tp(num_threads);
 
 		// Perform docking for each file in the ligand folder.
