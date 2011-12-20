@@ -99,11 +99,11 @@ namespace idock
 		class one_to_four_pair
 		{
 		public:
-			const size_t k1; ///< Frame of atom 1.
-			const size_t i1; ///< Index of atom 1 in frame k1.
-			const size_t k2; ///< Frame of atom 2.
-			const size_t i2; ///< Index of atom 2 in frame k2.
-			const size_t type_pair_index; ///< Index to the XScore types of the two atoms for fast evaluating the scoring function.
+			size_t k1; ///< Frame of atom 1.
+			size_t i1; ///< Index of atom 1 in frame k1.
+			size_t k2; ///< Frame of atom 2.
+			size_t i2; ///< Index of atom 2 in frame k2.
+			size_t type_pair_index; ///< Index to the XScore types of the two atoms for fast evaluating the scoring function.
 			one_to_four_pair(const size_t k1, const size_t i1, const size_t k2, const size_t i2, const size_t type_pair_index) : k1(k1), i1(i1), k2(k2), i2(i2), type_pair_index(type_pair_index) {}
 		};
 
