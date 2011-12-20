@@ -95,17 +95,19 @@ namespace idock
 	private:
 		const fl num_heavy_atoms_inverse; ///< 1 / num_heavy_atoms.
 
-		//class nonbonded_pair
-		//{
-		//public:
-		//	size_t i;
-		//	size_t j;
-		//	fl square_sum_covalent_radius;
-		//
-		//	nonbonded_pair(const size_t i, const size_t j, const fl square_sum_covalent_radius) : i(i), j(j), square_sum_covalent_radius(square_sum_covalent_radius) {}
-		//};
+		/// Represents a pair of interacting atoms that are separated by 3 consecutive covalent bonds.
+		class one_to_four_pair
+		{
+		public:
+			const size_t k1; ///< Frame of atom 1.
+			const size_t i1; ///< Index of atom 1 in frame k1.
+			const size_t k2; ///< Frame of atom 2.
+			const size_t i2; ///< Index of atom 2 in frame k2.
+			const size_t type_pair_index; ///< Index to the XScore types of the two atoms for fast evaluating the scoring function.
+			one_to_four_pair(const size_t k1, const size_t i1, const size_t k2, const size_t i2, const size_t type_pair_index) : k1(k1), i1(i1), k2(k2), i2(i2), type_pair_index(type_pair_index) {}
+		};
 
-		//vector<nonbonded_pair> nonbonded_pairs;
+		vector<one_to_four_pair> one_to_four_pairs; ///< 1-4 interacting pairs.
 	};
 }
 

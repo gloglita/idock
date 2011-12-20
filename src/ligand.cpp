@@ -40,6 +40,104 @@ namespace idock
 			f.relative_origin =  origin - pf.heavy_atoms.front().coordinate;
 			f.relative_axis   = (origin - pf.heavy_atoms[f.rotorX].coordinate).normalize();
 		}
+		
+		// Reserve enough capacity for bonds.
+		using std::pair;
+		vector<vector<vector<pair<size_t, size_t> > > > bonds(num_frames);
+		for (size_t k = 0; k < num_frames; ++k)
+		{
+			const frame& f = frames[k];
+			const size_t num_heavy_atoms = f.heavy_atoms.size();
+			bonds[k].resize(num_heavy_atoms);
+			for (size_t i = 0; i < num_heavy_atoms; ++i)
+			{
+				bonds[k][i].reserve(4); // An atom typically consists of <= 4 bonds.
+			}
+		}
+
+		for (size_t k = 0; k < num_frames; ++k)
+		{
+			const frame& f = frames[k];
+			const size_t num_heavy_atoms = f.heavy_atoms.size();
+			for (size_t i = 0; i < num_heavy_atoms; ++i)
+			{
+				const atom& a1 = f.heavy_atoms[i];
+				const fl a1_covalent_radius = a1.covalent_radius();
+
+				for (size_t j = i + 1; j < num_heavy_atoms; ++j)
+				{
+					const atom& a2 = f.heavy_atoms[j];
+					const fl a2_covalent_radius = a2.covalent_radius();
+					const fl covalent_bond_length = a1_covalent_radius + a2_covalent_radius;
+					const vec3 r = a1.coordinate - a2.coordinate;
+					const fl r2 = r.norm_sqr();
+					if (r2 < sqr(covalent_bond_length))
+					{
+						bonds[k][i].push_back(pair<size_t, size_t>(k, j));
+						bonds[k][j].push_back(pair<size_t, size_t>(k, i));
+					}
+				}
+			}
+			if (k > 0)
+			{
+				bonds[k][0].push_back(pair<size_t, size_t>(f.parent, f.rotorX));
+				bonds[f.parent][f.rotorX].push_back(pair<size_t, size_t>(k, 0));
+			}
+		}
+
+		// Find 1-4 interacting pairs.
+		one_to_four_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
+		vector<pair<size_t, size_t> > neighbors;
+		neighbors.reserve(10); // An atom typically consists of <= 10 neighbors.
+		for (size_t k1 = 0; k1 < num_frames; ++k1)
+		{
+			const frame& f1 = frames[k1];
+			const size_t num_heavy_atoms1 = f1.heavy_atoms.size();
+			for (size_t i = 0; i < num_heavy_atoms1; ++i)
+			{
+				// Find neighbor atoms within 3 consecutive covalent bonds.
+				const vector<pair<size_t, size_t> >& i0_bonds = bonds[k1][i];
+				const size_t num_i0_bonds = i0_bonds.size();
+				for (size_t i0 = 0; i0 < num_i0_bonds; ++i0)
+				{
+					const pair<size_t, size_t>& b1 = i0_bonds[i0];
+					if (find(neighbors.begin(), neighbors.end(), b1) == neighbors.end())
+						neighbors.push_back(b1);
+					const vector<pair<size_t, size_t> >& i1_bonds = bonds[b1.first][b1.second];
+					const size_t num_i1_bonds = i1_bonds.size();
+					for (size_t i1 = 0; i1 < num_i1_bonds; ++i1)
+					{
+						const pair<size_t, size_t>& b2 = i1_bonds[i1];
+						if (find(neighbors.begin(), neighbors.end(), b2) == neighbors.end())
+							neighbors.push_back(b2);
+						const vector<pair<size_t, size_t> >& i2_bonds = bonds[b2.first][b2.second];
+						const size_t num_i2_bonds = i2_bonds.size();
+						for (size_t i2 = 0; i2 < num_i2_bonds; ++i2)
+						{
+							const pair<size_t, size_t>& b3 = i2_bonds[i2];
+							if (find(neighbors.begin(), neighbors.end(), b3) == neighbors.end())
+								neighbors.push_back(b3);
+						}
+					}
+				}
+
+				// Determine if interacting pairs can be possibly formed.
+				for (size_t k2 = k1 + 1; k2 < num_frames; ++k2)
+				{
+					const frame& f2 = frames[k2];
+					const size_t num_heavy_atoms2 = f2.heavy_atoms.size();
+					for (size_t j = 0; j < num_heavy_atoms2; ++j)
+					{
+						if (((k1 == f2.parent) && ((j == 0) || (i == f2.rotorX))) || (find(neighbors.begin(), neighbors.end(), pair<size_t, size_t>(k2, j)) != neighbors.end())) continue;
+						const size_t type_pair_index = triangular_matrix_permissive_index(f1.heavy_atoms[i].xs, f2.heavy_atoms[j].xs);
+						one_to_four_pairs.push_back(one_to_four_pair(k1, i, k2, j, type_pair_index));
+					}
+				}
+
+				// Clear the current neighbor set for the next atom.
+				neighbors.clear();
+			}
+		}
 
 		// Update heavy_atoms[].coordinate and hydrogens[] to relative coordinates.
 		for (size_t k = 0; k < num_frames; ++k)
@@ -207,44 +305,21 @@ namespace idock
 		f = e;
 
 		// Calculate intra-ligand free energy.
-		for (size_t k1 = num_frames - 1; k1 > 0; --k1)
+		const size_t num_one_to_four_pairs = one_to_four_pairs.size();
+		for (size_t i = 0; i < num_one_to_four_pairs; ++i)
 		{
-			frame& f1 = frames[k1];
-			const size_t num_heavy_atoms1 = f1.heavy_atoms.size();
-			for (size_t i1 = 0; i1 < num_heavy_atoms1; ++i1)
+			const one_to_four_pair& p = one_to_four_pairs[i];
+			frame& f1 = frames[p.k1];
+			frame& f2 = frames[p.k2];
+			const vec3 r = f2.coordinates[p.i2] - f1.coordinates[p.i1];
+			const fl r2 = r.norm_sqr();
+			if (r2 < scoring_function::Cutoff_Sqr)
 			{
-				for (size_t k2 = 0; k2 < k1; ++k2)
-				{
-					// The distance is fixed between rotorY and the atoms of its parent frame.
-					if ((k2 == f1.parent) && (i1 == 0)) continue;
-
-					frame& f2 = frames[k2];
-					const size_t num_heavy_atoms2 = f2.heavy_atoms.size();
-
-					// Skip frames having only one heavy atom.
-					if (num_heavy_atoms2 == 1) continue;
-
-					for (size_t i2 = 0; i2 < num_heavy_atoms2; ++i2)
-					{
-						// The distance is fixed between the two atoms of a rotor.
-						if ((k2 == f1.parent) && (i1 > 0) && (i2 == f1.rotorX)) continue;
-
-						// The distance is fixed between rotorY and the rotorX of its parent's parent frame.
-						if ((k2 == frames[f1.parent].parent) && (i1 == 0) && (i2 == frames[f1.parent].rotorX)) continue;
-
-						const vec3 r = f2.coordinates[i2] - f1.coordinates[i1];
-						const fl r2 = r.norm_sqr();
-						if (r2 < scoring_function::Cutoff_Sqr)
-						{
-							const size_t type_pair_index = triangular_matrix_permissive_index(f1.heavy_atoms[i1].xs, f2.heavy_atoms[i2].xs);
-							const scoring_function_element element = sf.evaluate(type_pair_index, r2);
-							e += element.e;
-							const vec3 derivative = element.dor * r;
-							f1.derivatives[i1] -= derivative;
-							f2.derivatives[i2] += derivative;
-						}
-					}
-				}
+				const scoring_function_element element = sf.evaluate(p.type_pair_index, r2);
+				e += element.e;
+				const vec3 derivative = element.dor * r;
+				f1.derivatives[p.i1] -= derivative;
+				f2.derivatives[p.i2] += derivative;
 			}
 		}
 
