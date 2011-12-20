@@ -11,7 +11,7 @@ Features
 * idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
-* idock can be used as a backend docking engine for [igrow].
+* idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
 
 
 Supported operating systems and compilers
@@ -113,10 +113,11 @@ Change Log
 
 * First release on [CodePlex].
 
-### 1.1 (2011-11-20)
+### 1.1 (2011-12-20)
 
 * Added program option --config.
 * Added progress bar and verbose output.
+* Better RMSD obtained for certain cases.
 
 
 Contact Author
