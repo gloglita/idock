@@ -17,7 +17,6 @@
 */
 
 #include "receptor.hpp"
-#include "file.hpp"
 
 namespace idock
 {
@@ -26,15 +25,5 @@ namespace idock
 		// Assert the Rvalue constructor of vector<T> work.
 		BOOST_ASSERT(atoms_.empty());
 		BOOST_ASSERT(!atoms.empty());
-
-		// Dump receptor.
-		//ofstream dump("receptor.csv");
-		//dump << "i,x,y,z,ad,xs\n";
-		//for (size_t i = 0; i < atoms.size(); ++i)
-		//{
-		//	const atom& a = atoms[i];
-		//	dump << i << ',' << a.coordinate[0] << ',' << a.coordinate[1] << ',' << a.coordinate[2] << ',' << a.ad << ',' << a.xs << '\n';
-		//}
-		//dump.close();
 	}
 }

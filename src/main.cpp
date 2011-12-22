@@ -21,10 +21,12 @@
  *
  * \section introduction Introduction
  * idock is a multithreaded virtual screening tool for flexible ligand docking.
+ *
+ * \section features Features
  * idock invents its own thread pool in order to reuse threads and maintain a high CPU utilization throughout the entire screening procedure. The thread pool parallelizes the creation of grid maps and the execution of Monte Carlo tasks.
  * idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the C++11 standard, to avoid frequent memory reallocation.
  * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
- * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
+ * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
  *
  * \section availability Availability
  * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Both x86 and x64 binaries for Linux and Windows are provided.
@@ -36,10 +38,10 @@
  * pythonsh prepare_receptor4.py -r receptor.pdb -A hydrogens -U nphs_lps_waters_deleteAltB
  *
  * \subsection prepare_ligand Prepare ligand files in PDBQT format
- * pythonsh prepare_ligand4.py -l ligand.pdb
+ * pythonsh prepare_ligand4.py -l ligand.mol2
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date November 9, 2011
+ * \date 22 December 2011
  *
  * Copyright (C) 2011 The Chinese University of Hong Kong.
  */
