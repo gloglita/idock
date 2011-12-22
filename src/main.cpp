@@ -56,13 +56,14 @@
 #include "thread_pool.hpp"
 #include "grid_map_task.hpp"
 #include "monte_carlo_task.hpp"
+#include "summary.hpp"
 
 int main(int argc, char* argv[])
 {
 	std::cout << "idock 1.1\n";
 
 	using namespace idock;
-	path receptor_path, ligand_folder_path, output_folder_path, log_path;
+	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	fl energy_range, grid_granularity;
@@ -73,7 +74,8 @@ int main(int argc, char* argv[])
 
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
-		const path default_log_path = "log";
+		const path default_log_path = "log.txt";
+		const path default_csv_path = "log.csv";
 		const unsigned int concurrency = boost::thread::hardware_concurrency();
 		const unsigned int default_num_threads = concurrency ? concurrency : 1;
 		const size_t default_seed = random_seed();
@@ -98,6 +100,7 @@ int main(int argc, char* argv[])
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
 			("log", value<path>(&log_path)->default_value(default_log_path), "log file")
+			("csv", value<path>(&csv_path)->default_value(default_csv_path), "csv file")
 			;
 
 		options_description miscellaneous_options("options (optional)");
@@ -322,6 +325,9 @@ int main(int argc, char* argv[])
 		// Initialize a ligand parser.
 		ligand_parser lig_parser;
 
+		// Initialize a summary container. ptr_vector is used for fast sorting.
+		ptr_vector<summary> summaries(1000); // A virtual screening typically docks <= 1000 ligands.
+
 		// Initialize a thread pool and create worker threads for later use.
 		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 		thread_pool tp(num_threads);
@@ -330,12 +336,13 @@ int main(int argc, char* argv[])
 		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
-		using namespace boost::filesystem;
+		size_t max_existing_conformations = 0; // Maximum number of num_conformations' across all ligands.
+		using boost::filesystem::directory_iterator;
 		const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 		for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
 			// Skip non-regular files such as folders.
-			if (!is_regular_file(dir_iter->status())) continue;
+			if (!boost::filesystem::is_regular_file(dir_iter->status())) continue;
 
 			// Increment the ligand counter.
 			++num_ligands;
@@ -491,6 +498,17 @@ int main(int argc, char* argv[])
 				}
 				log << '\n';
 
+				// Aggregate the summary of current ligand for subsequent ranking.
+				vector<fl> energies(num_conformations);
+				for (size_t i = 0; i < num_conformations; ++i)
+				{
+					energies[i] = results[i].e;
+				}
+				summaries.push_back(new summary(ligand_filename, static_cast<vector<fl>&&>(energies)));
+
+				// Find the largest num_conformations.
+				if (max_existing_conformations < num_conformations) max_existing_conformations = num_conformations;
+
 				// Clear the results of the current ligand.
 				results.clear();
 			}
@@ -500,6 +518,34 @@ int main(int argc, char* argv[])
 				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
+
+		// Virtual screening is done. Dispose the thread pool.
+		tp.dispose();
+
+		// Sort the summaries.
+		summaries.sort(); // Might be a bottleneck for a large number of summaries.
+
+		ofstream csv(csv_path);
+		csv << "ligand,no. of conformations";
+		for (size_t i = 1; i <= max_existing_conformations; ++i)
+		{
+			csv << ",free energy in kcal/mol of conformation " << i;
+		}
+		csv.setf(std::ios::fixed, std::ios::floatfield);
+		csv << std::endl << std::setprecision(2);
+		const size_t num_summaries = summaries.size(); // num_summaries == num_ligands may not always hold should any ligands fail.
+		for (size_t i = 0; i < num_summaries; ++i)
+		{
+			const summary& s = summaries[i];
+			const size_t num_conformations = s.energies.size();
+			csv << s.filename << ',' << num_conformations;
+			for (size_t j = 0; j < num_conformations; ++j)
+			{
+				csv << ',' << s.energies[j];
+			}
+			csv << std::endl;
+		}
+		csv.close();
 	}
 	catch (const std::exception& e)
 	{

@@ -39,6 +39,7 @@
     <ClInclude Include="..\src\quaternion.hpp" />
     <ClInclude Include="..\src\receptor.hpp" />
     <ClInclude Include="..\src\seed.hpp" />
+    <ClInclude Include="..\src\summary.hpp" />
     <ClInclude Include="..\src\thread_pool.hpp" />
     <ClInclude Include="..\src\tee.hpp" />
     <ClInclude Include="..\src\vec3.hpp" />

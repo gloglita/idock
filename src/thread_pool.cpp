@@ -103,7 +103,7 @@ namespace idock
 			task_completion.wait(self_lk);
 	}
 
-	thread_pool::~thread_pool()
+	void thread_pool::dispose()
 	{
 		// Notify threads to exit from the loop back function.
 		exiting = true;
@@ -111,5 +111,10 @@ namespace idock
 
 		// Wait until all threads are joined.
 		join_all();
+	}
+
+	thread_pool::~thread_pool()
+	{
+		dispose();
 	}
 }

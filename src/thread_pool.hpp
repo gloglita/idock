@@ -60,6 +60,9 @@ namespace idock
 		/// Blocks until all tasks are completed and the progress bar becomes full.
 		void hard_sync();
 
+		/// Joins all the threads.
+		void dispose();
+
 		/// Destructs a thread pool by joining all the threads.
 		~thread_pool();
 
