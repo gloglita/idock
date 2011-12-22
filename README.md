@@ -10,7 +10,7 @@ Features
 * idock invents its own thread pool in order to reuse threads and maintain a high CPU utilization throughout the entire screening procedure. The thread pool parallelizes the creation of grid maps and the execution of Monte Carlo tasks.
 * idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
-* idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand, without explicitly detecting covalent bonds among atoms.
+* idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
 * idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
 
 
