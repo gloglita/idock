@@ -70,10 +70,10 @@ namespace idock
 
 		// Create csv files to dump Monte Carlo and BFGS information for debugging purpose.
 		//const unsigned int task_no = seed & 31;
-		//ofile mc_dump("mc" + boost::lexical_cast<string>(task_no) + ".csv");
+		//ofstream mc_dump("mc" + boost::lexical_cast<string>(task_no) + ".csv");
 		//mc_dump << "num_randomizations," << num_randomizations << '\n';
 		//mc_dump << "iteration,num_mutations,mutation_entity,e before bfgs,e after bfgs,acceptance\n";
-		//ofile bfgs_dump("bfgs" + boost::lexical_cast<string>(task_no) + ".csv");
+		//ofstream bfgs_dump("bfgs" + boost::lexical_cast<string>(task_no) + ".csv");
 		//bfgs_dump << ",num_alpha_trials,e";
 		//for (size_t k = 0; k < lig.num_frames; ++k)
 		//{

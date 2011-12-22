@@ -38,7 +38,7 @@ namespace idock
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 		// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
-		ifile in(file); // Parsing starts. Open the file stream as late as possible.
+		ifstream in(file); // Parsing starts. Open the file stream as late as possible.
 		while (getline(in, line))
 		{
 			++num_lines;

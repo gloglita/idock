@@ -25,7 +25,7 @@
     <ClInclude Include="..\src\box.hpp" />
     <ClInclude Include="..\src\common.hpp" />
     <ClInclude Include="..\src\conformation.hpp" />
-    <ClInclude Include="..\src\file.hpp" />
+    <ClInclude Include="..\src\fstream.hpp" />
     <ClInclude Include="..\src\grid_map_task.hpp" />
     <ClInclude Include="..\src\ligand.hpp" />
     <ClInclude Include="..\src\ligand_parser.hpp" />

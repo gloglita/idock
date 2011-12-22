@@ -21,7 +21,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include "file.hpp"
+#include "fstream.hpp"
 
 namespace idock
 {
@@ -29,7 +29,7 @@ namespace idock
 	class tee
 	{
 	public:
-		ofile file; ///< Custom log file.
+		ofstream file; ///< Custom log file.
 
 		/// Constructs a log and sets up the floating point format.
 		explicit tee(const path& p) : file(p)

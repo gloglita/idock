@@ -19,21 +19,23 @@
 #ifndef IDOCK_PARSER_HPP
 #define IDOCK_PARSER_HPP
 
+#include <stdexcept>
 #include <boost/lexical_cast.hpp>
-#include "file.hpp"
+#include "fstream.hpp"
 #include "atom.hpp"
 
 namespace idock
 {
+	using std::domain_error;
 	using boost::filesystem::path;
 	using boost::lexical_cast;
 
 	/// Represents a parsing error.
-	class parsing_error : public runtime_error
+	class parsing_error : public domain_error
 	{
 	public:
 		/// Constructs a parsing error.
-		parsing_error(const path& file, const size_t line, const string& reason) : runtime_error("Error parsing \"" + file.filename().string() + "\" on line " + lexical_cast<string>(line) + ": " + reason) {}
+		parsing_error(const path& file, const size_t line, const string& reason) : domain_error("Error parsing \"" + file.filename().string() + "\" on line " + lexical_cast<string>(line) + ": " + reason) {}
 	};
 
 	/// Represents a base parser for both receptor and ligand.

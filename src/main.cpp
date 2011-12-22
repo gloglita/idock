@@ -67,7 +67,6 @@ int main(int argc, char* argv[])
 
 	// Process program options.
 	{
-		using namespace std;
 		using namespace boost::program_options;
 
 		// Initialize the default values of optional arguments.
@@ -116,7 +115,7 @@ int main(int argc, char* argv[])
 		// If no command line argument is supplied, simply print the usage and exit.
 		if (argc == 1)
 		{
-			cout << all_options;
+			std::cout << all_options;
 			return 0;
 		}
 
@@ -128,38 +127,38 @@ int main(int argc, char* argv[])
 			variable_value config_value = vm["config"];
 			if (!config_value.empty()) // If a configuration file is presented, parse it.
 			{
-				ifile config_file(config_value.as<path>());
+				ifstream config_file(config_value.as<path>());
 				store(parse_config_file(config_file, all_options), vm);
 			}
 			vm.notify(); // Notify the user if there are any parsing errors.
 		}
-		catch (const exception& e)
+		catch (const std::exception& e)
 		{
-			cerr << e.what() << '\n';
+			std::cerr << e.what() << '\n';
 			return 1;
 		}
 
 		// Validate receptor.
 		if (!exists(receptor_path))
 		{
-			cerr << "Receptor " << receptor_path << " does not exist\n";
+			std::cerr << "Receptor " << receptor_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_regular_file(receptor_path))
 		{
-			cerr << "Receptor " << receptor_path << " is not a regular file\n";
+			std::cerr << "Receptor " << receptor_path << " is not a regular file\n";
 			return 1;
 		}
 
 		// Validate ligand_folder.
 		if (!exists(ligand_folder_path))
 		{
-			cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
+			std::cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_directory(ligand_folder_path))
 		{
-			cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
+			std::cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
 
@@ -168,7 +167,7 @@ int main(int argc, char* argv[])
 			size_y < box::Default_Partition_Granularity ||
 			size_z < box::Default_Partition_Granularity)
 		{
-			cerr << "Search space must be "
+			std::cerr << "Search space must be "
 				 << box::Default_Partition_Granularity << "A x "
 				 << box::Default_Partition_Granularity << "A x "
 				 << box::Default_Partition_Granularity << "A or larger\n";
@@ -180,7 +179,7 @@ int main(int argc, char* argv[])
 		{
 			if (!is_directory(output_folder_path))
 			{
-				cerr << "Output folder " << output_folder_path << " is not a directory\n";
+				std::cerr << "Output folder " << output_folder_path << " is not a directory\n";
 				return 1;
 			}
 		}
@@ -188,7 +187,7 @@ int main(int argc, char* argv[])
 		{
 			if (!create_directories(output_folder_path))
 			{
-				cerr << "Failed to create output folder " << output_folder_path << '\n';
+				std::cerr << "Failed to create output folder " << output_folder_path << '\n';
 				return 1;
 			}
 		}
@@ -196,27 +195,27 @@ int main(int argc, char* argv[])
 		// Validate miscellaneous options.
 		if (num_threads < 1)
 		{
-			cerr << "Option threads must be 1 or greater\n";
+			std::cerr << "Option threads must be 1 or greater\n";
 			return 1;
 		}
 		if (num_mc_tasks < 1)
 		{
-			cerr << "Option tasks must be 1 or greater\n";
+			std::cerr << "Option tasks must be 1 or greater\n";
 			return 1;
 		}
 		if (max_conformations < 1)
 		{
-			cerr << "Option modes must be 1 or greater\n";
+			std::cerr << "Option modes must be 1 or greater\n";
 			return 1;
 		}
 		if (energy_range < 0)
 		{
-			cerr << "Option energy_range must be 0 or greater\n";
+			std::cerr << "Option energy_range must be 0 or greater\n";
 			return 1;
 		}
 		if (grid_granularity <= 0)
 		{
-			cerr << "Option granularity must be positive\n";
+			std::cerr << "Option granularity must be positive\n";
 			return 1;
 		}
 	}

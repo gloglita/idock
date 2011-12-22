@@ -28,7 +28,7 @@ namespace idock
 		BOOST_ASSERT(!atoms.empty());
 
 		// Dump receptor.
-		//ofile dump("receptor.csv");
+		//ofstream dump("receptor.csv");
 		//dump << "i,x,y,z,ad,xs\n";
 		//for (size_t i = 0; i < atoms.size(); ++i)
 		//{

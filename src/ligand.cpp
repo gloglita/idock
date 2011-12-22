@@ -160,7 +160,7 @@ namespace idock
 		}
 
 		// Dump ligand.
-		//ofile dump("ligand.csv");
+		//ofstream dump("ligand.csv");
 		//dump << "i,x,y,z,ad,xs\n";
 		//for (size_t k = 0; k < num_frames; ++k)
 		//{
@@ -443,7 +443,7 @@ namespace idock
 
 		// Dump binding conformations to the output ligand file.
 		using namespace std;
-		ofile out(output_ligand); // Dumping starts. Open the file stream as late as possible.
+		ofstream out(output_ligand); // Dumping starts. Open the file stream as late as possible.
 		out.setf(ios::fixed, ios::floatfield);
 		out << setprecision(2);
 		for (size_t i = 0; i < num_conformations; ++i)
