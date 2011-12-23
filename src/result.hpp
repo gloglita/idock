@@ -62,18 +62,18 @@ namespace idock
 
 		// If the container is not empty, find in a coordinate that is closest to the given newly found r.coordinate.
 		size_t index = 0;
-		fl best_sqrare_error = distance_sqr(r.heavy_atoms, results.front().heavy_atoms);
+		fl best_square_error = distance_sqr(r.heavy_atoms, results.front().heavy_atoms);
 		for (size_t i = 1; i < results.size(); ++i)
 		{
-			const fl this_sqrare_error = distance_sqr(r.heavy_atoms, results[i].heavy_atoms);
-			if (this_sqrare_error < best_sqrare_error)
+			const fl this_square_error = distance_sqr(r.heavy_atoms, results[i].heavy_atoms);
+			if (this_square_error < best_square_error)
 			{
 				index = i;
-				best_sqrare_error = this_sqrare_error;
+				best_square_error = this_square_error;
 			}
 		}
 
-		if (best_sqrare_error < required_square_error) // The result r is very close to results[index].
+		if (best_square_error < required_square_error) // The result r is very close to results[index].
 		{
 			if (r.e < results[index].e) // r is better than results[index], so substitute r for results[index].
 			{
