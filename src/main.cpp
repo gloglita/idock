@@ -198,17 +198,17 @@ int main(int argc, char* argv[])
 		}
 
 		// Validate miscellaneous options.
-		if (num_threads < 1)
+		if (!num_threads)
 		{
 			std::cerr << "Option threads must be 1 or greater\n";
 			return 1;
 		}
-		if (num_mc_tasks < 1)
+		if (!num_mc_tasks)
 		{
 			std::cerr << "Option tasks must be 1 or greater\n";
 			return 1;
 		}
-		if (max_conformations < 1)
+		if (!max_conformations)
 		{
 			std::cerr << "Option modes must be 1 or greater\n";
 			return 1;
