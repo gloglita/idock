@@ -217,6 +217,39 @@ namespace idock
 		return (xs_is_donor(xs1) && xs_is_acceptor(xs2))
 			|| (xs_is_donor(xs2) && xs_is_acceptor(xs1));
 	}
+	
+	/// Mapping from AutoDock4 atom type to XScore atom type.
+	const size_t ad_to_xs[] =
+	{
+		0,             //  0 = AD_TYPE_H
+		0,             //  1 = AD_TYPE_HD
+		XS_TYPE_C_H,   //  2 = AD_TYPE_C
+		XS_TYPE_C_H,   //  3 = AD_TYPE_A
+		XS_TYPE_N_P,   //  4 = AD_TYPE_N
+		XS_TYPE_N_A,   //  5 = AD_TYPE_NA
+		XS_TYPE_O_A,   //  6 = AD_TYPE_OA
+		XS_TYPE_S_P,   //  7 = AD_TYPE_S
+		XS_TYPE_S_P,   //  8 = AD_TYPE_SA
+		XS_TYPE_S_P,   //  9 = AD_TYPE_Se
+		XS_TYPE_P_P,   // 10 = AD_TYPE_P
+		XS_TYPE_F_H,   // 11 = AD_TYPE_F
+		XS_TYPE_Cl_H,  // 12 = AD_TYPE_Cl
+		XS_TYPE_Br_H,  // 13 = AD_TYPE_Br
+		XS_TYPE_I_H,   // 14 = AD_TYPE_I
+		XS_TYPE_Met_D, // 15 = AD_TYPE_Zn
+		XS_TYPE_Met_D, // 16 = AD_TYPE_Fe
+		XS_TYPE_Met_D, // 17 = AD_TYPE_Mg
+		XS_TYPE_Met_D, // 18 = AD_TYPE_Ca
+		XS_TYPE_Met_D, // 19 = AD_TYPE_Mn
+		XS_TYPE_Met_D, // 20 = AD_TYPE_Cu
+		XS_TYPE_Met_D, // 21 = AD_TYPE_Na
+		XS_TYPE_Met_D, // 22 = AD_TYPE_K
+		XS_TYPE_Met_D, // 23 = AD_TYPE_Hg
+		XS_TYPE_Met_D, // 24 = AD_TYPE_Ni
+		XS_TYPE_Met_D, // 25 = AD_TYPE_Co
+		XS_TYPE_Met_D, // 26 = AD_TYPE_Cd
+		XS_TYPE_Met_D, // 27 = AD_TYPE_As
+	};
 }
 
 #endif

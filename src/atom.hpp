@@ -37,36 +37,7 @@ namespace idock
 		{
 			// Assign XScore atom type.
 			BOOST_ASSERT(ad < AD_TYPE_SIZE);
-			switch (ad)
-			{
-				// The probability of (ad == AD_TYPE_C || AD_TYPE_A) is high, so consider them first.
-				case AD_TYPE_C	:
-				case AD_TYPE_A	: xs = XS_TYPE_C_H; break;
-				case AD_TYPE_N	: xs = XS_TYPE_N_P; break;
-				case AD_TYPE_NA	: xs = XS_TYPE_N_A; break;
-				case AD_TYPE_OA	: xs = XS_TYPE_O_A; break;
-				case AD_TYPE_S	:
-				case AD_TYPE_SA	:
-				case AD_TYPE_Se : xs = XS_TYPE_S_P; break; // Se is approximated as XS_TYPE_S_P.
-				case AD_TYPE_P	: xs = XS_TYPE_P_P; break;
-				case AD_TYPE_F	: xs = XS_TYPE_F_H; break;
-				case AD_TYPE_Cl	: xs = XS_TYPE_Cl_H; break;
-				case AD_TYPE_Br	: xs = XS_TYPE_Br_H; break;
-				case AD_TYPE_I	: xs = XS_TYPE_I_H; break;
-				case AD_TYPE_Zn	:
-				case AD_TYPE_Fe	:
-				case AD_TYPE_Mg	:
-				case AD_TYPE_Ca	:
-				case AD_TYPE_Mn	:
-				case AD_TYPE_Cu	:
-				case AD_TYPE_Na	:
-				case AD_TYPE_K	:
-				case AD_TYPE_Hg	:
-				case AD_TYPE_Ni	:
-				case AD_TYPE_Co	:
-				case AD_TYPE_Cd	:
-				case AD_TYPE_As	: xs = XS_TYPE_Met_D; break;
-			}
+			xs = ad_to_xs[ad];
 		}
 
 		/// Returns the covalent radius of current AutoDock4 atom type.
