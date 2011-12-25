@@ -1,7 +1,7 @@
 idock
 =====
 
-idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0].
+idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is inspired by [AutoDock Vina], and is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0].
 
 
 Features
@@ -81,14 +81,21 @@ To display a full list of available options, simply run the program without argu
 
     idock
 
-The `examples` folder contains several use cases. One can supply the options from command line arguments
+The `examples` folder contains several use cases. For example, to dock the ligand TMC278 against HIV-1 RT of PDB ID 2ZD1,
 
-    idock --receptor receptors/3KFN.pdbqt --ligand_folder ligands/4DX --output_folder output --center_x 17.488 --center_y 5.151 --center_z 2.530 --size_x 20 --size_y 20 --size_z 18
+    cd examples/2ZD1/T27
+
+One can supply the options from command line arguments
+
+    idock --receptor ../../../receptors/2ZD1.pdbqt --ligand_folder ../../../ligands/T27 --output_folder output --center_x 49.712 --center_y -28.923 --center_z 36.824 --size_x 18 --size_y 18 --size_z 20
 
 Or one can instruct idock to load the options from a configuration file
 
-    cd examples/3KFN/4DX
-    idock --config config.txt
+    idock --config idock.cfg
+
+For comparison against [AutoDock Vina]
+
+    vina --config vina.cfg
 
 
 Documentation Creation
@@ -136,6 +143,7 @@ Green grape is chosen as the logo for idock because it is one of the author's fa
 
 [virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
 [docking]: http://en.wikipedia.org/wiki/Docking_(molecular)
+[AutoDock Vina]: http://vina.scripps.edu
 [Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
 [C++11]: http://en.wikipedia.org/wiki/C++11
 [igrow]: https://github.com/HongjianLi/igrow
