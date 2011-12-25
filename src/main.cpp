@@ -266,8 +266,8 @@ int main(int argc, char* argv[])
 			for (size_t z = 0; z < b.num_partitions[2]; ++z)
 			{
 				partitions(x, y, z).reserve(receptor_atoms_within_cutoff.size());
-				const array<size_t, 3> index1 = { x,     y,     z     };
-				const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
+				const array<size_t, 3> index1 = {{ x,     y,     z     }};
+				const array<size_t, 3> index2 = {{ x + 1, y + 1, z + 1 }};
 				const vec3 corner1 = b.partition_corner1(index1);
 				const vec3 corner2 = b.partition_corner1(index2);
 				for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)

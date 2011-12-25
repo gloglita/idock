@@ -30,17 +30,17 @@ namespace idock
 		static const fl Default_Partition_Granularity; ///< Default size of partitions.
 		static const fl Default_Partition_Granularity_Inverse; ///< 1 / Default_Partition_Granularity.
 
+		const vec3 center; ///< Box center.
+		vec3 span; ///< 3D sizes of box.
+		vec3 corner1; ///< Box boundary corner with smallest values of all the 3 dimensions.
+		vec3 corner2; ///< Box boundary corner with largest values of all the 3 dimensions.
 		const fl grid_granularity; ///< 1D size of grids.
 		const fl grid_granularity_inverse; ///< 1 / grid_granularity.
 		const vec3 grid_size; ///< 3D sizes of grids.
 		const vec3 grid_size_inverse; ///< (1, 1, 1) / grid_size.
-		const vec3 center; ///< Box center.
 		array<size_t, 3> num_grids; ///< Number of grids.
 		array<size_t, 3> num_probes; ///< Number of probes.
 		array<size_t, 3> num_partitions; ///< Number of partitions.
-		vec3 span; ///< 3D sizes of box.
-		vec3 corner1; ///< Box boundary corner with smallest values of all the 3 dimensions.
-		vec3 corner2; ///< Box boundary corner with largest values of all the 3 dimensions.
 		vec3 partition_size; ///< 3D sizes of partitions.
 		vec3 partition_size_inverse; ///< (1, 1, 1) / partition_size.
 

@@ -53,7 +53,6 @@ namespace idock
 		conformation c0(lig.num_active_torsions);
 		fl e0, f0;
 		change g0(lig.num_active_torsions);
-		size_t num_randomizations = 0;
 		do
 		{
 			// Randomize conformation c0.
@@ -64,7 +63,6 @@ namespace idock
 			{
 				c0.torsions[i] = uniform_pi_gen();
 			}
-			++num_randomizations;
 		} while (!lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0));
 		fl best_e = e0; // The best free energy so far.
 
@@ -201,10 +199,10 @@ namespace idock
 					// 2) The curvature condition ensures that the slope has been reduced sufficiently.
 					if (lig.evaluate(c2, sf, b, grid_maps, e1 + 0.0001 * alpha * pg1, e2, f2, g2))
 					{
-						//pg2 = 0;
-						//for (size_t i = 0; i < num_variables; ++i)
-						//	pg2 += p(i) * g2(i);
-						//if (pg2 >= 0.9 * pg1)
+						pg2 = 0;
+						for (size_t i = 0; i < num_variables; ++i)
+							pg2 += p(i) * g2(i);
+						if (pg2 >= 0.9 * pg1)
 							break; // An appropriate alpha is found.
 					}
 				}

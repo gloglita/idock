@@ -36,7 +36,7 @@ namespace idock
 		array3d() : n(Zero) {}
 
 		/// Constructs a 3D array with specified sizes.
-		explicit array3d(const array<size_t, 3> n) : n(n), vector<T>(n[0] * n[1] * n[2]) {}
+		explicit array3d(const array<size_t, 3> n_) : vector<T>(n_[0] * n_[1] * n_[2]), n(n_) {}
 
 		/// Returns true if all the 3 dimensions are non-zero.
 		bool initialized() const
@@ -82,7 +82,7 @@ namespace idock
 	};
 
 	template<typename T>
-	const array<size_t, 3> array3d<T>::Zero = {0, 0, 0};
+	const array<size_t, 3> array3d<T>::Zero = {{0, 0, 0}};
 }
 
 #endif

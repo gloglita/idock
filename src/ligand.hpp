@@ -74,11 +74,11 @@ namespace idock
 		const size_t num_frames; ///< Number of frames.
 		const size_t num_torsions; ///< Number of torsions.
 		const size_t num_active_torsions; ///< Number of active torsions.
-		const size_t num_heavy_atoms; ///< Number of heavy atoms.
 		const fl flexibility_penalty_factor; ///< A value in (0, 1] to penalize ligand flexibility.
+		const size_t num_heavy_atoms; ///< Number of heavy atoms.
 
 		/// Constructs a ligand from frames and lines.
-		ligand(vector<frame>&& frames_, vector<string>&& lines_, const size_t num_heavy_atoms, const size_t num_redundant_rotors);
+		ligand(vector<frame>&& frames_, vector<string>&& lines_, const size_t num_heavy_atoms, const size_t num_inactive_torsions);
 
 		/// Returns the XScore atom types presented in current ligand.
 		vector<size_t> get_atom_types() const;
