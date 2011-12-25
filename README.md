@@ -130,7 +130,7 @@ Change Log
 Contact Author
 --------------
 
-[Jacky Lee] (JackyLeeHongJian@Gmail.com)
+[Jacky Lee]
 
 
 Logo
