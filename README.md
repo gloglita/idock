@@ -130,7 +130,7 @@ Change Log
 Contact Author
 --------------
 
-Jacky Lee (JackyLeeHongJian@Gmail.com)
+[Jacky Lee] (JackyLeeHongJian@Gmail.com)
 
 
 Logo
@@ -149,6 +149,7 @@ Green grape is chosen as the logo for idock because it is one of the author's fa
 [igrow]: https://github.com/HongjianLi/igrow
 [Boost C++ Libraries]: http://www.boost.org
 [doxygen]: http://www.doxygen.org
-[Open Clip Art]: http://www.openclipart.org
 [CodePlex]: http://idock.codeplex.com
+[Jacky Lee]: http://www.cse.cuhk.edu.hk/~hjli
+[Open Clip Art]: http://www.openclipart.org
 
