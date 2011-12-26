@@ -281,8 +281,8 @@ int main(int argc, char* argv[])
 
 		// Reserve storage for task containers.
 		const size_t num_gm_tasks = b.num_probes[0];
-		ptr_vector<packaged_task<void> > gm_tasks; // ptr_vector<T> is used rather than vector<T> in order to pass compilation by the clang compiler.
-		ptr_vector<packaged_task<void> > mc_tasks;
+		vector<packaged_task<void> > gm_tasks;
+		vector<packaged_task<void> > mc_tasks;
 		gm_tasks.reserve(num_gm_tasks);
 		mc_tasks.reserve(num_mc_tasks);
 
@@ -378,7 +378,7 @@ int main(int argc, char* argv[])
 					BOOST_ASSERT(gm_tasks.empty());
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
-						gm_tasks.push_back(new packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
+						gm_tasks.push_back(packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
 					}
 
 					// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
@@ -423,7 +423,7 @@ int main(int argc, char* argv[])
 				{
 					result_containers[i].clear();
 					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
-					mc_tasks.push_back(new packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					mc_tasks.push_back(packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.

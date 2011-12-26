@@ -57,12 +57,15 @@ namespace idock
 		vector<fl> energies; ///< Heavy atom free energies.
 
 		/// Constructs an active frame, and relates it to its parent frame.
-		frame(const size_t parent) : parent(parent), active(true)
+		explicit frame(const size_t parent) : parent(parent), active(true)
 		{
 			heavy_atoms.reserve(20); // A frame typically consists of < 20 heavy atoms.
 			numbers.reserve(20); // A frame typically consists of < 20 heavy atoms.
 			hydrogens.reserve(10); // A frame typically consists of < 20 hydrogen atoms.
 		}
+		
+		/// Move constructor.
+		//frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), active(f.active), heavy_atoms(static_cast<vector<atom>&&>(f.heavy_atoms)), hydrogens(static_cast<vector<atom>&&>(f.hydrogens)), relative_origin(f.relative_origin), relative_axis(f.relative_axis), numbers(static_cast<vector<size_t>&&>(f.numbers)), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(static_cast<vector<vec3>&&>(f.coordinates)), derivatives(static_cast<vector<vec3>&&>(f.derivatives)), energies(static_cast<vector<fl>&&>(f.energies)) {}
 	};
 
 	/// Represents a ligand.
