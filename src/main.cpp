@@ -302,7 +302,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
-		const size_t max_results = 20;
+		const size_t max_results = 20; // Maximum number of results obtained from a single Monte Carlo task.
 		vector<ptr_vector<result> > result_containers(num_mc_tasks);
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 			result_containers[i].reserve(max_results);
@@ -420,8 +420,8 @@ int main(int argc, char* argv[])
 				// Populate the Monte Carlo task container.
 				BOOST_ASSERT(mc_tasks.empty());
 				for (size_t i = 0; i < num_mc_tasks; ++i)
-				{
-					result_containers[i].clear();
+				{	
+					BOOST_ASSERT(result_containers[i].empty());
 					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
 					mc_tasks.push_back(packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
@@ -446,10 +446,11 @@ int main(int argc, char* argv[])
 						continue;
 					}
 					BOOST_ASSERT(future.is_ready());
-					const ptr_vector<result>& task_results = result_containers[i];
+					ptr_vector<result>& task_results = result_containers[i];
 					const size_t num_task_results = task_results.size();
 					for (size_t j = 0; j < num_task_results; ++j)
 						add_to_result_container(results, task_results[j], required_square_error);
+					task_results.clear();
 				}
 
 				// Block until all the Monte Carlo tasks are completed.
