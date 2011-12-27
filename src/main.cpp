@@ -449,7 +449,7 @@ int main(int argc, char* argv[])
 					ptr_vector<result>& task_results = result_containers[i];
 					const size_t num_task_results = task_results.size();
 					for (size_t j = 0; j < num_task_results; ++j)
-						add_to_result_container(results, task_results[j], required_square_error);
+						add_to_result_container(results, static_cast<result&&>(task_results[j]), required_square_error);
 					task_results.clear();
 				}
 

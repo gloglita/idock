@@ -64,6 +64,7 @@ namespace idock
 			hydrogens.reserve(10); // A frame typically consists of < 20 hydrogen atoms.
 		}
 		
+		/// Copy constructor.
 		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), active(f.active), heavy_atoms(f.heavy_atoms), hydrogens(f.hydrogens), relative_origin(f.relative_origin), relative_axis(f.relative_axis), numbers(f.numbers), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(f.coordinates), derivatives(f.derivatives), energies(f.energies) {}
 		
 		/// Move constructor.

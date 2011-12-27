@@ -20,13 +20,11 @@
 #define IDOCK_RESULT_HPP
 
 #include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/functional/factory.hpp>
 #include "conformation.hpp"
 
 namespace idock
 {
 	using boost::ptr_vector;
-	using boost::factory;
 
 	/// Represents a result found by BFGS local optimization for later clustering.
 	class result
@@ -39,24 +37,26 @@ namespace idock
 
 		/// Constructs a result from free energy e, force f, heavy atom coordinates and hydrogen atom coordinates.
 		explicit result(const fl e, const fl f, vector<vector<vec3> >&& heavy_atoms_, vector<vector<vec3> >&& hydrogens_) : e(e), f(f), heavy_atoms(static_cast<vector<vector<vec3> >&&>(heavy_atoms_)), hydrogens(static_cast<vector<vector<vec3> >&&>(hydrogens_)) {}
-	};
 
-	/// For sorting ptr_vector<result>.
-	inline bool operator<(const result& a, const result& b)
-	{
-		return a.e < b.e;
-	}
+		/// Move constructor.
+		result(result&& r) : e(r.e), f(r.f), heavy_atoms(static_cast<vector<vector<vec3> >&&>(r.heavy_atoms)), hydrogens(static_cast<vector<vector<vec3> >&&>(r.hydrogens))	{}
+
+		/// For sorting ptr_vector<result>.
+		const bool operator<(const result& r) const
+		{
+			return e < r.e;
+		}
+	};
 
 	// TODO: Do not inline large functions.
 	// TODO: Consider using double linked list std::list<> to store results because of frequent insertions and deletions.
 	/// Clusters a result into an existing result set with a minimum RMSD requirement.
-	inline void add_to_result_container(ptr_vector<result>& results, const result& r, const fl required_square_error)
+	inline void add_to_result_container(ptr_vector<result>& results, result&& r, const fl required_square_error)
 	{
 		// If this is the first result, simply save it.
-		const factory<result*> result_factory;
 		if (results.empty())
 		{
-			results.push_back(result_factory(r));
+			results.push_back(new result(static_cast<result&&>(r)));
 			return;
 		}
 
@@ -83,7 +83,7 @@ namespace idock
 		else // Cannot find in results a result that is similar to r.
 		{
 			if (results.size() < results.capacity())
-				results.push_back(result_factory(r));
+				results.push_back(new result(static_cast<result&&>(r)));
 			else // Now the container is full.
 				if (r.e < results.back().e) // If r is better than the worst one, then replace it.
 					results.back() = r;
