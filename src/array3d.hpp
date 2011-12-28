@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_ARRAY3D_HPP
 #define IDOCK_ARRAY3D_HPP
 

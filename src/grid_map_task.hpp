@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_GRID_MAP_TASK_HPP
 #define IDOCK_GRID_MAP_TASK_HPP
 

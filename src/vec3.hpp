@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_VEC3_HPP
 #define IDOCK_VEC3_HPP
 

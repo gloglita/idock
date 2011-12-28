@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_RESULT_HPP
 #define IDOCK_RESULT_HPP
 

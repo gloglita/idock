@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_QUATERNION_HPP
 #define IDOCK_QUATERNION_HPP
 

@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_ATOM_HPP
 #define IDOCK_ATOM_HPP
 

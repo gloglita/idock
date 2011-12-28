@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_THREAD_POOL_HPP
 #define IDOCK_THREAD_POOL_HPP
 

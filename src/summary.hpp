@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_SUMMARY_HPP
 #define IDOCK_SUMMARY_HPP
 

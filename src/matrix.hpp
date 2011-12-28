@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_MATRIX_HPP
 #define IDOCK_MATRIX_HPP
 

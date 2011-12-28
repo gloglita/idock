@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_MONTE_CARLO_TASK_HPP
 #define IDOCK_MONTE_CARLO_TASK_HPP
 

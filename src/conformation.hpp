@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_CONFORMATION_HPP
 #define IDOCK_CONFORMATION_HPP
 

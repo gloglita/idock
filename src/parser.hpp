@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_PARSER_HPP
 #define IDOCK_PARSER_HPP
 

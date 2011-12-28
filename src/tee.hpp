@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_TEE_HPP
 #define IDOCK_TEE_HPP
 

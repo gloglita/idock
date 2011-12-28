@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_FSTREAM_HPP
 #define IDOCK_FSTREAM_HPP
 

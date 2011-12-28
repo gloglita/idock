@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_LIGAND_HPP
 #define IDOCK_LIGAND_HPP
 

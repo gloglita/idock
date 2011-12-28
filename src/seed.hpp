@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_SEED_HPP
 #define IDOCK_SEED_HPP
 

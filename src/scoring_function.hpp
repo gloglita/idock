@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_SCORING_FUNCTION_HPP
 #define IDOCK_SCORING_FUNCTION_HPP
 

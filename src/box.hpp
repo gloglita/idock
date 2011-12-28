@@ -16,6 +16,7 @@
 
 */
 
+#pragma once
 #ifndef IDOCK_BOX_HPP
 #define IDOCK_BOX_HPP
 
