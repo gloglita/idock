@@ -158,21 +158,6 @@ namespace idock
 			f.derivatives.resize(num_heavy_atoms);
 			f.energies.resize(num_heavy_atoms);
 		}
-
-		// Dump ligand.
-		//ofstream dump("ligand.csv");
-		//dump << "i,x,y,z,ad,xs\n";
-		//for (size_t k = 0; k < num_frames; ++k)
-		//{
-		//	const frame& f = frames[k];
-		//	const size_t num_heavy_atoms = f.heavy_atoms.size();
-		//	for (size_t i = 0; i < num_heavy_atoms; ++i)
-		//	{
-		//		const atom& a = f.heavy_atoms[i];
-		//		dump << i << ',' << a.coordinate[0] << ',' << a.coordinate[1] << ',' << a.coordinate[2] << ',' << a.ad << ',' << a.xs << '\n';
-		//	}
-		//}
-		//dump.close();
 	}
 
 	vector<size_t> ligand::get_atom_types() const
@@ -272,7 +257,7 @@ namespace idock
 				const array3d<fl>& grid_map = grid_maps[f.heavy_atoms[i].xs];
 				BOOST_ASSERT(grid_map.initialized());
 
-				// Find the index and fraction of the current cooords.
+				// Find the index and fraction of the current coordinates.
 				const array<size_t, 3> index = b.grid_index(f.coordinates[i]);
 
 				// Assert the validity of index.
@@ -349,7 +334,7 @@ namespace idock
 				// The derivatives with respect to the position, orientation, and torsions
 				// would be the negative total force acting on the ligand,
 				// the negative total torque, and the negative torque projections, respectively,
-				// where the projections refer to the torque applied to the branch ¡°moved¡± by the torsion,
+				// where the projections refer to the torque applied to the branch moved by the torsion,
 				// projected on its rotation axis.
 				f.force  += f.derivatives[i];
 				f.torque += cross_product(f.coordinates[i] - origin, f.derivatives[i]);
