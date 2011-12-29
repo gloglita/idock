@@ -430,7 +430,7 @@ namespace idock
 		using namespace std;
 		ofstream out(output_ligand); // Dumping starts. Open the file stream as late as possible.
 		out.setf(ios::fixed, ios::floatfield);
-		out << setprecision(2);
+		out << setprecision(3);
 		for (size_t i = 0; i < num_conformations; ++i)
 		{
 			const result& r = results[i];
