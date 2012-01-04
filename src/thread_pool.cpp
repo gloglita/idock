@@ -20,7 +20,7 @@
 
 namespace idock
 {
-	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(NULL), hashes_ptr(NULL), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_hash_index(0), exiting(false)
+	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), hashes_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_hash_index(0), exiting(false)
 	{
 		// Create threads to call (*this)().
 		for (size_t i = 0; i < num_threads; ++i)
