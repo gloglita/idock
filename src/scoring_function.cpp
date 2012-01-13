@@ -25,6 +25,7 @@ namespace idock
 	const fl scoring_function::Cutoff_Sqr = Cutoff * Cutoff;
 	const fl scoring_function::Factor = static_cast<fl>(256);
 	const fl scoring_function::Factor_Inverse = 1 / Factor;
+	const size_t scoring_function::Num_Samples = static_cast<size_t>(Factor * Cutoff_Sqr) + 1;
 
 	fl scoring_function::score(const size_t t1, const size_t t2, const fl r)
 	{
@@ -42,36 +43,28 @@ namespace idock
 			+  (-0.587439) * ((xs_hbond(t1, t2)) ? ((d >= 0) ? 0.0 : ((d <= -0.7) ? 1 : d * (-1.428571))): 0.0);
 	}
 
-	scoring_function::scoring_function() : triangular_matrix<vector<scoring_function_element> >(XS_TYPE_SIZE, vector<scoring_function_element>(static_cast<size_t>(Factor * Cutoff_Sqr) + 1, scoring_function_element()))
+	void scoring_function::precalculate(const size_t t1, const size_t t2, const vector<fl>& rs)
 	{
-		// Obtain the number of sampling points within [0, Cutoff].
-		const size_t n = (*this)(0, 0).size();
+		vector<scoring_function_element>& p = (*this)(t1, t2);
+		BOOST_ASSERT(p.size() == Num_Samples);
 
-		vector<fl> rs(n, 0);
-		for (size_t i = 0; i < n; ++i)
-			rs[i] = sqrt(i * Factor_Inverse);
-		// rs[0] == 0
-		// rs[16384] == sqrt(16384 / 256) == sqrt(64) == 8 == Cutoff
-
-		for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
-		for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
+		// Calculate the value of scoring function evaluated at (t1, t2, d).
+		for (size_t i = 0; i < Num_Samples; ++i)
 		{
-			vector<scoring_function_element>& p = (*this)(t1, t2);
-
-			// Calculate the value of scoring function evaluated at (t1, t2, d).
-			for (size_t i = 0; i < n; ++i)
-			{
-				p[i].e = score(t1, t2, rs[i]);
-			}
-
-			// Calculate the dor of scoring function evaluated at (t1, t2, d).
-			for (size_t i = 1; i < n - 1; ++i)
-			{
-				p[i].dor = (p[i + 1].e - p[i].e) / ((rs[i + 1] - rs[i]) * rs[i]);
-			}
-			p[0].dor = 0;
-			p[n - 1].dor = 0;
+			p[i].e = score(t1, t2, rs[i]);
 		}
+
+		// Calculate the dor of scoring function evaluated at (t1, t2, d).
+		for (size_t i = 1; i < Num_Samples - 1; ++i)
+		{
+			p[i].dor = (p[i + 1].e - p[i].e) / ((rs[i + 1] - rs[i]) * rs[i]);
+		}
+		p.front().dor = 0;
+		p.back().dor = 0;
+	}
+
+	scoring_function::scoring_function() : triangular_matrix<vector<scoring_function_element>>(XS_TYPE_SIZE, vector<scoring_function_element>(Num_Samples, scoring_function_element()))
+	{
 	}
 
 	scoring_function_element scoring_function::evaluate(const size_t type_pair_index, const fl r2) const

@@ -33,11 +33,12 @@ namespace idock
 	};
 
 	/// Represents a scoring function.
-	class scoring_function : private triangular_matrix<vector<scoring_function_element> >
+	class scoring_function : private triangular_matrix<vector<scoring_function_element>>
 	{
 	public:
 		static const fl Cutoff; ///< Cutoff of a scoring function.
 		static const fl Cutoff_Sqr; ///< Square of Cutoff.
+		static const size_t Num_Samples; ///< Number of sampling points within [0, Cutoff].
 
 		/// Returns the score between two atoms of XScore atom types t1 and t2 and distance r.
 		static fl score(const size_t t1, const size_t t2, const fl r);
@@ -45,10 +46,12 @@ namespace idock
 		/// Constructs an empty scoring function.
 		scoring_function();
 
+		/// Precalculates the scoring function values of sample points for the type combination of t1 and t2.
+		void precalculate(const size_t t1, const size_t t2, const vector<fl>& rs);
+
 		/// Evaluates the scoring function given (t1, t2, r2).
 		scoring_function_element evaluate(const size_t type_pair_index, const fl r2) const;
 
-	private:
 		static const fl Factor; ///< Scaling factor for r, i.e. distance between two atoms.
 		static const fl Factor_Inverse; ///< 1 / Factor.
 	};

@@ -41,9 +41,9 @@
  * pythonsh prepare_ligand4.py -l ligand.mol2
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 22 December 2011
+ * \date 13 January 2012
  *
- * Copyright (C) 2011 The Chinese University of Hong Kong.
+ * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
 
 #include <boost/thread/thread.hpp>
@@ -235,9 +235,6 @@ int main(int argc, char* argv[])
 		log << "Using random seed " << seed << '\n';
 		mt19937eng eng(seed);
 
-		// Precalculate the scoring function.
-		const scoring_function sf;
-
 		// Initialize the search space of cuboid shape.
 		const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 
@@ -246,7 +243,7 @@ int main(int argc, char* argv[])
 		const receptor rec = receptor_parser().parse(receptor_path);
 
 		// Divide the box into coarse-grained partitions for subsequent grid map creation.
-		array3d<vector<size_t> > partitions(b.num_partitions);
+		array3d<vector<size_t>> partitions(b.num_partitions);
 		{
 			// Find all the heavy receptor atoms that are within 8A of the box.
 			vector<size_t> receptor_atoms_within_cutoff;
@@ -281,15 +278,14 @@ int main(int argc, char* argv[])
 
 		// Reserve storage for task containers.
 		const size_t num_gm_tasks = b.num_probes[0];
-		vector<packaged_task<void> > gm_tasks;
-		vector<packaged_task<void> > mc_tasks;
+		vector<packaged_task<void>> gm_tasks;
+		vector<packaged_task<void>> mc_tasks;
 		gm_tasks.reserve(num_gm_tasks);
 		mc_tasks.reserve(num_mc_tasks);
 
 		// Initialize the hash values for displaying the progress bar.
 		array<fl, num_hashes> gm_hashes, mc_hashes;
 		{
-			const fl num_hashes_inverse = static_cast<fl>(1) / num_hashes;
 			const fl gm_hash_step = num_gm_tasks * num_hashes_inverse;
 			const fl mc_hash_step = num_mc_tasks * num_hashes_inverse;
 			gm_hashes[0] = gm_hash_step - tolerance; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
@@ -303,7 +299,7 @@ int main(int argc, char* argv[])
 
 		// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 		const size_t max_results = 20; // Maximum number of results obtained from a single Monte Carlo task.
-		vector<ptr_vector<result> > result_containers(num_mc_tasks);
+		vector<ptr_vector<result>> result_containers(num_mc_tasks);
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 			result_containers[i].reserve(max_results);
 		ptr_vector<result> results;
@@ -318,7 +314,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
-		vector<array3d<fl> > grid_maps(XS_TYPE_SIZE);
+		vector<array3d<fl>> grid_maps(XS_TYPE_SIZE);
 		vector<size_t> atom_types_to_populate;
 		atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
@@ -331,6 +327,45 @@ int main(int argc, char* argv[])
 		// Initialize a thread pool and create worker threads for later use.
 		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 		thread_pool tp(num_threads);
+
+		// Precalculate the scoring function in parallel.
+		log << "Precalculating scoring function ";
+		scoring_function sf;
+		{
+			// Precalculate reciprocal square root values.
+			vector<fl> rs(scoring_function::Num_Samples, 0);
+			for (size_t i = 0; i < scoring_function::Num_Samples; ++i)
+			{
+				rs[i] = sqrt(i * scoring_function::Factor_Inverse);
+			}
+			BOOST_ASSERT(rs.front() == 0);
+			BOOST_ASSERT(rs.back() == scoring_function::Cutoff);
+
+			// Populate the scoring function task container.
+			const size_t num_sf_tasks = ((XS_TYPE_SIZE + 1) * XS_TYPE_SIZE) >> 1;
+			vector<packaged_task<void>> sf_tasks;
+			sf_tasks.reserve(num_sf_tasks);
+			for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
+			for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
+			{
+				sf_tasks.push_back(packaged_task<void>(boost::bind(&scoring_function::precalculate, boost::ref(sf), t1, t2, boost::cref(rs))));
+			}
+			BOOST_ASSERT(sf_tasks.size() == sf_tasks.capacity());
+
+			// Initialize the hash values for displaying the progress bar.
+			array<fl, num_hashes> sf_hashes;
+			const fl sf_hash_step = num_sf_tasks * num_hashes_inverse;
+			sf_hashes[0] = sf_hash_step - tolerance; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
+			for (size_t i = 1; i < num_hashes; ++i)
+			{
+				sf_hashes[i] = sf_hashes[i - 1] + sf_hash_step;
+			}
+
+			// Run the scoring function tasks in parallel asynchronously and display the progress bar with hashes.
+			tp.run(sf_tasks, sf_hashes);
+			tp.hard_sync();
+		}
+		log << '\n';
 
 		// Perform docking for each file in the ligand folder.
 		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);

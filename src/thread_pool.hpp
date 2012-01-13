@@ -40,6 +40,7 @@ namespace idock
 	using boost::unique_future;
 
 	const size_t num_hashes = 10; ///< Number of hashes in a progress bar.
+	const fl num_hashes_inverse = static_cast<fl>(1) / num_hashes; ///< Inverse of num_hashes.
 
 	/// Represents a thread pool and incorporates a progress bar. It inherits from boost::thread_group for the usage of create_thread and join_all.
 	class thread_pool : public thread_group
@@ -50,7 +51,7 @@ namespace idock
 		explicit thread_pool(const size_t num_threads);
 
 		/// Runs tasks in parallel asynchronously.
-		void run(vector<packaged_task<void> >& tasks, array<fl, num_hashes>& hashes);
+		void run(vector<packaged_task<void>>& tasks, array<fl, num_hashes>& hashes);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
