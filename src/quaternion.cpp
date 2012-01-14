@@ -75,6 +75,7 @@ namespace idock
 
 	qt rotation_vector_to_quaternion(const vec3& rotation)
 	{
+		if (rotation.zero()) return qt_identity;
 		const fl angle = rotation.norm(); // sqrt involved.
 		const vec3 axis = (1 / angle) * rotation;
 		return axis_angle_to_quaternion(axis, angle); // The result is a unit quaternion.

@@ -64,6 +64,12 @@ namespace idock
 			return elems[i];
 		}
 
+		/// Returns true is the vector is (0, 0, 0).
+		bool zero() const
+		{
+			return (eq(elems[0], 0) && eq(elems[1], 0) && eq(elems[2], 0));
+		}
+
 		/// Returns the square norm.
 		fl norm_sqr() const
 		{
