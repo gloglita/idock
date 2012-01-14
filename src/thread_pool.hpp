@@ -56,11 +56,8 @@ namespace idock
 		/// The function for threads to execute and loop inside.
 		void operator()();
 
-		/// Blocks until any thread becomes available.
-		void soft_sync();
-
 		/// Blocks until all tasks are completed and the progress bar becomes full.
-		void hard_sync();
+		void sync();
 
 		/// Joins all the threads.
 		void dispose();

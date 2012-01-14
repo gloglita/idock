@@ -89,14 +89,7 @@ namespace idock
 		} while (true);
 	}
 
-	void thread_pool::soft_sync()
-	{
-		mutex::scoped_lock self_lk(self);
-		while (num_completed_tasks + (num_threads - 1) < num_tasks)
-			task_completion.wait(self_lk);
-	}
-
-	void thread_pool::hard_sync()
+	void thread_pool::sync()
 	{
 		mutex::scoped_lock self_lk(self);
 		while (num_completed_tasks < num_tasks)

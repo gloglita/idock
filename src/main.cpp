@@ -361,7 +361,7 @@ int main(int argc, char* argv[])
 
 			// Run the scoring function tasks in parallel asynchronously and display the progress bar with hashes.
 			tp.run(sf_tasks, sf_hashes);
-			tp.hard_sync();
+			tp.sync();
 		}
 		log << '\n';
 
@@ -435,7 +435,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Block until all the grid map tasks are completed.
-					tp.hard_sync();
+					tp.sync();
 					gm_tasks.clear();
 					atom_types_to_populate.clear();
 
@@ -487,7 +487,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Block until all the Monte Carlo tasks are completed.
-				tp.hard_sync();
+				tp.sync();
 				mc_tasks.clear();
 
 				// Reset the cursor to the beginning of the progress bar.
