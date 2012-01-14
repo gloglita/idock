@@ -37,12 +37,12 @@ namespace idock
 	/// This could possible be demoted to single precision for better performance.
 	typedef double fl;
 
-	const fl tolerance = static_cast<fl>(0.001); ///< Tolerance for equality comparison of two floating point values.
+	const fl epsilon = static_cast<fl>(0.00001); ///< Tolerance for equality comparison of two floating point values.
 
 	/// Returns true if the absolute difference between two floating point values is within the constant tolerance.
 	inline bool eq(const fl a, const fl b)
 	{
-		return fabs(a - b) < tolerance;
+		return fabs(a - b) < epsilon;
 	}
 
 	/// Returns the square of a generic value.

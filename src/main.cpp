@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 	fl energy_range, grid_granularity;
 
 	// Process program options.
+	try
 	{
 		using namespace boost::program_options;
 
@@ -77,7 +78,7 @@ int main(int argc, char* argv[])
 		const path default_log_path = "log.txt";
 		const path default_csv_path = "log.csv";
 		const unsigned int concurrency = boost::thread::hardware_concurrency();
-		const unsigned int default_num_threads = concurrency ? concurrency : 1;
+		const size_t default_num_threads = concurrency ? concurrency : 1;
 		const size_t default_seed = random_seed();
 		const size_t default_num_mc_tasks = 32;
 		const size_t default_max_conformations = 9;
@@ -125,23 +126,15 @@ int main(int argc, char* argv[])
 		}
 
 		// Parse command line arguments.
-		try
+		variables_map vm;
+		store(parse_command_line(argc, argv, all_options), vm);
+		variable_value config_value = vm["config"];
+		if (!config_value.empty()) // If a configuration file is presented, parse it.
 		{
-			variables_map vm;
-			store(parse_command_line(argc, argv, all_options), vm);
-			variable_value config_value = vm["config"];
-			if (!config_value.empty()) // If a configuration file is presented, parse it.
-			{
-				ifstream config_file(config_value.as<path>());
-				store(parse_config_file(config_file, all_options), vm);
-			}
-			vm.notify(); // Notify the user if there are any parsing errors.
+			ifstream config_file(config_value.as<path>());
+			store(parse_config_file(config_file, all_options), vm);
 		}
-		catch (const std::exception& e)
-		{
-			std::cerr << e.what() << '\n';
-			return 1;
-		}
+		vm.notify(); // Notify the user if there are any parsing errors.
 
 		// Validate receptor.
 		if (!exists(receptor_path))
@@ -224,6 +217,11 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 	}
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << '\n';
+		return 1;
+	}
 
 	try
 	{
@@ -288,8 +286,8 @@ int main(int argc, char* argv[])
 		{
 			const fl gm_hash_step = num_gm_tasks * num_hashes_inverse;
 			const fl mc_hash_step = num_mc_tasks * num_hashes_inverse;
-			gm_hashes[0] = gm_hash_step - tolerance; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
-			mc_hashes[0] = mc_hash_step - tolerance;
+			gm_hashes[0] = gm_hash_step - epsilon; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
+			mc_hashes[0] = mc_hash_step - epsilon;
 			for (size_t i = 1; i < num_hashes; ++i)
 			{
 				gm_hashes[i] = gm_hashes[i - 1] + gm_hash_step;
@@ -355,7 +353,7 @@ int main(int argc, char* argv[])
 			// Initialize the hash values for displaying the progress bar.
 			array<fl, num_hashes> sf_hashes;
 			const fl sf_hash_step = num_sf_tasks * num_hashes_inverse;
-			sf_hashes[0] = sf_hash_step - tolerance; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
+			sf_hashes[0] = sf_hash_step - epsilon; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
 			for (size_t i = 1; i < num_hashes; ++i)
 			{
 				sf_hashes[i] = sf_hashes[i - 1] + sf_hash_step;
