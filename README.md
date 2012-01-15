@@ -118,13 +118,19 @@ Change Log
 
 ### 1.0 (2011-07-20)
 
-* First release on [CodePlex].
+* Initial release at [CodePlex].
 
 ### 1.1 (2011-12-20)
 
-* Added program option --config.
-* Added progress bar and verbose output.
-* Better RMSD obtained for certain cases.
+* Changed the version control system from TFS to Git.
+* Project migrated from CodePlex to GitHub.
+* Tested Solaris 11, clang 3.0, and Intel C++ Compiler v11.
+* Provided Visual C++ solution, project and bat files to ease recompilation on Windows.
+* Added precompiled executables for both 32-bit and 64-bit Linux and Windows.
+* Added program option `config` to allow users to specify a configuration file.
+* Added thread-safe progress bar.
+* Output predicted free energy of the top 5 conformations.
+* Reverted the evaluation of intra-molecular free energy to Vina's implementation to obtain better RMSD for certain cases.
 
 ### 1.2 (2012-01-20)
 
