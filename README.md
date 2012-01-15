@@ -134,7 +134,7 @@ Change Log
 
 ### 1.2 (2012-01-20)
 
-* Added program option --csv for dumping docking summary sorted in the ascending of predicted free energy.
+* Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
 * Profiled by the Valgrind tool suite to ensure zero memory leak.
 * Replaced a switch statement by table lookup to decrease indirect branch misprediction rate.
 * Added move constructors for several classes to boost performance.
