@@ -44,6 +44,9 @@ namespace idock
 			++num_lines;
 			if (starts_with(line, "ATOM") || starts_with(line, "HETATM"))
 			{
+				// Whenever an ATOM/HETATM line shows up, the current frame must be the last one.
+				BOOST_ASSERT(current == frames.size() - 1);
+
 				// This line will be dumped to the output ligand file.
 				lines.push_back(line);
 
@@ -63,13 +66,11 @@ namespace idock
 					// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 					if (ad == AD_TYPE_HD)
 					{
-						const fl a_covalent_radius = a.covalent_radius();
 						for (size_t i = frames.back().heavy_atoms.size(); i > 0;)
 						{
 							atom& b = frames.back().heavy_atoms[--i];
-							if (!b.is_hetero()) continue;
-							const fl b_covalent_radius = b.covalent_radius();
-							if (distance_sqr(a.coordinate, b.coordinate) < sqr(a_covalent_radius + b_covalent_radius))
+							if (!b.is_hetero()) continue; // Only a hetero atom can be a hydrogen bond donor.
+							if (a.is_neighbor(b))
 							{
 								b.donorize();
 								break;
@@ -151,24 +152,16 @@ namespace idock
 			const size_t num_heavy_atoms = f.heavy_atoms.size();
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
-				atom& a = f.heavy_atoms[i];
-
-				// Find hetero atoms of the current residue.
-				if (!a.is_hetero()) continue;
-
-				const fl a_covalent_radius = a.covalent_radius();
+				const atom& a = f.heavy_atoms[i];
+				if (!a.is_hetero()) continue; // a is a hetero atom.
 
 				for (size_t j = 0; j < num_heavy_atoms; ++j)
 				{
 					atom& b = f.heavy_atoms[j];
-
-					// Find carbon atoms of the current residue.
-					if (b.is_hetero()) continue;
-
-					const fl b_covalent_radius = b.covalent_radius();
+					if (b.is_hetero()) continue; // b is a carbon atom.
 
 					// If the carbon atom b is bonded to the hetero atom a, it is no longer a hydrophobic atom.
-					if (distance_sqr(a.coordinate, b.coordinate) < sqr(a_covalent_radius + b_covalent_radius))
+					if (a.is_neighbor(b))
 					{
 						b.dehydrophobicize();
 					}
@@ -263,21 +256,27 @@ namespace idock
 				{
 					const pair<size_t, size_t>& b1 = i0_bonds[i0];
 					if (find(neighbors.begin(), neighbors.end(), b1) == neighbors.end())
+					{
 						neighbors.push_back(b1);
+					}
 					const vector<pair<size_t, size_t>>& i1_bonds = bonds[b1.first][b1.second];
 					const size_t num_i1_bonds = i1_bonds.size();
 					for (size_t i1 = 0; i1 < num_i1_bonds; ++i1)
 					{
 						const pair<size_t, size_t>& b2 = i1_bonds[i1];
 						if (find(neighbors.begin(), neighbors.end(), b2) == neighbors.end())
+						{
 							neighbors.push_back(b2);
+						}
 						const vector<pair<size_t, size_t>>& i2_bonds = bonds[b2.first][b2.second];
 						const size_t num_i2_bonds = i2_bonds.size();
 						for (size_t i2 = 0; i2 < num_i2_bonds; ++i2)
 						{
 							const pair<size_t, size_t>& b3 = i2_bonds[i2];
 							if (find(neighbors.begin(), neighbors.end(), b3) == neighbors.end())
+							{
 								neighbors.push_back(b3);
+							}
 						}
 					}
 				}
@@ -611,7 +610,7 @@ namespace idock
 				else // This line starts with "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", TORSDOF", which will not change during docking.
 				{
 					out << line;
-					if (line[0] == 'B') // This line is "BRANCH".
+					if (starts_with(line, "BRANCH"))
 					{
 						++frame;
 						heavy_atom = 0;

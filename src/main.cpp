@@ -476,7 +476,9 @@ int main(int argc, char* argv[])
 					ptr_vector<result>& task_results = result_containers[i];
 					const size_t num_task_results = task_results.size();
 					for (size_t j = 0; j < num_task_results; ++j)
+					{
 						add_to_result_container(results, static_cast<result&&>(task_results[j]), required_square_error);
+					}
 					task_results.clear();
 				}
 
@@ -502,7 +504,9 @@ int main(int argc, char* argv[])
 				const result& best_result = results.front();
 				const fl best_result_intra_e = best_result.e - best_result.f;
 				for (size_t i = 0; i < num_results; ++i)
+				{
 					results[i].e = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
+				}
 
 				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
 				const fl energy_upper_bound = best_result.e + energy_range;

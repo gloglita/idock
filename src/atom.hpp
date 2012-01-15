@@ -283,6 +283,13 @@ namespace idock
 			return ad >= AD_TYPE_N;
 		}
 
+		/// Returns true if the current atom is covalently bonded to a given atom.
+		bool is_neighbor(const atom& a) const
+		{
+			BOOST_ASSERT(this != &a);
+			return (distance_sqr(coordinate, a.coordinate) < sqr(covalent_radius() + a.covalent_radius()));
+		}
+
 		/// For nitrogen and oxygen, revises the XScore atom type to make it a hydrogen bond donor.
 		void donorize()
 		{

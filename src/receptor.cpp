@@ -56,14 +56,12 @@ namespace idock
 				// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 				if (ad == AD_TYPE_HD)
 				{
-					const fl a_covalent_radius = a.covalent_radius();
 					const size_t residue_start = residues.back();
 					for (size_t i = atoms.size(); i > residue_start;)
 					{
 						atom& b = atoms[--i];
-						if (!b.is_hetero()) continue;
-						const fl b_covalent_radius = b.covalent_radius();
-						if (distance_sqr(a.coordinate, b.coordinate) < sqr(a_covalent_radius + b_covalent_radius))
+						if (!b.is_hetero()) continue; // Only a hetero atom can be a hydrogen bond donor.
+						if (a.is_neighbor(b))
 						{
 							b.donorize();
 							break;
@@ -97,23 +95,15 @@ namespace idock
 			for (size_t i = begin; i < end; ++i)
 			{
 				const atom& a = atoms[i];
-
-				// Find hetero atoms of the current residue.
-				if (!a.is_hetero()) continue;
-
-				const fl a_covalent_radius = a.covalent_radius();
+				if (!a.is_hetero()) continue; // a is a hetero atom.
 
 				for (size_t j = begin; j < end; ++j)
 				{
 					atom& b = atoms[j];
+					if (b.is_hetero()) continue; // b is a carbon atom.
 
-					// Find carbon atoms of the current residue.
-					if (b.is_hetero()) continue;
-
-					const fl b_covalent_radius = b.covalent_radius();
-
-					// If the carbon atom b is bonded to the hetero atom a, it is no longer a hydrophobic atom.
-					if (distance_sqr(a.coordinate, b.coordinate) < sqr(a_covalent_radius + b_covalent_radius))
+					// If carbon atom b is bonded to hetero atom a, b is no longer a hydrophobic atom.
+					if (a.is_neighbor(b))
 					{
 						b.dehydrophobicize();
 					}
