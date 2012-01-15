@@ -216,16 +216,11 @@ namespace idock
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
 				const atom& a1 = f.heavy_atoms[i];
-				const fl a1_covalent_radius = a1.covalent_radius();
 
 				for (size_t j = i + 1; j < num_heavy_atoms; ++j)
 				{
 					const atom& a2 = f.heavy_atoms[j];
-					const fl a2_covalent_radius = a2.covalent_radius();
-					const fl covalent_bond_length = a1_covalent_radius + a2_covalent_radius;
-					const vec3 r = a1.coordinate - a2.coordinate;
-					const fl r2 = r.norm_sqr();
-					if (r2 < sqr(covalent_bond_length))
+					if (a1.is_neighbor(a2))
 					{
 						bonds[k][i].push_back(pair<size_t, size_t>(k, j));
 						bonds[k][j].push_back(pair<size_t, size_t>(k, i));
