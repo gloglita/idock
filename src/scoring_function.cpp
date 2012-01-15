@@ -43,7 +43,7 @@ namespace idock
 			+  (-0.587439) * ((xs_hbond(t1, t2)) ? ((d >= 0) ? 0.0 : ((d <= -0.7) ? 1 : d * (-1.428571))): 0.0);
 	}
 
-	void scoring_function::precalculate(const size_t t1, const size_t t2, const vector<fl>& rs)
+	int scoring_function::precalculate(const size_t t1, const size_t t2, const vector<fl>& rs)
 	{
 		vector<scoring_function_element>& p = (*this)(t1, t2);
 		BOOST_ASSERT(p.size() == Num_Samples);
@@ -61,6 +61,7 @@ namespace idock
 		}
 		p.front().dor = 0;
 		p.back().dor = 0;
+		return 0;
 	}
 
 	scoring_function::scoring_function() : triangular_matrix<vector<scoring_function_element>>(XS_TYPE_SIZE, vector<scoring_function_element>(Num_Samples, scoring_function_element()))

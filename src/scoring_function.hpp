@@ -47,7 +47,7 @@ namespace idock
 		scoring_function();
 
 		/// Precalculates the scoring function values of sample points for the type combination of t1 and t2.
-		void precalculate(const size_t t1, const size_t t2, const vector<fl>& rs);
+		int precalculate(const size_t t1, const size_t t2, const vector<fl>& rs);
 
 		/// Evaluates the scoring function given (t1, t2, r2).
 		scoring_function_element evaluate(const size_t type_pair_index, const fl r2) const;

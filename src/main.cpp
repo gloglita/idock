@@ -276,8 +276,8 @@ int main(int argc, char* argv[])
 
 		// Reserve storage for task containers.
 		const size_t num_gm_tasks = b.num_probes[0];
-		vector<packaged_task<void>> gm_tasks;
-		vector<packaged_task<void>> mc_tasks;
+		vector<packaged_task<int>> gm_tasks;
+		vector<packaged_task<int>> mc_tasks;
 		gm_tasks.reserve(num_gm_tasks);
 		mc_tasks.reserve(num_mc_tasks);
 
@@ -341,12 +341,12 @@ int main(int argc, char* argv[])
 
 			// Populate the scoring function task container.
 			const size_t num_sf_tasks = ((XS_TYPE_SIZE + 1) * XS_TYPE_SIZE) >> 1;
-			vector<packaged_task<void>> sf_tasks;
+			vector<packaged_task<int>> sf_tasks;
 			sf_tasks.reserve(num_sf_tasks);
 			for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
 			for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
 			{
-				sf_tasks.push_back(packaged_task<void>(boost::bind(&scoring_function::precalculate, boost::ref(sf), t1, t2, boost::cref(rs))));
+				sf_tasks.push_back(packaged_task<int>(boost::bind<int>(&scoring_function::precalculate, boost::ref(sf), t1, t2, boost::cref(rs))));
 			}
 			BOOST_ASSERT(sf_tasks.size() == sf_tasks.capacity());
 
@@ -411,7 +411,7 @@ int main(int argc, char* argv[])
 					BOOST_ASSERT(gm_tasks.empty());
 					for (size_t x = 0; x < num_gm_tasks; ++x)
 					{
-						gm_tasks.push_back(packaged_task<void>(boost::bind(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
+						gm_tasks.push_back(packaged_task<int>(boost::bind<int>(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec), boost::cref(partitions))));
 					}
 
 					// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
@@ -420,11 +420,16 @@ int main(int argc, char* argv[])
 					// Propagate possible exceptions thrown by grid_map_task().
 					for (size_t i = 0; i < num_gm_tasks; ++i)
 					{
-						unique_future<void> future = gm_tasks[i].get_future();
+						unique_future<int> future = gm_tasks[i].get_future();
 						try
 						{
 							// If there is an exception thrown by the task, it will be rethrown by calling future.get(), which implicitly calls wait().
-							future.get();
+							const int exit_code = future.get();
+							if (exit_code)
+							{
+								log << "A grid map task returned with exit code " << exit_code << '\n';
+								return 1;
+							}
 						}
 						catch (const std::exception& e)
 						{
@@ -456,7 +461,7 @@ int main(int argc, char* argv[])
 				{	
 					BOOST_ASSERT(result_containers[i].empty());
 					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
-					mc_tasks.push_back(packaged_task<void>(boost::bind(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					mc_tasks.push_back(packaged_task<int>(boost::bind<int>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
@@ -467,11 +472,16 @@ int main(int argc, char* argv[])
 				const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms); // Ligands with RMSD < 2.0 will be clustered into the same cluster.
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
-					unique_future<void> future = mc_tasks[i].get_future();
+					unique_future<int> future = mc_tasks[i].get_future();
 					try
 					{
 						// If there is an exception thrown by the task, it will be rethrown by calling future.get(), which implicitly calls wait().
-						future.get();
+						const int exit_code = future.get();
+						if (exit_code)
+						{
+							log << "A Monte Carlo task returned with exit code " << exit_code << '\n';
+							return 1;
+						}
 					}
 					catch (const std::exception& e)
 					{

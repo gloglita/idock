@@ -55,7 +55,7 @@ namespace idock
 	const size_t AD_TYPE_As   = 27; ///< Arsenic.
 	const size_t AD_TYPE_SIZE = 28; ///< Number of supported AutoDock4 atom types.
 
-	const string ad_names[] = ///< AutoDock4 atom type names.
+	const string ad_type_strings[] = ///< AutoDock4 atom type names.
 	{
 		"H" , //  0 = AD_TYPE_H
 		"HD", //  1 = AD_TYPE_HD
@@ -88,10 +88,10 @@ namespace idock
 	};
 
 	/// Parses AutoDock4 atom type name, and returns AD_TYPE_SIZE if it does not match any supported AutoDock4 atom types.
-	inline size_t parse_ad_name(const string& ad_name)
+	inline size_t parse_ad_type_string(const string& ad_type_string)
 	{
 		for (size_t i = 0; i < AD_TYPE_SIZE; ++i)
-			if (ad_names[i] == ad_name) return i;
+			if (ad_type_strings[i] == ad_type_string) return i;
 		return AD_TYPE_SIZE;
 	}
 

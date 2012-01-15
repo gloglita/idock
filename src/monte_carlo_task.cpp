@@ -21,7 +21,7 @@
 
 namespace idock
 {
-	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig_, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl> >& grid_maps)
+	int monte_carlo_task(ptr_vector<result>& results, const ligand& lig_, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps)
 	{
 		// Make a copy of the ligand.
 		ligand lig(lig_);
@@ -40,14 +40,14 @@ namespace idock
 		using boost::random::uniform_int_distribution;
 		using boost::random::normal_distribution;
 		mt19937eng eng(seed);
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_01_gen(eng, uniform_real_distribution<fl>(  0,  1));
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_11_gen(eng, uniform_real_distribution<fl>( -1,  1));
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_pi_gen(eng, uniform_real_distribution<fl>(-pi, pi));
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_box0_gen(eng, uniform_real_distribution<fl>(b.corner1[0], b.corner2[0]));
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_box1_gen(eng, uniform_real_distribution<fl>(b.corner1[1], b.corner2[1]));
-		variate_generator<mt19937eng, uniform_real_distribution<fl> > uniform_box2_gen(eng, uniform_real_distribution<fl>(b.corner1[2], b.corner2[2]));
-		variate_generator<mt19937eng, uniform_int_distribution<size_t> > uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
-		variate_generator<mt19937eng, normal_distribution<fl> > normal_01_gen(eng, normal_distribution<fl>(0, 1));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_01_gen(eng, uniform_real_distribution<fl>(  0,  1));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_11_gen(eng, uniform_real_distribution<fl>( -1,  1));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_pi_gen(eng, uniform_real_distribution<fl>(-pi, pi));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box0_gen(eng, uniform_real_distribution<fl>(b.corner1[0], b.corner2[0]));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box1_gen(eng, uniform_real_distribution<fl>(b.corner1[1], b.corner2[1]));
+		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box2_gen(eng, uniform_real_distribution<fl>(b.corner1[2], b.corner2[2]));
+		variate_generator<mt19937eng, uniform_int_distribution<size_t>> uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
+		variate_generator<mt19937eng, normal_distribution<fl>> normal_01_gen(eng, normal_distribution<fl>(0, 1));
 
 		// Generate an initial random conformation c0, and evaluate it.
 		conformation c0(lig.num_active_torsions);
@@ -279,5 +279,6 @@ namespace idock
 
 			//mc_dump << '\n';
 		}
+		return 0;
 	}
 }

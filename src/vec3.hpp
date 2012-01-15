@@ -177,7 +177,7 @@ namespace idock
 	}
 
 	/// Returns the accumulated square distance between two vectors of vectors of vectors.
-	inline fl distance_sqr(const vector<vector<vec3> >& a, const vector<vector<vec3> >& b)
+	inline fl distance_sqr(const vector<vector<vec3>>& a, const vector<vector<vec3>>& b)
 	{
 		const size_t n = a.size();
 		BOOST_ASSERT(n > 0);

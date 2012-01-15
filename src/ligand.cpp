@@ -43,7 +43,7 @@ namespace idock
 		
 		// Reserve enough capacity for bonds.
 		using std::pair;
-		vector<vector<vector<pair<size_t, size_t> > > > bonds(num_frames);
+		vector<vector<vector<pair<size_t, size_t>>>> bonds(num_frames);
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			const frame& f = frames[k];
@@ -87,7 +87,7 @@ namespace idock
 
 		// Find 1-4 interacting pairs.
 		one_to_four_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
-		vector<pair<size_t, size_t> > neighbors;
+		vector<pair<size_t, size_t>> neighbors;
 		neighbors.reserve(10); // An atom typically consists of <= 10 neighbors.
 		for (size_t k1 = 0; k1 < num_frames; ++k1)
 		{
@@ -96,21 +96,21 @@ namespace idock
 			for (size_t i = 0; i < num_heavy_atoms1; ++i)
 			{
 				// Find neighbor atoms within 3 consecutive covalent bonds.
-				const vector<pair<size_t, size_t> >& i0_bonds = bonds[k1][i];
+				const vector<pair<size_t, size_t>>& i0_bonds = bonds[k1][i];
 				const size_t num_i0_bonds = i0_bonds.size();
 				for (size_t i0 = 0; i0 < num_i0_bonds; ++i0)
 				{
 					const pair<size_t, size_t>& b1 = i0_bonds[i0];
 					if (find(neighbors.begin(), neighbors.end(), b1) == neighbors.end())
 						neighbors.push_back(b1);
-					const vector<pair<size_t, size_t> >& i1_bonds = bonds[b1.first][b1.second];
+					const vector<pair<size_t, size_t>>& i1_bonds = bonds[b1.first][b1.second];
 					const size_t num_i1_bonds = i1_bonds.size();
 					for (size_t i1 = 0; i1 < num_i1_bonds; ++i1)
 					{
 						const pair<size_t, size_t>& b2 = i1_bonds[i1];
 						if (find(neighbors.begin(), neighbors.end(), b2) == neighbors.end())
 							neighbors.push_back(b2);
-						const vector<pair<size_t, size_t> >& i2_bonds = bonds[b2.first][b2.second];
+						const vector<pair<size_t, size_t>>& i2_bonds = bonds[b2.first][b2.second];
 						const size_t num_i2_bonds = i2_bonds.size();
 						for (size_t i2 = 0; i2 < num_i2_bonds; ++i2)
 						{
@@ -177,7 +177,7 @@ namespace idock
 		return atom_types;
 	}
 
-	bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl> >& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g)
+	bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g)
 	{
 		if (!b.within(conf.position))
 			return false;
@@ -370,8 +370,8 @@ namespace idock
 	{
 		vector<qt> orientations_q(num_frames);
 		vector<mat3> orientations_m(num_frames);
-		vector<vector<vec3> > heavy_atoms(num_frames);
-		vector<vector<vec3> > hydrogens(num_frames);
+		vector<vector<vec3>> heavy_atoms(num_frames);
+		vector<vector<vec3>> hydrogens(num_frames);
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
 		const frame& root = frames.front();
@@ -416,7 +416,7 @@ namespace idock
 			}
 		}
 
-		return result(e, f, static_cast<vector<vector<vec3> >&&>(heavy_atoms), static_cast<vector<vector<vec3> >&&>(hydrogens));
+		return result(e, f, static_cast<vector<vector<vec3>>&&>(heavy_atoms), static_cast<vector<vector<vec3>>&&>(hydrogens));
 	}
 
 	void ligand::write_models(const path& output_ligand, const ptr_vector<result>& results, const size_t num_conformations)

@@ -48,9 +48,9 @@ namespace idock
 				lines.push_back(line);
 
 				// Parse and validate AutoDock4 atom type.
-				const string ad_name = line.substr(77, isspace(line[78]) ? 1 : 2);
-				const size_t ad = parse_ad_name(ad_name);
-				if (ad == AD_TYPE_SIZE) throw parsing_error(file, num_lines, "Atom type " + ad_name + " is not supported by idock.");
+				const string ad_type_string = line.substr(77, isspace(line[78]) ? 1 : 2);
+				const size_t ad = parse_ad_type_string(ad_type_string);
+				if (ad == AD_TYPE_SIZE) throw parsing_error(file, num_lines, "Atom type " + ad_type_string + " is not supported by idock.");
 
 				// Parse the Cartesian coordinate.
 				const atom a(ad, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)));

@@ -27,7 +27,7 @@ namespace idock
 			create_thread(boost::ref(*this));
 	}
 
-	void thread_pool::run(vector<packaged_task<void>>& tasks, array<fl, num_hashes>& hashes)
+	void thread_pool::run(vector<packaged_task<int>>& tasks, array<fl, num_hashes>& hashes)
 	{
 		// Initialize several task counters for scheduling.
 		tasks_ptr = &tasks;
@@ -45,7 +45,7 @@ namespace idock
 
 	void thread_pool::operator()()
 	{
-		packaged_task<void>* task; // Declare a pointer to a task.
+		packaged_task<int>* task; // Declare a pointer to a task.
 		do // Threads loop inside.
 		{
 			// If there are no tasks to run, simply wait.

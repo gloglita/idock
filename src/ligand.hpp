@@ -91,7 +91,7 @@ namespace idock
 		vector<size_t> get_atom_types() const;
 
 		/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
-		bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl> >& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g);
+		bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g);
 
 		/// Composes a result from free energy, force f, and conformation conf.
 		result compose_result(const fl e, const fl f, const conformation& conf) const;
