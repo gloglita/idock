@@ -108,6 +108,6 @@ namespace idock
 
 	thread_pool::~thread_pool()
 	{
-		dispose();
+		if (!exiting) dispose();
 	}
 }
