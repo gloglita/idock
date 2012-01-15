@@ -20,14 +20,28 @@
 
 namespace idock
 {
-	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), hashes_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_hash_index(0), exiting(false)
+	const fl progress_bar::num_bars_inverse = static_cast<fl>(1) / num_bars;
+	
+	progress_bar::progress_bar(const size_t num_tasks)
+	{
+		const fl delta = num_tasks * num_bars_inverse;
+		(*this)[0] = delta - epsilon;
+		for (size_t i = 1; i < num_bars; ++i)
+		{
+			(*this)[i] = (*this)[i - 1] + delta;
+		}
+	}
+
+	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_bar_index(0), exiting(false)
 	{
 		// Create threads to call (*this)().
 		for (size_t i = 0; i < num_threads; ++i)
+		{
 			create_thread(boost::ref(*this));
+		}
 	}
 
-	void thread_pool::run(vector<packaged_task<int>>& tasks, array<fl, num_hashes>& hashes)
+	void thread_pool::run(vector<packaged_task<int>>& tasks, const progress_bar& prog_bar)
 	{
 		// Initialize several task counters for scheduling.
 		tasks_ptr = &tasks;
@@ -36,8 +50,8 @@ namespace idock
 		num_completed_tasks = 0;
 
 		// Initialize hash variables for displaying progress bar.
-		hashes_ptr = &hashes;
-		next_hash_index = 0;
+		prog_bar_ptr = &prog_bar;
+		next_bar_index = 0;
 
 		// Notify the threads to run tasks.
 		task_incoming.notify_all();
@@ -52,7 +66,9 @@ namespace idock
 			{
 				mutex::scoped_lock self_lk(self); // A scoped lock is a type associated to some mutex type whose objects do the locking/unlocking of a mutex on construction/destruction time.
 				while ((!exiting) && (num_started_tasks == num_tasks))
+				{
 					task_incoming.wait(self_lk);
+				}
 				if (exiting) return; // The only exit of this function.
 			}
 
@@ -76,10 +92,10 @@ namespace idock
 					++num_completed_tasks;
 
 					// Flush hashes if necessary.
-					while ((next_hash_index < num_hashes) && (num_completed_tasks >= (*hashes_ptr)[next_hash_index]))
+					while ((next_bar_index < num_bars) && (num_completed_tasks >= (*prog_bar_ptr)[next_bar_index]))
 					{
 						std::cout << '#' << std::flush;
-						++next_hash_index;
+						++next_bar_index;
 					}
 				}
 
@@ -93,10 +109,12 @@ namespace idock
 	{
 		mutex::scoped_lock self_lk(self);
 		while (num_completed_tasks < num_tasks)
+		{
 			task_completion.wait(self_lk);
+		}
 	}
 
-	void thread_pool::dispose()
+	thread_pool::~thread_pool()
 	{
 		// Notify threads to exit from the loop back function.
 		exiting = true;
@@ -104,10 +122,5 @@ namespace idock
 
 		// Wait until all threads are joined.
 		join_all();
-	}
-
-	thread_pool::~thread_pool()
-	{
-		if (!exiting) dispose();
 	}
 }

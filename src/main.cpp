@@ -41,7 +41,7 @@
  * pythonsh prepare_ligand4.py -l ligand.mol2
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 13 January 2012
+ * \date 15 January 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -251,7 +251,9 @@ int main(int argc, char* argv[])
 			{
 				const atom& a = rec.atoms[i];
 				if (b.within_cutoff(a.coordinate))
+				{
 					receptor_atoms_within_cutoff.push_back(i);
+				}
 			}
 			const size_t num_receptor_atoms_within_cutoff = receptor_atoms_within_cutoff.size();
 
@@ -260,7 +262,7 @@ int main(int argc, char* argv[])
 			for (size_t y = 0; y < b.num_partitions[1]; ++y)
 			for (size_t z = 0; z < b.num_partitions[2]; ++z)
 			{
-				partitions(x, y, z).reserve(receptor_atoms_within_cutoff.size());
+				partitions(x, y, z).reserve(num_receptor_atoms_within_cutoff);
 				const array<size_t, 3> index1 = {{ x,     y,     z     }};
 				const array<size_t, 3> index2 = {{ x + 1, y + 1, z + 1 }};
 				const vec3 corner1 = b.partition_corner1(index1);
@@ -269,7 +271,9 @@ int main(int argc, char* argv[])
 				{
 					const size_t i = receptor_atoms_within_cutoff[l];
 					if (b.within_cutoff(corner1, corner2, rec.atoms[i].coordinate))
+					{
 						partitions(x, y, z).push_back(i);
+					}
 				}
 			}
 		}
@@ -282,24 +286,16 @@ int main(int argc, char* argv[])
 		mc_tasks.reserve(num_mc_tasks);
 
 		// Initialize the hash values for displaying the progress bar.
-		array<fl, num_hashes> gm_hashes, mc_hashes;
-		{
-			const fl gm_hash_step = num_gm_tasks * num_hashes_inverse;
-			const fl mc_hash_step = num_mc_tasks * num_hashes_inverse;
-			gm_hashes[0] = gm_hash_step - epsilon; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
-			mc_hashes[0] = mc_hash_step - epsilon;
-			for (size_t i = 1; i < num_hashes; ++i)
-			{
-				gm_hashes[i] = gm_hashes[i - 1] + gm_hash_step;
-				mc_hashes[i] = mc_hashes[i - 1] + mc_hash_step;
-			}
-		}
+		const progress_bar gm_progress_bar(num_gm_tasks);
+		const progress_bar mc_progress_bar(num_mc_tasks);
 
 		// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 		const size_t max_results = 20; // Maximum number of results obtained from a single Monte Carlo task.
 		vector<ptr_vector<result>> result_containers(num_mc_tasks);
 		for (size_t i = 0; i < num_mc_tasks; ++i)
+		{
 			result_containers[i].reserve(max_results);
+		}
 		ptr_vector<result> results;
 		results.reserve(max_results * num_mc_tasks);
 		
@@ -324,7 +320,7 @@ int main(int argc, char* argv[])
 		thread_pool tp(num_threads);
 
 		// Precalculate the scoring function in parallel.
-		log << "Precalculating scoring function ";
+		log << "Precalculating scoring function in parallel ";
 		scoring_function sf;
 		{
 			// Precalculate reciprocal square root values.
@@ -345,19 +341,15 @@ int main(int argc, char* argv[])
 			{
 				sf_tasks.push_back(packaged_task<int>(boost::bind<int>(&scoring_function::precalculate, boost::ref(sf), t1, t2, boost::cref(rs))));
 			}
-			BOOST_ASSERT(sf_tasks.size() == sf_tasks.capacity());
+			BOOST_ASSERT(sf_tasks.size() == num_sf_tasks);
 
 			// Initialize the hash values for displaying the progress bar.
-			array<fl, num_hashes> sf_hashes;
-			const fl sf_hash_step = num_sf_tasks * num_hashes_inverse;
-			sf_hashes[0] = sf_hash_step - epsilon; // Make sure e.g. 16 >= 15.999 holds for correctly determining the number of hashes to display in thread_pool.cpp.
-			for (size_t i = 1; i < num_hashes; ++i)
-			{
-				sf_hashes[i] = sf_hashes[i - 1] + sf_hash_step;
-			}
+			const progress_bar sf_progress_bar(num_sf_tasks);
 
 			// Run the scoring function tasks in parallel asynchronously and display the progress bar with hashes.
-			tp.run(sf_tasks, sf_hashes);
+			tp.run(sf_tasks, sf_progress_bar);
+
+			// Wait until all the scoring function tasks are completed.
 			tp.sync();
 		}
 		log << '\n';
@@ -414,7 +406,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
-					tp.run(gm_tasks, gm_hashes);
+					tp.run(gm_tasks, gm_progress_bar);
 
 					// Propagate possible exceptions thrown by grid_map_task().
 					for (size_t i = 0; i < num_gm_tasks; ++i)
@@ -464,7 +456,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
-				tp.run(mc_tasks, mc_hashes);
+				tp.run(mc_tasks, mc_progress_bar);
 
 				// Merge results from all the tasks into one single result container.
 				BOOST_ASSERT(results.empty());
@@ -561,9 +553,6 @@ int main(int argc, char* argv[])
 				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
-
-		// Virtual screening is done. Dispose the thread pool.
-		tp.dispose();
 
 		// Sort the summaries.
 		summaries.sort(); // Might be a bottleneck for a large number of summaries.

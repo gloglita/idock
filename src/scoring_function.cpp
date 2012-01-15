@@ -17,7 +17,6 @@
 */
 
 #include "scoring_function.hpp"
-#include "atom_constants.hpp"
 
 namespace idock
 {
@@ -62,10 +61,6 @@ namespace idock
 		p.front().dor = 0;
 		p.back().dor = 0;
 		return 0;
-	}
-
-	scoring_function::scoring_function() : triangular_matrix<vector<scoring_function_element>>(XS_TYPE_SIZE, vector<scoring_function_element>(Num_Samples, scoring_function_element()))
-	{
 	}
 
 	scoring_function_element scoring_function::evaluate(const size_t type_pair_index, const fl r2) const

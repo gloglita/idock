@@ -22,7 +22,6 @@
 
 #include <iostream>
 #include <boost/array.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
@@ -32,26 +31,32 @@
 namespace idock
 {
 	using boost::array;
-	using boost::ptr_vector;
 	using boost::thread_group;
 	using boost::mutex;
 	using boost::condition;
 	using boost::packaged_task;
 	using boost::unique_future;
 
-	const size_t num_hashes = 10; ///< Number of hashes in a progress bar.
-	const fl num_hashes_inverse = static_cast<fl>(1) / num_hashes; ///< Inverse of num_hashes.
+	const size_t num_bars = 10; ///< Number of bars of a progress.
+
+	class progress_bar : public array<fl, num_bars>
+	{
+	public:
+		static const fl num_bars_inverse; ///< 1 / num_bars.
+
+		/// Constructs a progress bar with bar values determined from the number of tasks.
+		explicit progress_bar(const size_t num_tasks);
+	};
 
 	/// Represents a thread pool and incorporates a progress bar. It inherits from boost::thread_group for the usage of create_thread and join_all.
 	class thread_pool : public thread_group
 	{
 	public:
-
 		/// Constructs a thread pool with specified number of threads.
 		explicit thread_pool(const size_t num_threads);
 
 		/// Runs tasks in parallel asynchronously.
-		void run(vector<packaged_task<int>>& tasks, array<fl, num_hashes>& hashes);
+		void run(vector<packaged_task<int>>& tasks, const progress_bar& prog);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
@@ -59,20 +64,17 @@ namespace idock
 		/// Blocks until all tasks are completed and the progress bar becomes full.
 		void sync();
 
-		/// Joins all the threads.
-		void dispose();
-
 		/// Destructs a thread pool by joining all the threads.
 		~thread_pool();
 
 	protected:
 		const size_t num_threads; ///< Number of threads to run tasks.
 		vector<packaged_task<int>>* tasks_ptr; ///< Pointer to the tasks to run.
-		array<fl, num_hashes>* hashes_ptr; ///< Pointer to the hashes.
+		const progress_bar* prog_bar_ptr; ///< Pointer to the progress bar.
 		size_t num_tasks; ///< Number of tasks.
 		size_t num_started_tasks; ///< Number of tasks that have started running.
 		size_t num_completed_tasks; ///< Number of tasks that have completed running.
-		size_t next_hash_index; ///< Index to the next hash value.
+		size_t next_bar_index; ///< Index to the next bar value.
 		condition task_completion;	///< Completion event of a running task.
 		condition task_incoming; ///< Incoming event of new tasks.
 		bool exiting; ///< If true, notify threads to return.
