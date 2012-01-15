@@ -20,7 +20,7 @@
 #ifndef IDOCK_SCORING_FUNCTION_HPP
 #define IDOCK_SCORING_FUNCTION_HPP
 
-#include "atom_constants.hpp"
+#include "atom.hpp"
 #include "matrix.hpp"
 
 namespace idock

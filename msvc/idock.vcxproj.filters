@@ -46,9 +46,6 @@
     <ClInclude Include="..\src\atom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\atom_constants.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

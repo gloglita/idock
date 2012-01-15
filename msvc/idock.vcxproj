@@ -21,7 +21,6 @@
   <ItemGroup>
     <ClInclude Include="..\src\array3d.hpp" />
     <ClInclude Include="..\src\atom.hpp" />
-    <ClInclude Include="..\src\atom_constants.hpp" />
     <ClInclude Include="..\src\box.hpp" />
     <ClInclude Include="..\src\common.hpp" />
     <ClInclude Include="..\src\conformation.hpp" />

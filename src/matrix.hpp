@@ -20,7 +20,7 @@
 #ifndef IDOCK_MATRIX_HPP
 #define IDOCK_MATRIX_HPP
 
-#include "atom_constants.hpp"
+#include "atom.hpp"
 
 namespace idock
 {
