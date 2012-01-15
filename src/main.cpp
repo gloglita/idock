@@ -285,10 +285,6 @@ int main(int argc, char* argv[])
 		gm_tasks.reserve(num_gm_tasks);
 		mc_tasks.reserve(num_mc_tasks);
 
-		// Initialize the hash values for displaying the progress bar.
-		const progress_bar gm_progress_bar(num_gm_tasks);
-		const progress_bar mc_progress_bar(num_mc_tasks);
-
 		// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 		const size_t max_results = 20; // Maximum number of results obtained from a single Monte Carlo task.
 		vector<ptr_vector<result>> result_containers(num_mc_tasks);
@@ -343,11 +339,8 @@ int main(int argc, char* argv[])
 			}
 			BOOST_ASSERT(sf_tasks.size() == num_sf_tasks);
 
-			// Initialize the hash values for displaying the progress bar.
-			const progress_bar sf_progress_bar(num_sf_tasks);
-
 			// Run the scoring function tasks in parallel asynchronously and display the progress bar with hashes.
-			tp.run(sf_tasks, sf_progress_bar);
+			tp.run(sf_tasks);
 
 			// Wait until all the scoring function tasks are completed.
 			tp.sync();
@@ -406,7 +399,7 @@ int main(int argc, char* argv[])
 					}
 
 					// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
-					tp.run(gm_tasks, gm_progress_bar);
+					tp.run(gm_tasks);
 
 					// Propagate possible exceptions thrown by grid_map_task().
 					for (size_t i = 0; i < num_gm_tasks; ++i)
@@ -456,7 +449,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
-				tp.run(mc_tasks, mc_progress_bar);
+				tp.run(mc_tasks);
 
 				// Merge results from all the tasks into one single result container.
 				BOOST_ASSERT(results.empty());

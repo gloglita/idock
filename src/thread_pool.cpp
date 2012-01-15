@@ -16,13 +16,16 @@
 
 */
 
+#include <boost/flyweight.hpp>
+#include <boost/flyweight/key_value.hpp>
+#include <boost/flyweight/no_tracking.hpp>
 #include "thread_pool.hpp"
 
 namespace idock
 {
 	const fl progress_bar::num_bars_inverse = static_cast<fl>(1) / num_bars;
 	
-	progress_bar::progress_bar(const size_t num_tasks)
+	progress_bar::progress_bar(const size_t num_tasks) : num_tasks(num_tasks)
 	{
 		const fl delta = num_tasks * num_bars_inverse;
 		(*this)[0] = delta - epsilon;
@@ -31,6 +34,20 @@ namespace idock
 			(*this)[i] = (*this)[i - 1] + delta;
 		}
 	}
+
+	/// For extracting the number of tasks out of a progress bar.
+	class progress_bar_num_tasks_extractor
+	{
+	public:
+		const size_t& operator()(const progress_bar& prog_bar) const
+		{			
+			return prog_bar.num_tasks;
+		}
+	};
+
+	/// Define flyweight type for progress_bar.
+	using namespace boost::flyweights;
+	typedef	flyweight<key_value<size_t, progress_bar, progress_bar_num_tasks_extractor>, no_tracking> progress_bar_flyweight;
 
 	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_bar_index(0), exiting(false)
 	{
@@ -41,7 +58,7 @@ namespace idock
 		}
 	}
 
-	void thread_pool::run(vector<packaged_task<int>>& tasks, const progress_bar& prog_bar)
+	void thread_pool::run(vector<packaged_task<int>>& tasks)
 	{
 		// Initialize several task counters for scheduling.
 		tasks_ptr = &tasks;
@@ -50,7 +67,7 @@ namespace idock
 		num_completed_tasks = 0;
 
 		// Initialize hash variables for displaying progress bar.
-		prog_bar_ptr = &prog_bar;
+		prog_bar_ptr = &progress_bar_flyweight(num_tasks).get();
 		next_bar_index = 0;
 
 		// Notify the threads to run tasks.

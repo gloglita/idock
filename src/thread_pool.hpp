@@ -44,6 +44,8 @@ namespace idock
 	public:
 		static const fl num_bars_inverse; ///< 1 / num_bars.
 
+		const size_t num_tasks; ///< Number of tasks.
+
 		/// Constructs a progress bar with bar values determined from the number of tasks.
 		explicit progress_bar(const size_t num_tasks);
 	};
@@ -56,7 +58,7 @@ namespace idock
 		explicit thread_pool(const size_t num_threads);
 
 		/// Runs tasks in parallel asynchronously.
-		void run(vector<packaged_task<int>>& tasks, const progress_bar& prog);
+		void run(vector<packaged_task<int>>& tasks);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
