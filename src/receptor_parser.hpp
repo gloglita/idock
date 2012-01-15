@@ -20,7 +20,7 @@
 #ifndef IDOCK_RECEPTOR_PARSER_HPP
 #define IDOCK_RECEPTOR_PARSER_HPP
 
-#include "parser.hpp"
+#include "parsing_error.hpp"
 #include "receptor.hpp"
 
 namespace idock

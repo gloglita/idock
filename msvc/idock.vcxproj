@@ -28,13 +28,11 @@
     <ClInclude Include="..\src\fstream.hpp" />
     <ClInclude Include="..\src\grid_map_task.hpp" />
     <ClInclude Include="..\src\ligand.hpp" />
-    <ClInclude Include="..\src\ligand_parser.hpp" />
     <ClInclude Include="..\src\mat3.hpp" />
     <ClInclude Include="..\src\matrix.hpp" />
     <ClInclude Include="..\src\monte_carlo_task.hpp" />
-    <ClInclude Include="..\src\receptor_parser.hpp" />
     <ClInclude Include="..\src\result.hpp" />
-    <ClInclude Include="..\src\parser.hpp" />
+    <ClInclude Include="..\src\parsing_error.hpp" />
     <ClInclude Include="..\src\scoring_function.hpp" />
     <ClInclude Include="..\src\quaternion.hpp" />
     <ClInclude Include="..\src\receptor.hpp" />
@@ -48,13 +46,11 @@
     <ClCompile Include="..\src\box.cpp" />
     <ClCompile Include="..\src\grid_map_task.cpp" />
     <ClCompile Include="..\src\ligand.cpp" />
-    <ClCompile Include="..\src\ligand_parser.cpp" />
     <ClCompile Include="..\src\main.cpp" />
     <ClCompile Include="..\src\monte_carlo_task.cpp" />
     <ClCompile Include="..\src\scoring_function.cpp" />
     <ClCompile Include="..\src\quaternion.cpp" />
     <ClCompile Include="..\src\receptor.cpp" />
-    <ClCompile Include="..\src\receptor_parser.cpp" />
     <ClCompile Include="..\src\thread_pool.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

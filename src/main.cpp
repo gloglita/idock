@@ -51,8 +51,8 @@
 #include <boost/filesystem/operations.hpp>
 #include "seed.hpp"
 #include "tee.hpp"
-#include "receptor_parser.hpp"
-#include "ligand_parser.hpp"
+#include "receptor.hpp"
+#include "ligand.hpp"
 #include "thread_pool.hpp"
 #include "grid_map_task.hpp"
 #include "monte_carlo_task.hpp"
@@ -238,7 +238,7 @@ int main(int argc, char* argv[])
 
 		// Parse the receptor.
 		log << "Parsing receptor " << receptor_path.string() << '\n';
-		const receptor rec = receptor_parser().parse(receptor_path);
+		const receptor rec(receptor_path);
 
 		// Divide the box into coarse-grained partitions for subsequent grid map creation.
 		array3d<vector<size_t>> partitions(b.num_partitions);
@@ -316,14 +316,11 @@ int main(int argc, char* argv[])
 		vector<size_t> atom_types_to_populate;
 		atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
-		// Initialize a ligand parser.
-		ligand_parser lig_parser;
-
 		// Initialize a summary container. ptr_vector is used for fast sorting.
 		ptr_vector<summary> summaries(1000); // A virtual screening typically docks <= 1000 ligands.
 
 		// Initialize a thread pool and create worker threads for later use.
-		log << "Creating " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << " to run " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
+		log << "Creating a thread pool of " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << '\n';
 		thread_pool tp(num_threads);
 
 		// Precalculate the scoring function in parallel.
@@ -365,6 +362,8 @@ int main(int argc, char* argv[])
 		}
 		log << '\n';
 
+		log << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
+
 		// Perform docking for each file in the ligand folder.
 		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);
 		size_t num_ligands = 0; // Ligand counter.
@@ -386,7 +385,7 @@ int main(int argc, char* argv[])
 				const path ligand_filename = ligand_path.filename();
 
 				// Parse the ligand.
-				ligand lig = lig_parser.parse(ligand_path);
+				ligand lig(ligand_path);
 
 				// Create grid maps on the fly if necessary.
 				BOOST_ASSERT(atom_types_to_populate.empty());

@@ -16,7 +16,6 @@
 
 */
 
-//#include <boost/lexical_cast.hpp> // TODO: Remove this #include for release.
 #include "monte_carlo_task.hpp"
 
 namespace idock
@@ -65,24 +64,6 @@ namespace idock
 			}
 		} while (!lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0));
 		fl best_e = e0; // The best free energy so far.
-
-		// Create csv files to dump Monte Carlo and BFGS information for debugging purpose.
-		//const unsigned int task_no = seed & 31;
-		//ofstream mc_dump("mc" + boost::lexical_cast<string>(task_no) + ".csv");
-		//mc_dump << "num_randomizations," << num_randomizations << '\n';
-		//mc_dump << "iteration,num_mutations,mutation_entity,e before bfgs,e after bfgs,acceptance\n";
-		//ofstream bfgs_dump("bfgs" + boost::lexical_cast<string>(task_no) + ".csv");
-		//bfgs_dump << ",num_alpha_trials,e";
-		//for (size_t k = 0; k < lig.num_frames; ++k)
-		//{
-		//	const frame& f = lig.frames[k];
-		//	const size_t num_heavy_atoms = f.heavy_atoms.size();
-		//	for (size_t i = 0; i < num_heavy_atoms; ++i)
-		//	{
-		//		bfgs_dump << ",k" << k << " i" << i << " xs" << f.heavy_atoms[i].xs;
-		//	}
-		//}
-		//bfgs_dump << '\n';
 
 		// Initialize necessary variables for BFGS.
 		conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
@@ -136,20 +117,6 @@ namespace idock
 				}
 				++num_mutations;
 			} while (!lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1));
-
-			// Dump num_mutations, mutation_entity, and energies.
-			//mc_dump << mc_i << ',' << num_mutations << ',' << mutation_entity << ',' << e1;
-			//bfgs_dump << mc_i << ',' << /*e0 <<*/ ',' << e1;
-			//for (size_t k = 0; k < lig.num_frames; ++k)
-			//{
-			//	const frame& f = lig.frames[k];
-			//	const size_t num_heavy_atoms = f.heavy_atoms.size();
-			//	for (size_t i = 0; i < num_heavy_atoms; ++i)
-			//	{
-			//		bfgs_dump << ',' << f.energies[i];
-			//	}
-			//}
-			//bfgs_dump << '\n';
 
 			// Initialize the Hessian matrix to identity.
 			h = identity_hessian;
@@ -207,19 +174,6 @@ namespace idock
 					}
 				}
 
-				// Dump energies.
-				//bfgs_dump << ',' << num_alpha_trials << ',' << e2;
-				//for (size_t k = 0; k < lig.num_frames; ++k)
-				//{
-				//	const frame& f = lig.frames[k];
-				//	const size_t num_heavy_atoms = f.heavy_atoms.size();
-				//	for (size_t i = 0; i < num_heavy_atoms; ++i)
-				//	{
-				//		bfgs_dump << ',' << f.energies[i];
-				//	}
-				//}
-				//bfgs_dump << '\n';
-
 				// If an appropriate alpha cannot be found, exit the BFGS loop.
 				if (num_alpha_trials == num_alphas) break;
 
@@ -254,15 +208,10 @@ namespace idock
 				g1 = g2;
 			}
 
-			// Dump e1.
-			//mc_dump << ',' << e1;
-
 			// Accept c1 according to Metropolis critera.
 			const fl delta = e0 - e1;
 			if ((delta > 0) || (uniform_01_gen() < exp(delta)))
 			{
-				//mc_dump << ",1";
-
 				// best_e is the best energy of all the conformations in the container.
 				// e1 will be saved if and only if it is even better than the best one.
 				if (e1 < best_e || results.size() < results.capacity())
@@ -275,9 +224,6 @@ namespace idock
 				c0 = c1;
 				e0 = e1;
 			}
-			//else mc_dump << ",0";
-
-			//mc_dump << '\n';
 		}
 		return 0;
 	}

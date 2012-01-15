@@ -37,7 +37,7 @@ namespace idock
 		/// @exception filesystem_error Thrown when error opening the file to read.
 		explicit ifstream(const path& p) : boost::filesystem::ifstream(p)
 		{
-			if (!(*this)) throw filesystem_error("Error opening file to read",  p, error_code(errc::permission_denied, system_category()));
+			if (!(*this)) throw filesystem_error("Error opening file to read",  p, error_code(errc::io_error, system_category()));
 		}
 	};
 
@@ -49,7 +49,7 @@ namespace idock
 		/// @exception filesystem_error Thrown when error opening the file to write.
 		explicit ofstream(const path& p) : boost::filesystem::ofstream(p)
 		{
-			if (!(*this)) throw filesystem_error("Error opening file to write", p, error_code(errc::permission_denied, system_category()));
+			if (!(*this)) throw filesystem_error("Error opening file to write", p, error_code(errc::io_error, system_category()));
 		}
 	};
 }

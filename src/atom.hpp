@@ -29,17 +29,12 @@ namespace idock
 	class atom
 	{
 	public:
-		size_t ad; ///< AutoDock4 atom type.
 		vec3 coordinate; ///< 3D coordinate.
+		size_t ad; ///< AutoDock4 atom type.
 		size_t xs; ///< XScore atom type.
 
-		/// Constructs an atom with AutoDock4 atom type and 3D coordinate.
-		atom(const size_t ad, const vec3& coordinate) : ad(ad), coordinate(coordinate)
-		{
-			// Assign XScore atom type.
-			BOOST_ASSERT(ad < AD_TYPE_SIZE);
-			xs = ad_to_xs[ad];
-		}
+		/// Constructs an atom with 3D coordinate and AutoDock4 atom type.
+		explicit atom(const vec3& coordinate, const size_t ad) : coordinate(coordinate), ad(ad), xs(ad_to_xs[ad]) {}
 
 		/// Returns the covalent radius of current AutoDock4 atom type.
 		fl covalent_radius() const
