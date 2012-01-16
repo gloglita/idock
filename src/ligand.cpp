@@ -194,7 +194,7 @@ namespace idock
 			f.relative_origin =  origin - pf.heavy_atoms.front().coordinate;
 			f.relative_axis   = (origin - pf.heavy_atoms[f.rotorX].coordinate).normalize();
 		}
-		
+
 		// Reserve enough capacity for bonds.
 		using std::pair;
 		vector<vector<vector<pair<size_t, size_t>>>> bonds(num_frames);

@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 		}
 		ptr_vector<result> results;
 		results.reserve(max_results * num_mc_tasks);
-		
+
 		// Precalculate alpha values for determining step size in BFGS.
 		array<fl, num_alphas> alphas;
 		alphas[0] = 1;
@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
 				// Populate the Monte Carlo task container.
 				BOOST_ASSERT(mc_tasks.empty());
 				for (size_t i = 0; i < num_mc_tasks; ++i)
-				{	
+				{
 					BOOST_ASSERT(result_containers[i].empty());
 					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
 					mc_tasks.push_back(packaged_task<int>(boost::bind<int>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));

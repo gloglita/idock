@@ -24,7 +24,7 @@
 namespace idock
 {
 	const fl progress_bar::num_bars_inverse = static_cast<fl>(1) / num_bars;
-	
+
 	progress_bar::progress_bar(const size_t num_tasks) : num_tasks(num_tasks)
 	{
 		const fl delta = num_tasks * num_bars_inverse;
@@ -40,7 +40,7 @@ namespace idock
 	{
 	public:
 		const size_t& operator()(const progress_bar& prog_bar) const
-		{			
+		{
 			return prog_bar.num_tasks;
 		}
 	};

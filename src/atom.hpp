@@ -220,7 +220,7 @@ namespace idock
 		return (xs_is_donor(xs1) && xs_is_acceptor(xs2))
 			|| (xs_is_donor(xs2) && xs_is_acceptor(xs1));
 	}
-	
+
 	/// Mapping from AutoDock4 atom type to XScore atom type.
 	const size_t ad_to_xs[] =
 	{
