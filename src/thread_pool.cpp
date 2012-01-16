@@ -58,7 +58,7 @@ namespace idock
 		}
 	}
 
-	void thread_pool::run(vector<packaged_task<int>>& tasks)
+	void thread_pool::run(vector<packaged_task<void>>& tasks)
 	{
 		// Initialize several task counters for scheduling.
 		tasks_ptr = &tasks;
@@ -76,7 +76,7 @@ namespace idock
 
 	void thread_pool::operator()()
 	{
-		packaged_task<int>* task; // Declare a pointer to a task.
+		packaged_task<void>* task; // Declare a pointer to a task.
 		do // Threads loop inside.
 		{
 			// If there are no tasks to run, simply wait.

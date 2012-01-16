@@ -58,7 +58,7 @@ namespace idock
 		explicit thread_pool(const size_t num_threads);
 
 		/// Runs tasks in parallel asynchronously.
-		void run(vector<packaged_task<int>>& tasks);
+		void run(vector<packaged_task<void>>& tasks);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
@@ -71,7 +71,7 @@ namespace idock
 
 	protected:
 		const size_t num_threads; ///< Number of threads to run tasks.
-		vector<packaged_task<int>>* tasks_ptr; ///< Pointer to the tasks to run.
+		vector<packaged_task<void>>* tasks_ptr; ///< Pointer to the tasks to run.
 		const progress_bar* prog_bar_ptr; ///< Pointer to the progress bar.
 		size_t num_tasks; ///< Number of tasks.
 		size_t num_started_tasks; ///< Number of tasks that have started running.
