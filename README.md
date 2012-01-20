@@ -26,7 +26,6 @@ Tested operating systems and compilers
 * Arch Linux 3.2.1 x86_64 and CLANG 3.0
 * Arch Linux 3.2.1 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.0
-* Solaris 11 11/11 and GCC 4.5.2
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler XE 12.1.2
