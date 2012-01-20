@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include <boost/array.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
@@ -31,6 +32,7 @@
 namespace idock
 {
 	using boost::array;
+	using boost::ptr_vector;
 	using boost::thread_group;
 	using boost::mutex;
 	using boost::condition;
@@ -58,7 +60,7 @@ namespace idock
 		explicit thread_pool(const size_t num_threads);
 
 		/// Runs tasks in parallel asynchronously.
-		void run(vector<packaged_task<void>>& tasks);
+		void run(ptr_vector<packaged_task<void>>& tasks);
 
 		/// The function for threads to execute and loop inside.
 		void operator()();
@@ -71,7 +73,7 @@ namespace idock
 
 	protected:
 		const size_t num_threads; ///< Number of threads to run tasks.
-		vector<packaged_task<void>>* tasks_ptr; ///< Pointer to the tasks to run.
+		ptr_vector<packaged_task<void>>* tasks_ptr; ///< Pointer to the tasks to run.
 		const progress_bar* prog_bar_ptr; ///< Pointer to the progress bar.
 		size_t num_tasks; ///< Number of tasks.
 		size_t num_started_tasks; ///< Number of tasks that have started running.

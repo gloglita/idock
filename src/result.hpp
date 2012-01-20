@@ -43,7 +43,7 @@ namespace idock
 		result(result&& r) : e(r.e), f(r.f), heavy_atoms(static_cast<vector<vector<vec3>>&&>(r.heavy_atoms)), hydrogens(static_cast<vector<vector<vec3>>&&>(r.hydrogens)) {}
 
 		/// For sorting ptr_vector<result>.
-		const bool operator<(const result& r) const
+		bool operator<(const result& r) const
 		{
 			return e < r.e;
 		}
@@ -78,7 +78,7 @@ namespace idock
 		{
 			if (r.e < results[index].e) // r is better than results[index], so substitute r for results[index].
 			{
-				results[index] = r;
+				results.replace(index, new result(static_cast<result&&>(r)));
 			}
 		}
 		else // Cannot find in results a result that is similar to r.
@@ -87,7 +87,7 @@ namespace idock
 				results.push_back(new result(static_cast<result&&>(r)));
 			else // Now the container is full.
 				if (r.e < results.back().e) // If r is better than the worst one, then replace it.
-					results.back() = r;
+					results.replace(results.size() - 1, new result(static_cast<result&&>(r)));
 		}
 		results.sort();
 	}

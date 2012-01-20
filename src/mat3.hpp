@@ -54,7 +54,7 @@ namespace idock
 		}
 
 		/// Returns the value at index (i, j) where j is the lowest dimension.
-		const fl operator()(const size_t i, const size_t j) const
+		fl operator()(const size_t i, const size_t j) const
 		{
 			BOOST_ASSERT(i < 3);
 			BOOST_ASSERT(j < 3);

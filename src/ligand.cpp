@@ -416,11 +416,8 @@ namespace idock
 				const array<size_t, 3> index = b.grid_index(f.coordinates[i]);
 
 				// Assert the validity of index.
-				BOOST_ASSERT(index[0] >= 0);
-				BOOST_ASSERT(index[0] < b.num_grids[0]);
-				BOOST_ASSERT(index[1] >= 0);
+				BOOST_ASSERT(index[0] < b.num_grids[0]);				
 				BOOST_ASSERT(index[1] < b.num_grids[1]);
-				BOOST_ASSERT(index[2] >= 0);
 				BOOST_ASSERT(index[2] < b.num_grids[2]);
 
 				// (x0, y0, z0) is the beginning corner of the partition.
