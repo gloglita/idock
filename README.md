@@ -28,7 +28,7 @@ Tested operating systems and compilers
 * FreeBSD 9.0 x86_64 and CLANG 3.0
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
-* Windows 7 SP1 x64 and Intel C++ Compiler XE 12.1.2
+* Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
 
 
 Compilation
