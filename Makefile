@@ -2,7 +2,7 @@ CC = g++ -O3 -DNDEBUG -std=gnu++0x
 
 ifeq ($(TOOLSET), clang)
   CC = clang++ -O3 -DNDEBUG -std=gnu++11
-else ifeq ($(TOOLSET), intel-linux)
+else ifeq ($(TOOLSET), intel)
   CC = icpc -O3 -DNDEBUG -std=gnu++0x
 endif
 
