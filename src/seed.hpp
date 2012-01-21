@@ -21,31 +21,26 @@
 #define IDOCK_SEED_HPP
 
 #include <ctime>
-#ifdef WIN32
+#ifdef _WIN32
 #include <Windows.h>
-#else // TODO: A platform not being Windows does not necessarily imply Linux. Use #elif to check again.
+#else
 #include <unistd.h>
 #endif
 
 namespace idock
 {
-
-#ifdef WIN32
-
+#ifdef _WIN32
 	/// Returns current process ID.
 	inline unsigned int pid()
 	{
 		return GetCurrentProcessId();
 	}
-
-#else // TODO: A platform not being Windows does not necessarily imply Linux. Use #elif to check again.
-
+#else
 	/// Returns current process ID.
 	inline unsigned int pid()
 	{
 		return getpid();
 	}
-
 #endif
 
 	/// Generates a random seed from current process ID and current time.
