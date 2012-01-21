@@ -127,7 +127,7 @@ Change Log
 * Output predicted free energy of the top 5 conformations.
 * Reverted the evaluation of intra-molecular free energy to Vina's implementation to obtain better RMSD for certain cases.
 
-### 1.2 (2012-01-20)
+### 1.2 (under construction)
 
 * Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
 * Profiled by the Valgrind tool suite to ensure zero memory leak.
