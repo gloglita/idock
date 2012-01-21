@@ -1,0 +1,19 @@
+BOOST_ROOT = $(HOME)/boost_1_48_0
+CC = clang++ -static -O3 -DNDEBUG -std=gnu++11
+
+all: ../bin/Mac/x86_64/idock ../bin/Mac/x86/idock
+
+../bin/Mac/x86_64/idock: ../obj/Mac/x86_64/scoring_function.o ../obj/Mac/x86_64/box.o ../obj/Mac/x86_64/quaternion.o ../obj/Mac/x86_64/thread_pool.o ../obj/Mac/x86_64/receptor.o ../obj/Mac/x86_64/ligand.o ../obj/Mac/x86_64/grid_map_task.o ../obj/Mac/x86_64/monte_carlo_task.o ../obj/Mac/x86_64/main.o
+	$(CC) -m64 -o $@ $^ -L$(BOOST_ROOT)/lib/x86_64 -pthread -lboost_system -lboost_thread -lboost_filesystem -lboost_program_options
+
+../obj/Mac/x86_64/%.o: ../src/%.cpp 
+	$(CC) -m64 -o $@ $< -I$(BOOST_ROOT) -c
+
+../bin/Mac/x86/idock: ../obj/Mac/x86/scoring_function.o ../obj/Mac/x86/box.o ../obj/Mac/x86/quaternion.o ../obj/Mac/x86/thread_pool.o ../obj/Mac/x86/receptor.o ../obj/Mac/x86/ligand.o ../obj/Mac/x86/grid_map_task.o ../obj/Mac/x86/monte_carlo_task.o ../obj/Mac/x86/main.o
+	$(CC) -m32 -o $@ $^ -L$(BOOST_ROOT)/lib/x86 -pthread -lboost_system -lboost_thread -lboost_filesystem -lboost_program_options
+
+../obj/Mac/x86/%.o: ../src/%.cpp 
+	$(CC) -m32 -o $@ $< -I$(BOOST_ROOT) -c
+
+clean:
+	rm -f ../bin/Mac/x86/idock ../obj/Mac/x86/*.o ../bin/Mac/x86_64/idock ../obj/Mac/x86_64/*.o
