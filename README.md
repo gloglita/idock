@@ -30,6 +30,7 @@ Tested operating systems and compilers
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
+* Windows 8 Developer Preview x64 and Visual Studio 11 Express
 
 
 Compilation
