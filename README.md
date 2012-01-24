@@ -137,6 +137,7 @@ Change Log
 * Revised the precision of free energy to be 2 digits.
 * Parallelized the precalculation of scoring function.
 * Fixed a numerical bug when docking a ligand of only one single heavy atom.
+* Added support for Mac OS X 10.7.2 and FreeBSD 9.0.
 * Added support for docking ligands created by igrow.
 
 Contact Author
