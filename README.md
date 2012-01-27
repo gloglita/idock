@@ -14,7 +14,7 @@ Features
 * idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
 
 
-Tested operating systems and compilers
+Supported operating systems and compilers
 -----------------------------------------
 
 * Ubuntu 11.10 x86_64 and GCC 4.6.1
@@ -22,9 +22,9 @@ Tested operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.2.1 x86_64 and GCC 4.6.2
-* Arch Linux 3.2.1 x86_64 and CLANG 3.0
-* Arch Linux 3.2.1 x86_64 and Intel C++ Compiler 12.1.2
+* Arch Linux 3.2.2 x86_64 and GCC 4.6.2
+* Arch Linux 3.2.2 x86_64 and CLANG 3.0
+* Arch Linux 3.2.2 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.0
 * Mac OS X 10.7.2 and CLANG 3.0
 * Windows 7 SP1 x64 and Windows SDK 7.1
