@@ -502,7 +502,7 @@ int main(int argc, char* argv[])
 				{
 					energies[i] = results[i].e;
 				}
-				summaries.push_back(new summary(ligand_filename, static_cast<vector<fl>&&>(energies)));
+				summaries.push_back(new summary(canonical(ligand_path), static_cast<vector<fl>&&>(energies)));
 
 				// Find the largest num_conformations.
 				if (max_existing_conformations < num_conformations) max_existing_conformations = num_conformations;
