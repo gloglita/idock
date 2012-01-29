@@ -151,7 +151,7 @@ Logo
 
 ![idock logo](https://github.com/HongjianLi/idock/raw/master/logo.png)
 
-Green grape is chosen as the logo for idock because it is one of the author's favorite fruit. The logo image is collected from [Open Clip Art].
+Green gooseberry is chosen as the logo for idock because it is one of the author's favorite fruit. The logo image is collected from [Open Clip Art].
 
 
 [virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
