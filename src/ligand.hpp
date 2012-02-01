@@ -58,7 +58,7 @@ namespace idock
 		vector<fl> energies; ///< Heavy atom free energies.
 
 		/// Constructs an active frame, and relates it to its parent frame.
-		explicit frame(const size_t parent) : parent(parent), active(true)
+		explicit frame(const size_t parent, const size_t rotorX) : parent(parent), rotorX(rotorX), active(true)
 		{
 			heavy_atoms.reserve(20); // A frame typically consists of < 20 heavy atoms.
 			numbers.reserve(20); // A frame typically consists of < 20 heavy atoms.

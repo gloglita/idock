@@ -22,17 +22,16 @@
 
 namespace idock
 {
-	ligand::ligand(const path& p)
+	ligand::ligand(const path& p) : num_active_torsions(0), num_heavy_atoms(0)
 	{
 		// Initialize necessary variables for constructing a ligand.
 		lines.reserve(200); // A ligand typically consists of <= 200 lines.
 		frames.reserve(30); // A ligand typically consists of <= 30 frames.
-		frames.push_back(frame(0)); // ROOT is also treated as a frame. The parent of ROOT frame is dummy.
-		num_heavy_atoms = 0;
+		frames.push_back(frame(0, 0)); // ROOT is also treated as a frame. The parent and rotorX of ROOT frame are dummy.
 
 		// Initialize helper variables for parsing.
-		size_t num_inactive_torsions = 0; // A torsion is inactive if all the atoms except rotor Y of the frame are hydrogens. Examples include -OH and -NH2.
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
+		frame* f = &frames.front(); // Pointer to the current frame.
 		size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 		string line;
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
@@ -46,6 +45,7 @@ namespace idock
 			{
 				// Whenever an ATOM/HETATM line shows up, the current frame must be the last one.
 				BOOST_ASSERT(current == frames.size() - 1);
+				BOOST_ASSERT(f == &frames.back());
 
 				// This line will be dumped to the output ligand file.
 				lines.push_back(line);
@@ -61,14 +61,14 @@ namespace idock
 				// For a hydrogen, save it.
 				if (a.is_hydrogen())
 				{
-					frames.back().hydrogens.push_back(a);
+					f->hydrogens.push_back(a);
 
 					// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 					if (ad == AD_TYPE_HD)
 					{
-						for (size_t i = frames.back().heavy_atoms.size(); i > 0;)
+						for (size_t i = f->heavy_atoms.size(); i > 0;)
 						{
-							atom& b = frames.back().heavy_atoms[--i];
+							atom& b = f->heavy_atoms[--i];
 							if (!b.is_hetero()) continue; // Only a hetero atom can be a hydrogen bond donor.
 							if (a.is_neighbor(b))
 							{
@@ -80,8 +80,8 @@ namespace idock
 				}
 				else // It is a heavy atom.
 				{
-					frames.back().heavy_atoms.push_back(a);
-					frames.back().numbers.push_back(right_cast<size_t>(line, 7, 11));
+					f->heavy_atoms.push_back(a);
+					f->numbers.push_back(right_cast<size_t>(line, 7, 11));
 					++num_heavy_atoms;
 				}
 			}
@@ -90,27 +90,27 @@ namespace idock
 				// This line will be dumped to the output ligand file.
 				lines.push_back(line);
 
-				// Insert a new frame whose parent is the current frame.
-				frames.push_back(frame(current));
-
 				// Parse "BRANCH   X   Y". X and Y are right-justified and 4 characters wide.
 				// Y is not parsed because the atom immediately follows "BRANCH" must be Y in pdbqt files created by the prepare_ligand4.py script of MGLTools.
 				// This assumption fails if pdbqt files are prepared by OpenBabel. In this case, the class frame should incorporate a new field rotorY to track the origin.
 				const size_t x = right_cast<size_t>(line, 7, 10);
 
 				// Find the corresponding heavy atom with X as its atom number in the current frame.
-				const frame& f = frames[current];
-				for (size_t i = 0; i < f.numbers.size(); ++i)
+				for (size_t i = 0; i < f->numbers.size(); ++i)
 				{
-					if (f.numbers[i] == x)
+					if (f->numbers[i] == x)
 					{
-						frames.back().rotorX = i;
+						// Insert a new frame whose parent is the current frame.
+						frames.push_back(frame(current, i));
 						break;
 					}
 				}
 
 				// Now the current frame is the newly inserted BRANCH frame.
 				current = frames.size() - 1;
+
+				// Update the pointer to the current frame.
+				f = &frames[current];
 			}
 			else if (starts_with(line, "ENDBRANCH"))
 			{
@@ -119,18 +119,24 @@ namespace idock
 
 				// A frame may be empty, e.g. "BRANCH   4   9" is immediately followed by "ENDBRANCH   4   9".
 				// This emptiness is likely to be caused by invalid input structure, especially when all the atoms are located in the same plane.
-				if (frames.back().heavy_atoms.empty()) throw parsing_error(p, num_lines, "An empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
+				if (f->heavy_atoms.empty()) throw parsing_error(p, num_lines, "An empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
 
 				// If the current frame consists of rotor Y and a few hydrogens only, e.g. -OH and -NH2,
 				// the torsion of this frame will have no effect on scoring and is thus redundant.
-				if ((current == frames.size() - 1) && (frames.back().heavy_atoms.size() == 1))
+				if ((current == frames.size() - 1) && (f->heavy_atoms.size() == 1))
 				{
-					frames.back().active = false;
-					++num_inactive_torsions;
+					f->active = false;
+				}
+				else
+				{
+					++num_active_torsions;
 				}
 
 				// Now the parent of the following frame is the parent of current frame.
 				current = frames[current].parent;
+
+				// Update the pointer to the current frame.
+				f = &frames[current];
 			}
 			else if (starts_with(line, "ROOT") || starts_with(line, "ENDROOT") || starts_with(line, "TORSDOF"))
 			{
@@ -141,11 +147,19 @@ namespace idock
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
 
 		BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
+		BOOST_ASSERT(f == &frames.front()); // f should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 		BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 
-		// Dehydrophobicize carbons if necessary.
+		// Determine num_frames, num_torsions, flexibility_penalty_factor, and num_heavy_atoms_inverse.
 		num_frames = frames.size();
 		BOOST_ASSERT(num_frames >= 1);
+		num_torsions = num_frames - 1;
+		BOOST_ASSERT(num_torsions + 1 == num_frames);
+		BOOST_ASSERT(num_torsions >= num_active_torsions);
+		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * (num_torsions - num_active_torsions)));
+		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
+
+		// Dehydrophobicize carbons if necessary.
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
@@ -176,14 +190,6 @@ namespace idock
 				if ((rotorX.is_hetero()) && (!rotorY.is_hetero())) rotorY.dehydrophobicize();
 			}
 		}
-
-		num_torsions = num_frames - 1;
-		num_active_torsions = num_torsions - num_inactive_torsions;
-		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * num_inactive_torsions));
-		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
-
-		BOOST_ASSERT(num_frames == num_torsions + 1);
-		BOOST_ASSERT(num_active_torsions <= num_torsions);
 
 		// Initialize relative_origin and relative_axis of BRANCH frames.
 		for (size_t k = 1; k < num_frames; ++k)
