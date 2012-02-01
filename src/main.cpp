@@ -193,6 +193,20 @@ int main(int argc, char* argv[])
 		}
 		output_folder_path = canonical(output_folder_path).make_preferred();
 
+		// Validate log_path.
+		if (is_directory(log_path))
+		{
+			std::cerr << "Log path " << log_path << " is a directory\n";
+			return 1;
+		}
+
+		// Validate csv_path.
+		if (is_directory(csv_path))
+		{
+			std::cerr << "csv path " << csv_path << " is a directory\n";
+			return 1;
+		}
+
 		// Validate miscellaneous options.
 		if (!num_threads)
 		{

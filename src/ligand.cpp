@@ -147,7 +147,7 @@ namespace idock
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
 
 		BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
-		BOOST_ASSERT(f == &frames.front()); // f should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
+		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 		BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 
 		// Determine num_frames, num_torsions, flexibility_penalty_factor, and num_heavy_atoms_inverse.
