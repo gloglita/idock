@@ -133,8 +133,7 @@ Change Log
 * Profiled by the Valgrind tool suite to ensure zero memory leak.
 * Replaced a switch statement by table lookup to decrease indirect branch misprediction rate.
 * Added move constructors for several classes to boost performance.
-* Revised the precision of coordinates to be 3 digits.
-* Revised the precision of free energy to be 2 digits.
+* Revised the precision of coordinates and free energy to be 3 digits.
 * Parallelized the precalculation of scoring function.
 * Fixed a numerical bug when docking a ligand of only one single heavy atom.
 * Added support for Mac OS X 10.7.2 and FreeBSD 9.0.

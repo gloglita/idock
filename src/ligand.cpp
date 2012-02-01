@@ -582,11 +582,12 @@ namespace idock
 		using namespace std;
 		ofstream out(output_ligand); // Dumping starts. Open the file stream as late as possible.
 		out.setf(ios::fixed, ios::floatfield);
+		out << setprecision(3);
 		for (size_t i = 0; i < num_conformations; ++i)
 		{
 			const result& r = results[i];
 			out << "MODEL     " << setw(4) << (i + 1) << '\n'
-				<< "REMARK     FREE ENERGY PREDICTED BY IDOCK: " << setprecision(2) << setw(8) << r.e << setprecision(3) << " KCAL/MOL\n";
+				<< "REMARK     FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e << " KCAL/MOL\n";
 			for (size_t j = 0, frame = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 			{
 				const string& line = lines[j];

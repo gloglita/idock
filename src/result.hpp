@@ -32,7 +32,7 @@ namespace idock
 	{
 	public:
 		fl e; ///< Free energy.
-		fl f; ///< Force.
+		fl f; ///< Inter-molecular free energy.
 		vector<vector<vec3>> heavy_atoms; ///< Heavy atom coordinates.
 		vector<vector<vec3>> hydrogens; ///< Hydrogen atom coordinates.
 
@@ -84,10 +84,16 @@ namespace idock
 		else // Cannot find in results a result that is similar to r.
 		{
 			if (results.size() < results.capacity())
+			{
 				results.push_back(new result(static_cast<result&&>(r)));
+			}
 			else // Now the container is full.
+			{
 				if (r.e < results.back().e) // If r is better than the worst one, then replace it.
+				{
 					results.replace(results.size() - 1, new result(static_cast<result&&>(r)));
+				}
+			}
 		}
 		results.sort();
 	}

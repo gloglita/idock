@@ -29,7 +29,7 @@
  * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
  *
  * \section availability Availability
- * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Both x86 and x64 binaries for Linux and Windows are provided.
+ * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X and FreeBSD are provided.
  *
  * \section installation Installation
  * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is not supported at the moment.
@@ -41,7 +41,7 @@
  * pythonsh prepare_ligand4.py -l ligand.mol2
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 15 January 2012
+ * \date 1 February 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -147,6 +147,7 @@ int main(int argc, char* argv[])
 			std::cerr << "Receptor " << receptor_path << " is not a regular file\n";
 			return 1;
 		}
+		receptor_path = canonical(receptor_path).make_preferred();
 
 		// Validate ligand_folder.
 		if (!exists(ligand_folder_path))
@@ -159,6 +160,7 @@ int main(int argc, char* argv[])
 			std::cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
+		ligand_folder_path = canonical(ligand_folder_path).make_preferred();
 
 		// Validate size_x, size_y, size_z.
 		if (size_x < box::Default_Partition_Granularity ||
@@ -189,6 +191,7 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 		}
+		output_folder_path = canonical(output_folder_path).make_preferred();
 
 		// Validate miscellaneous options.
 		if (!num_threads)
@@ -226,8 +229,8 @@ int main(int argc, char* argv[])
 	try
 	{
 		// Initialize the log.
-		std::cout << "Logging to " << log_path.string() << '\n';
 		tee log(log_path);
+		std::cout << "Logging to " << canonical(log_path).make_preferred() << '\n';
 
 		// Initialize a Mersenne Twister random number generator.
 		log << "Using random seed " << seed << '\n';
@@ -237,7 +240,7 @@ int main(int argc, char* argv[])
 		const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 
 		// Parse the receptor.
-		log << "Parsing receptor " << receptor_path.string() << '\n';
+		log << "Parsing receptor " << receptor_path << '\n';
 		const receptor rec(receptor_path);
 
 		// Divide the box into coarse-grained partitions for subsequent grid map creation.
@@ -348,10 +351,9 @@ int main(int argc, char* argv[])
 		log << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 
 		// Perform docking for each file in the ligand folder.
-		log << "  index |       ligand |   progress | conf | top 5 conf free energy in kcal/mol\n" << std::setprecision(2);
+		log << "  index |       ligand |   progress | conf | top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
-		size_t max_existing_conformations = 0; // Maximum number of num_conformations' across all ligands.
 		using boost::filesystem::directory_iterator;
 		const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 		for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
@@ -489,10 +491,10 @@ int main(int argc, char* argv[])
 				}
 
 				// Flush the free energies of the top 5 conformations.
-				const size_t num_energies = std::min<size_t>(num_conformations, 5);
+				const size_t num_energies = std::min<size_t>(num_conformations, 4);
 				for (size_t i = 0; i < num_energies; ++i)
 				{
-					log << ' ' << std::setw(6) << results[i].e;
+					log << std::setw(8) << results[i].e;
 				}
 				log << '\n';
 
@@ -502,10 +504,7 @@ int main(int argc, char* argv[])
 				{
 					energies[i] = results[i].e;
 				}
-				summaries.push_back(new summary(canonical(ligand_path), static_cast<vector<fl>&&>(energies)));
-
-				// Find the largest num_conformations.
-				if (max_existing_conformations < num_conformations) max_existing_conformations = num_conformations;
+				summaries.push_back(new summary(ligand_path, static_cast<vector<fl>&&>(energies)));
 
 				// Clear the results of the current ligand.
 				results.clear();
@@ -522,12 +521,12 @@ int main(int argc, char* argv[])
 
 		ofstream csv(csv_path);
 		csv << "ligand,no. of conformations";
-		for (size_t i = 1; i <= max_existing_conformations; ++i)
+		for (size_t i = 1; i <= max_conformations; ++i)
 		{
 			csv << ",free energy in kcal/mol of conformation " << i;
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
-		csv << std::endl << std::setprecision(2);
+		csv << '\n' << std::setprecision(3);
 		const size_t num_summaries = summaries.size(); // num_summaries == num_ligands may not always hold should any ligands fail.
 		for (size_t i = 0; i < num_summaries; ++i)
 		{
@@ -538,7 +537,7 @@ int main(int argc, char* argv[])
 			{
 				csv << ',' << s.energies[j];
 			}
-			csv << std::endl;
+			csv << '\n';
 		}
 		csv.close();
 	}
