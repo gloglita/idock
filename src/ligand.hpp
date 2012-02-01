@@ -38,7 +38,7 @@ namespace idock
 		// They remain constant once initialized.
 		size_t parent; ///< Frame array index pointing to the parent of current frame. For ROOT frame, this field is not used.
 		size_t rotorX; ///< Index pointing to the parent frame atom which forms a rotatable bond with the rotorY atom of current frame.
-		//size_t rotorY; ///< Index pointing to the current frame atom which forms a rotatable bond with the rotorX atom of parent frame.
+		size_t rotorY; ///< Index pointing to the current frame atom which forms a rotatable bond with the rotorX atom of parent frame.
 		bool active; ///< Indicates if the current frame is active.
 		vector<atom> heavy_atoms; ///< Heavy atoms. Coordinates are relative to frame origin, which is the first atom by default.
 		vector<atom> hydrogens; ///< Hydrogen atoms. Coordinates are relative to frame origin, which is the first atom by default.

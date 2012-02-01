@@ -91,11 +91,9 @@ namespace idock
 				lines.push_back(line);
 
 				// Parse "BRANCH   X   Y". X and Y are right-justified and 4 characters wide.
-				// Y is not parsed because the atom immediately follows "BRANCH" must be Y in pdbqt files created by the prepare_ligand4.py script of MGLTools.
-				// This assumption fails if pdbqt files are prepared by OpenBabel. In this case, the class frame should incorporate a new field rotorY to track the origin.
 				const size_t x = right_cast<size_t>(line, 7, 10);
 
-				// Find the corresponding heavy atom with X as its atom number in the current frame.
+				// Find the corresponding heavy atom with x as its atom serial number in the current frame.
 				for (size_t i = 0; i < f->numbers.size(); ++i)
 				{
 					if (f->numbers[i] == x)
@@ -120,6 +118,20 @@ namespace idock
 				// A frame may be empty, e.g. "BRANCH   4   9" is immediately followed by "ENDBRANCH   4   9".
 				// This emptiness is likely to be caused by invalid input structure, especially when all the atoms are located in the same plane.
 				if (f->heavy_atoms.empty()) throw parsing_error(p, num_lines, "An empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
+
+				// Parse "ENDBRANCH   X   Y". X and Y are right-justified and 4 characters wide.
+				const size_t y = right_cast<size_t>(line, 14, 17);
+
+				// Find the corresponding heavy atom with y as its atom serial number in the current frame.
+				for (size_t i = 0; i < f->numbers.size(); ++i)
+				{
+					if (f->numbers[i] == y)
+					{
+						// Set rotorY of current frame.
+						f->rotorY = i;
+						break;
+					}
+				}
 
 				// If the current frame consists of rotor Y and a few hydrogens only, e.g. -OH and -NH2,
 				// the torsion of this frame will have no effect on scoring and is thus redundant.
