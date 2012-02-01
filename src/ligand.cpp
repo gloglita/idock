@@ -191,14 +191,14 @@ namespace idock
 			}
 		}
 
-		// Initialize relative_origin and relative_axis of BRANCH frames.
+		// Initialize parent_origin_to_current_origin and parent_rotorX_to_current_rotorY of BRANCH frames.
 		for (size_t k = 1; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
 			const frame& pf = frames[f.parent];
 			const vec3& origin = f.heavy_atoms.front().coordinate;
-			f.relative_origin =  origin - pf.heavy_atoms.front().coordinate;
-			f.relative_axis   = (origin - pf.heavy_atoms[f.rotorX].coordinate).normalize();
+			f.parent_origin_to_current_origin = origin - pf.heavy_atoms.front().coordinate;
+			f.parent_rotorX_to_current_rotorY = (origin - pf.heavy_atoms[f.rotorX].coordinate).normalize();
 		}
 
 		// Reserve enough capacity for bonds.
@@ -362,7 +362,7 @@ namespace idock
 			const frame& pf = frames[f.parent];
 
 			// Update origin.
-			f.coordinates.front() = pf.coordinates.front() + pf.orientation_m * f.relative_origin;
+			f.coordinates.front() = pf.coordinates.front() + pf.orientation_m * f.parent_origin_to_current_origin;
 			if (!b.within(f.coordinates.front()))
 				return false;
 
@@ -370,8 +370,8 @@ namespace idock
 			if (!f.active) continue;
 
 			// Update orientation.
-			BOOST_ASSERT(f.relative_axis.normalized());
-			f.axis = pf.orientation_m * f.relative_axis;
+			BOOST_ASSERT(f.parent_rotorX_to_current_rotorY.normalized());
+			f.axis = pf.orientation_m * f.parent_rotorX_to_current_rotorY;
 			BOOST_ASSERT(f.axis.normalized());
 			f.orientation_q = axis_angle_to_quaternion(f.axis, conf.torsions[t++]) * pf.orientation_q;
 			BOOST_ASSERT(quaternion_is_normalized(f.orientation_q));
@@ -556,10 +556,10 @@ namespace idock
 			hydrogens[k].resize(f.hydrogens.size());
 
 			// Update origin.
-			heavy_atoms[k].front() = heavy_atoms[f.parent].front() + orientations_m[f.parent] * f.relative_origin;
+			heavy_atoms[k].front() = heavy_atoms[f.parent].front() + orientations_m[f.parent] * f.parent_origin_to_current_origin;
 
 			// Update orientation.
-			orientations_q[k] = axis_angle_to_quaternion(orientations_m[f.parent] * f.relative_axis, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
+			orientations_q[k] = axis_angle_to_quaternion(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
 			orientations_m[k] = quaternion_to_matrix(orientations_q[k]);
 
 			// Update coordinates.
