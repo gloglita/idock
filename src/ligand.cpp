@@ -176,6 +176,7 @@ namespace idock
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
+			f.origin = f.heavy_atoms[f.rotorY].coordinate;
 			const size_t num_heavy_atoms = f.heavy_atoms.size();
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
@@ -195,7 +196,7 @@ namespace idock
 				}
 			}
 
-			if (k > 0)
+			if (k) // k > 0
 			{
 				atom& rotorY = f.heavy_atoms[f.rotorY];
 				atom& rotorX = frames[f.parent].heavy_atoms[f.rotorX];
@@ -209,9 +210,8 @@ namespace idock
 		{
 			frame& f = frames[k];
 			const frame& pf = frames[f.parent];
-			const vec3& current_rotorY = f.heavy_atoms[f.rotorY].coordinate;
-			f.parent_rotorY_to_current_rotorY =  current_rotorY - pf.heavy_atoms[pf.rotorY].coordinate;
-			f.parent_rotorX_to_current_rotorY = (current_rotorY - pf.heavy_atoms[f.rotorX].coordinate).normalize();
+			f.parent_rotorY_to_current_rotorY =  f.origin - pf.origin;
+			f.parent_rotorX_to_current_rotorY = (f.origin - pf.heavy_atoms[f.rotorX].coordinate).normalize();
 		}
 
 		// Reserve enough capacity for bonds.
@@ -254,7 +254,7 @@ namespace idock
 		}
 
 		// Find 1-4 interacting pairs.
-		one_to_four_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
+		interacting_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
 		vector<pair<size_t, size_t>> neighbors;
 		neighbors.reserve(10); // An atom typically consists of <= 10 neighbors.
 		for (size_t k1 = 0; k1 < num_frames; ++k1)
@@ -304,7 +304,7 @@ namespace idock
 					{
 						if (((k1 == f2.parent) && ((j == f2.rotorY) || (i == f2.rotorX))) || (find(neighbors.begin(), neighbors.end(), pair<size_t, size_t>(k2, j)) != neighbors.end())) continue;
 						const size_t type_pair_index = triangular_matrix_permissive_index(f1.heavy_atoms[i].xs, f2.heavy_atoms[j].xs);
-						one_to_four_pairs.push_back(one_to_four_pair(k1, i, k2, j, type_pair_index));
+						interacting_pairs.push_back(interacting_pair(k1, i, k2, j, type_pair_index));
 					}
 				}
 
@@ -317,16 +317,15 @@ namespace idock
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
-			const vec3 origin = f.heavy_atoms[f.rotorY].coordinate; // Cannot use vec3& because origin will be udpated.
 			const size_t num_heavy_atoms = f.heavy_atoms.size();
 			for (size_t i = 0; i < num_heavy_atoms; ++i)
 			{
-				f.heavy_atoms[i].coordinate -= origin;
+				f.heavy_atoms[i].coordinate -= f.origin;
 			}
 			const size_t num_hydrogens = f.hydrogens.size();
 			for (size_t i = 0; i < num_hydrogens; ++i)
 			{
-				f.hydrogens[i].coordinate -= origin;
+				f.hydrogens[i].coordinate -= f.origin;
 			}
 			f.coordinates.resize(num_heavy_atoms);
 			f.derivatives.resize(num_heavy_atoms);
@@ -358,12 +357,12 @@ namespace idock
 
 		// Apply position and orientation to ROOT frame.
 		frame& root = frames.front();
-		root.coordinates[root.rotorY] = conf.position;
+		root.origin = conf.position;
 		root.orientation_q = conf.orientation;
 		root.orientation_m = quaternion_to_matrix(conf.orientation);
 		for (size_t i = 0; i < root.heavy_atoms.size(); ++i)
 		{
-			root.coordinates[i] = conf.position + root.orientation_m * root.heavy_atoms[i].coordinate;
+			root.coordinates[i] = root.origin + root.orientation_m * root.heavy_atoms[i].coordinate;
 			if (!b.within(root.coordinates[i]))
 				return false;
 		}
@@ -375,8 +374,8 @@ namespace idock
 			const frame& pf = frames[f.parent];
 
 			// Update origin.
-			f.coordinates[f.rotorY] = pf.coordinates[pf.rotorY] + pf.orientation_m * f.parent_rotorY_to_current_rotorY;
-			if (!b.within(f.coordinates.front()))
+			f.origin = pf.origin + pf.orientation_m * f.parent_rotorY_to_current_rotorY;
+			if (!b.within(f.origin))
 				return false;
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
@@ -391,10 +390,9 @@ namespace idock
 			f.orientation_m = quaternion_to_matrix(f.orientation_q);
 
 			// Update coordinates.
-			const vec3& origin = f.coordinates[f.rotorY];
 			for (size_t i = 0; i < f.heavy_atoms.size(); ++i)
 			{
-				f.coordinates[i] = origin + f.orientation_m * f.heavy_atoms[i].coordinate;
+				f.coordinates[i] = f.origin + f.orientation_m * f.heavy_atoms[i].coordinate;
 				if (!b.within(f.coordinates[i]))
 					return false;
 			}
@@ -458,13 +456,14 @@ namespace idock
 			}
 		}
 
+		// Save intra-molecular free energy into f.
 		f = e;
 
 		// Calculate intra-ligand free energy.
-		const size_t num_one_to_four_pairs = one_to_four_pairs.size();
-		for (size_t i = 0; i < num_one_to_four_pairs; ++i)
+		const size_t num_interacting_pairs = interacting_pairs.size();
+		for (size_t i = 0; i < num_interacting_pairs; ++i)
 		{
-			const one_to_four_pair& p = one_to_four_pairs[i];
+			const interacting_pair& p = interacting_pairs[i];
 			frame& f1 = frames[p.k1];
 			frame& f2 = frames[p.k2];
 			const vec3 r = f2.coordinates[p.i2] - f1.coordinates[p.i1];
@@ -495,11 +494,7 @@ namespace idock
 		{
 			frame&  f = frames[k];
 			frame& pf = frames[f.parent];
-			const vec3& origin = f.coordinates[f.rotorY];
 
-			// The origin is ignored for fast evaluation.
-			// The force of origin has been counted during initialization.
-			// The torque of origin is always zero.
 			for (size_t i = 0; i < f.heavy_atoms.size(); ++i)
 			{
 				// The derivatives with respect to the position, orientation, and torsions
@@ -508,12 +503,12 @@ namespace idock
 				// where the projections refer to the torque applied to the branch moved by the torsion,
 				// projected on its rotation axis.
 				f.force  += f.derivatives[i];
-				f.torque += cross_product(f.coordinates[i] - origin, f.derivatives[i]);
+				f.torque += cross_product(f.coordinates[i] - f.origin, f.derivatives[i]);
 			}
 
 			// Aggregate the force and torque of current frame to its parent frame.
 			pf.force  += f.force;
-			pf.torque += f.torque + cross_product(origin - pf.coordinates[pf.rotorY], f.force);
+			pf.torque += f.torque + cross_product(f.origin - pf.origin, f.force);
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active) continue;
@@ -523,11 +518,10 @@ namespace idock
 		}
 
 		// Calculate and aggregate the force and torque of ROOT frame.
-		const vec3& root_origin = root.coordinates[root.rotorY];
 		for (size_t i = 0; i < root.heavy_atoms.size(); ++i)
 		{
 			root.force  += root.derivatives[i];
-			root.torque += cross_product(root.coordinates[i] - root_origin, root.derivatives[i]);
+			root.torque += cross_product(root.coordinates[i] - root.origin, root.derivatives[i]);
 		}
 
 		// Save the aggregated force and torque to g.position and g.orientation.
@@ -539,6 +533,7 @@ namespace idock
 
 	result ligand::compose_result(const fl e, const fl f, const conformation& conf) const
 	{
+		vector<vec3> origins(num_frames);
 		vector<qt> orientations_q(num_frames);
 		vector<mat3> orientations_m(num_frames);
 		vector<vector<vec3>> heavy_atoms(num_frames);
@@ -549,16 +544,16 @@ namespace idock
 		heavy_atoms.front().resize(root.heavy_atoms.size());
 		hydrogens.front().resize(root.hydrogens.size());
 
-		heavy_atoms.front()[root.rotorY] = conf.position;
+		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
 		orientations_m.front() = quaternion_to_matrix(conf.orientation);
 		for (size_t i = 0; i < root.heavy_atoms.size(); ++i)
 		{
-			heavy_atoms.front()[i] = conf.position + orientations_m.front() * root.heavy_atoms[i].coordinate;
+			heavy_atoms.front()[i] = origins.front() + orientations_m.front() * root.heavy_atoms[i].coordinate;
 		}
 		for (size_t i = 0; i < root.hydrogens.size(); ++i)
 		{
-			hydrogens.front()[i] = conf.position + orientations_m.front() * root.hydrogens[i].coordinate;
+			hydrogens.front()[i] = origins.front() + orientations_m.front() * root.hydrogens[i].coordinate;
 		}
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of BRANCH frames.
@@ -570,21 +565,20 @@ namespace idock
 			hydrogens[k].resize(f.hydrogens.size());
 
 			// Update origin.
-			heavy_atoms[k][f.rotorY] = heavy_atoms[f.parent][pf.rotorY] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
+			origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
 
 			// Update orientation.
 			orientations_q[k] = axis_angle_to_quaternion(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
 			orientations_m[k] = quaternion_to_matrix(orientations_q[k]);
 
 			// Update coordinates.
-			const vec3& origin = heavy_atoms[k][f.rotorY];
 			for (size_t i = 0; i < f.heavy_atoms.size(); ++i)
 			{
-				heavy_atoms[k][i] = origin + orientations_m[k] * f.heavy_atoms[i].coordinate;
+				heavy_atoms[k][i] = origins[k] + orientations_m[k] * f.heavy_atoms[i].coordinate;
 			}
 			for (size_t i = 0; i < f.hydrogens.size(); ++i)
 			{
-				hydrogens[k][i] = origin + orientations_m[k] * f.hydrogens[i].coordinate;
+				hydrogens[k][i] = origins[k] + orientations_m[k] * f.hydrogens[i].coordinate;
 			}
 		}
 

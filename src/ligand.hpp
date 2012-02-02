@@ -48,6 +48,7 @@ namespace idock
 		// These fields are optional to a frame.
 		// They vary from time to time during parsing or Monte Carlo simulation.
 		vector<size_t> numbers; ///< Atom numbers.
+		vec3 origin; ///< Origin coordinate, which is rotorY.
 		qt orientation_q; ///< Orientation in the form of quaternion.
 		mat3 orientation_m; ///< Orientation in the form of 3x3 matrix.
 		vec3 axis; ///< Vector pointing from rotor Y to rotor X.
@@ -66,10 +67,10 @@ namespace idock
 		}
 
 		/// Copy constructor.
-		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(f.heavy_atoms), hydrogens(f.hydrogens), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(f.numbers), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(f.coordinates), derivatives(f.derivatives), energies(f.energies) {}
+		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(f.heavy_atoms), hydrogens(f.hydrogens), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(f.numbers), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(f.coordinates), derivatives(f.derivatives), energies(f.energies) {}
 
 		/// Move constructor.
-		frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(static_cast<vector<atom>&&>(f.heavy_atoms)), hydrogens(static_cast<vector<atom>&&>(f.hydrogens)), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(static_cast<vector<size_t>&&>(f.numbers)), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(static_cast<vector<vec3>&&>(f.coordinates)), derivatives(static_cast<vector<vec3>&&>(f.derivatives)), energies(static_cast<vector<fl>&&>(f.energies)) {}
+		frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(static_cast<vector<atom>&&>(f.heavy_atoms)), hydrogens(static_cast<vector<atom>&&>(f.hydrogens)), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(static_cast<vector<size_t>&&>(f.numbers)), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(static_cast<vector<vec3>&&>(f.coordinates)), derivatives(static_cast<vector<vec3>&&>(f.derivatives)), energies(static_cast<vector<fl>&&>(f.energies)) {}
 
 #ifdef __clang__ // In order to pass compilation by clang.
 		/// Copy assignment operator.
@@ -109,7 +110,7 @@ namespace idock
 		fl num_heavy_atoms_inverse; ///< 1 / num_heavy_atoms.
 
 		/// Represents a pair of interacting atoms that are separated by 3 consecutive covalent bonds.
-		class one_to_four_pair
+		class interacting_pair
 		{
 		public:
 			size_t k1; ///< Frame of atom 1.
@@ -117,10 +118,10 @@ namespace idock
 			size_t k2; ///< Frame of atom 2.
 			size_t i2; ///< Index of atom 2 in frame k2.
 			size_t type_pair_index; ///< Index to the XScore types of the two atoms for fast evaluating the scoring function.
-			one_to_four_pair(const size_t k1, const size_t i1, const size_t k2, const size_t i2, const size_t type_pair_index) : k1(k1), i1(i1), k2(k2), i2(i2), type_pair_index(type_pair_index) {}
+			interacting_pair(const size_t k1, const size_t i1, const size_t k2, const size_t i2, const size_t type_pair_index) : k1(k1), i1(i1), k2(k2), i2(i2), type_pair_index(type_pair_index) {}
 		};
 
-		vector<one_to_four_pair> one_to_four_pairs; ///< 1-4 interacting pairs.
+		vector<interacting_pair> interacting_pairs; ///< Non 1-4 interacting pairs.
 	};
 }
 
