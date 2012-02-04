@@ -39,38 +39,31 @@ namespace idock
 		size_t parent; ///< Frame array index pointing to the parent of current frame. For ROOT frame, this field is not used.
 		size_t rotorX; ///< Index pointing to the parent frame atom which forms a rotatable bond with the rotorY atom of current frame.
 		size_t rotorY; ///< Index pointing to the current frame atom which forms a rotatable bond with the rotorX atom of parent frame.
+		size_t habegin; ///< The inclusive beginning index to the heavy atoms of the current frame.
+		size_t haend; ///< The exclusive ending index to the heavy atoms of the current frame.
+		size_t hybegin; ///< The inclusive beginning index to the hydrogen atoms of the current frame.
+		size_t hyend; ///< The exclusive ending index to the hydrogen atoms of the current frame.
 		bool active; ///< Indicates if the current frame is active.
-		vector<atom> heavy_atoms; ///< Heavy atoms. Coordinates are relative to frame origin, which is the first atom by default.
-		vector<atom> hydrogens; ///< Hydrogen atoms. Coordinates are relative to frame origin, which is the first atom by default.
 		vec3 parent_rotorY_to_current_rotorY; ///< Vector pointing from the origin of parent frame to the origin of current frame.
 		vec3 parent_rotorX_to_current_rotorY; ///< Normalized vector pointing from rotor X of parent frame to rotor Y of current frame.
 
 		// These fields are optional to a frame.
 		// They vary from time to time during parsing or Monte Carlo simulation.
-		vector<size_t> numbers; ///< Atom numbers.
 		vec3 origin; ///< Origin coordinate, which is rotorY.
 		qt orientation_q; ///< Orientation in the form of quaternion.
 		mat3 orientation_m; ///< Orientation in the form of 3x3 matrix.
 		vec3 axis; ///< Vector pointing from rotor Y to rotor X.
 		vec3 force; ///< Aggregated derivatives of heavy atoms.
 		vec3 torque; /// Torque of the force.
-		vector<vec3> coordinates; ///< Heavy atom coordinates.
-		vector<vec3> derivatives; ///< Heavy atom derivatives.
-		vector<fl> energies; ///< Heavy atom free energies.
 
 		/// Constructs an active frame, and relates it to its parent frame.
-		explicit frame(const size_t parent, const size_t rotorX) : parent(parent), rotorX(rotorX), active(true)
-		{
-			heavy_atoms.reserve(20); // A frame typically consists of < 20 heavy atoms.
-			numbers.reserve(20); // A frame typically consists of < 20 heavy atoms.
-			hydrogens.reserve(10); // A frame typically consists of < 20 hydrogen atoms.
-		}
+		explicit frame(const size_t parent, const size_t rotorX, const size_t habegin, const size_t hybegin) : parent(parent), rotorX(rotorX), habegin(habegin), hybegin(hybegin), active(true) {}
 
 		/// Copy constructor.
-		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(f.heavy_atoms), hydrogens(f.hydrogens), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(f.numbers), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(f.coordinates), derivatives(f.derivatives), energies(f.energies) {}
+		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
 
 		/// Move constructor.
-		frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), active(f.active), heavy_atoms(static_cast<vector<atom>&&>(f.heavy_atoms)), hydrogens(static_cast<vector<atom>&&>(f.hydrogens)), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), numbers(static_cast<vector<size_t>&&>(f.numbers)), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque), coordinates(static_cast<vector<vec3>&&>(f.coordinates)), derivatives(static_cast<vector<vec3>&&>(f.derivatives)), energies(static_cast<vector<fl>&&>(f.energies)) {}
+		frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
 
 #ifdef __clang__ // In order to pass compilation by clang.
 		/// Copy assignment operator.
@@ -84,11 +77,16 @@ namespace idock
 	public:
 		vector<frame> frames; ///< ROOT and BRANCH frames.
 		vector<string> lines; ///< Input PDBQT file lines.
+		vector<atom> heavy_atoms; ///< Heavy atoms. Coordinates are relative to frame origin, which is the first atom by default.
+		vector<atom> hydrogens; ///< Hydrogen atoms. Coordinates are relative to frame origin, which is the first atom by default.
 		size_t num_frames; ///< Number of frames.
 		size_t num_torsions; ///< Number of torsions.
 		size_t num_active_torsions; ///< Number of active torsions.
 		fl flexibility_penalty_factor; ///< A value in (0, 1] to penalize ligand flexibility.
 		size_t num_heavy_atoms; ///< Number of heavy atoms.
+		vector<vec3> coordinates; ///< Heavy atom coordinates.
+		vector<vec3> derivatives; ///< Heavy atom derivatives.
+		vector<fl> energies; ///< Heavy atom free energies.
 
 		/// Constructs a ligand by parsing a ligand file in pdbqt format.
 		/// @exception parsing_error Thrown when an atom type is not recognized or an empty branch is detected.
@@ -113,12 +111,10 @@ namespace idock
 		class interacting_pair
 		{
 		public:
-			size_t k1; ///< Frame of atom 1.
-			size_t i1; ///< Index of atom 1 in frame k1.
-			size_t k2; ///< Frame of atom 2.
-			size_t i2; ///< Index of atom 2 in frame k2.
+			size_t i1; ///< Index of atom 1.
+			size_t i2; ///< Index of atom 2.
 			size_t type_pair_index; ///< Index to the XScore types of the two atoms for fast evaluating the scoring function.
-			interacting_pair(const size_t k1, const size_t i1, const size_t k2, const size_t i2, const size_t type_pair_index) : k1(k1), i1(i1), k2(k2), i2(i2), type_pair_index(type_pair_index) {}
+			interacting_pair(const size_t i1, const size_t i2, const size_t type_pair_index) : i1(i1), i2(i2), type_pair_index(type_pair_index) {}
 		};
 
 		vector<interacting_pair> interacting_pairs; ///< Non 1-4 interacting pairs.

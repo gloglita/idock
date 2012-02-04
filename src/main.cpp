@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 			std::cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
-		ligand_folder_path = canonical(ligand_folder_path).make_preferred();
+		//ligand_folder_path = canonical(ligand_folder_path).make_preferred();
 
 		// Validate size_x, size_y, size_z.
 		if (size_x < box::Default_Partition_Granularity ||
