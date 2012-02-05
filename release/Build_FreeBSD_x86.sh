@@ -1,4 +1,4 @@
-rm -f ../bin/FreeBSD/x86/igrow ../obj/FreeBSD/x86/*.o
+rm -f ../bin/FreeBSD/x86/idock ../obj/FreeBSD/x86/*.o
 clang++ -m32 -static -O3 -DNDEBUG -std=gnu++11 -o ../obj/FreeBSD/x86/scoring_function.o ../src/scoring_function.cpp -I/home/hjli/boost_1_48_0 -c
 clang++ -m32 -static -O3 -DNDEBUG -std=gnu++11 -o ../obj/FreeBSD/x86/box.o ../src/box.cpp -I/home/hjli/boost_1_48_0 -c
 clang++ -m32 -static -O3 -DNDEBUG -std=gnu++11 -o ../obj/FreeBSD/x86/quaternion.o ../src/quaternion.cpp -I/home/hjli/boost_1_48_0 -c
