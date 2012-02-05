@@ -175,18 +175,6 @@ namespace idock
 			sum += distance_sqr(a[i], b[i]);
 		return sum;
 	}
-
-	/// Returns the accumulated square distance between two vectors of vectors of vectors.
-	inline fl distance_sqr(const vector<vector<vec3>>& a, const vector<vector<vec3>>& b)
-	{
-		const size_t n = a.size();
-		BOOST_ASSERT(n > 0);
-		BOOST_ASSERT(n == b.size());
-		fl sum = 0;
-		for (size_t i = 0; i < n; ++i)
-			sum += distance_sqr(a[i], b[i]);
-		return sum;
-	}
 }
 
 #endif

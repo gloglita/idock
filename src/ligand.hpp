@@ -63,7 +63,7 @@ namespace idock
 		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
 
 		/// Move constructor.
-		frame(frame&& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
+		frame(frame&& f)      : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
 
 #ifdef __clang__ // In order to pass compilation by clang.
 		/// Copy assignment operator.

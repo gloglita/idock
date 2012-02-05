@@ -37,7 +37,7 @@ namespace idock
 		vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 
 		/// Constructs a result from free energy e, force f, heavy atom coordinates and hydrogen atom coordinates.
-		explicit result(const fl e, const fl f, vector<vec3>&& heavy_atoms, vector<vec3>&& hydrogens) : e(e), f(f), heavy_atoms(static_cast<vector<vec3>&&>(heavy_atoms)), hydrogens(static_cast<vector<vec3>&&>(hydrogens)) {}
+		explicit result(const fl e, const fl f, vector<vec3>&& heavy_atoms_, vector<vec3>&& hydrogens_) : e(e), f(f), heavy_atoms(static_cast<vector<vec3>&&>(heavy_atoms_)), hydrogens(static_cast<vector<vec3>&&>(hydrogens_)) {}
 
 		/// Move constructor.
 		result(result&& r) : e(r.e), f(r.f), heavy_atoms(static_cast<vector<vec3>&&>(r.heavy_atoms)), hydrogens(static_cast<vector<vec3>&&>(r.hydrogens)) {}

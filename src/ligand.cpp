@@ -97,7 +97,7 @@ namespace idock
 				const size_t x = right_cast<size_t>(line, 7, 10);
 
 				// Find the corresponding heavy atom with x as its atom serial number in the current frame.
-				for (size_t i = f->habegin; i < f->haend; ++i)
+				for (size_t i = f->habegin; true; ++i)
 				{
 					if (numbers[i] == x)
 					{
@@ -130,7 +130,7 @@ namespace idock
 				const size_t y = right_cast<size_t>(line, 14, 17);
 
 				// Find the corresponding heavy atom with y as its atom serial number in the current frame.
-				for (size_t i = f->habegin; i < f->haend; ++i)
+				for (size_t i = f->habegin; true; ++i)
 				{
 					if (numbers[i] == y)
 					{
@@ -256,7 +256,7 @@ namespace idock
 			}
 		}
 
-		// Find 1-4 interacting pairs.
+		// Find intra-ligand interacting pairs that are not 1-4.
 		interacting_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
 		vector<size_t> neighbors;
 		neighbors.reserve(10); // An atom typically consists of <= 10 neighbors.
@@ -377,9 +377,8 @@ namespace idock
 			if (!f.active)
 			{
 				BOOST_ASSERT(f.habegin + 1 == f.haend);
-				coordinates[f.habegin] = f.origin;
-				if (!b.within(coordinates[f.habegin]))
-					return false;
+				BOOST_ASSERT(f.habegin == f.rotorY);
+				coordinates[f.rotorY] = f.origin;
 				continue;
 			}
 
@@ -553,7 +552,6 @@ namespace idock
 		for (size_t k = 1, t = 0; k < num_frames; ++k)
 		{
 			const frame& f = frames[k];
-			const frame& pf = frames[f.parent];
 
 			// Update origin.
 			origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
