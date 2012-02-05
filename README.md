@@ -22,9 +22,9 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.2.2 x86_64 and GCC 4.6.2
-* Arch Linux 3.2.2 x86_64 and CLANG 3.0
-* Arch Linux 3.2.2 x86_64 and Intel C++ Compiler 12.1.2
+* Arch Linux 3.2.4 x86_64 and GCC 4.6.2
+* Arch Linux 3.2.4 x86_64 and CLANG 3.0
+* Arch Linux 3.2.4 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.0
 * Mac OS X 10.7.2 and CLANG 3.0
 * Windows 7 SP1 x64 and Windows SDK 7.1
@@ -127,7 +127,7 @@ Change Log
 * Output predicted free energy of the top 5 conformations.
 * Reverted the evaluation of intra-molecular free energy to Vina's implementation to obtain better RMSD for certain cases.
 
-### 1.2 (under construction)
+### 1.2 (2012-02-05)
 
 * Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
 * Profiled by the Valgrind tool suite to ensure zero memory leak.
