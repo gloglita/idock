@@ -41,7 +41,7 @@
  * pythonsh prepare_ligand4.py -l ligand.mol2
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 1 February 2012
+ * \date 5 February 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -60,7 +60,7 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "idock 1.1\n";
+	std::cout << "idock 1.2\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
@@ -468,11 +468,11 @@ int main(int argc, char* argv[])
 				tp.sync();
 				mc_tasks.clear();
 
-				// Reset the cursor to the beginning of the progress bar.
-				std::cout << "\b\b\b\b\b\b\b\b\b\b";
+				// Output full progress bar to log file to make it consistent with std::cout.s
+				log.file << "##########";
 
-				// Reprint the full progress bar.
-				log << "########## | ";
+				// Proceed to number of conformations.
+				log << " | ";
 
 				// If no conformation can be found, skip the current ligand and proceed with the next one.
 				const size_t num_results = std::min<size_t>(results.size(), max_conformations);
