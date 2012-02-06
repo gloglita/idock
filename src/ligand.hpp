@@ -84,6 +84,7 @@ namespace idock
 		size_t num_active_torsions; ///< Number of active torsions.
 		fl flexibility_penalty_factor; ///< A value in (0, 1] to penalize ligand flexibility.
 		size_t num_heavy_atoms; ///< Number of heavy atoms.
+		size_t num_hydrogens; ///< Number of hydrogens.
 		vector<vec3> coordinates; ///< Heavy atom coordinates.
 		vector<vec3> derivatives; ///< Heavy atom derivatives.
 		vector<fl> energies; ///< Heavy atom free energies.

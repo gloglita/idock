@@ -178,7 +178,7 @@ namespace idock
 		BOOST_ASSERT(num_torsions >= num_active_torsions);
 		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * (num_torsions - num_active_torsions)));
 		num_heavy_atoms = heavy_atoms.size();
-		const size_t num_hydrogens = hydrogens.size();
+		num_hydrogens = hydrogens.size();
 		BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 <= num_lines); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines + REMARK lines (if any) == num_lines
 		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
 		frames.back().haend = num_heavy_atoms;
@@ -528,10 +528,10 @@ namespace idock
 	result ligand::compose_result(const fl e, const fl f, const conformation& conf) const
 	{
 		vector<vec3> origins(num_frames);
-		vector<qt> orientations_q(num_frames);
+		vector<qt>   orientations_q(num_frames);
 		vector<mat3> orientations_m(num_frames);
 		vector<vec3> heavy_atoms(num_heavy_atoms);
-		vector<vec3> hydrogens(num_heavy_atoms);
+		vector<vec3> hydrogens(num_hydrogens);
 
 		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
@@ -545,7 +545,7 @@ namespace idock
 		}
 		for (size_t i = root.hybegin; i < root.hyend; ++i)
 		{
-			hydrogens[i] = origins.front() + orientations_m.front() * this->hydrogens[i].coordinate;
+			hydrogens[i]   = origins.front() + orientations_m.front() * this->hydrogens[i].coordinate;
 		}
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of BRANCH frames.
@@ -567,7 +567,7 @@ namespace idock
 			}
 			for (size_t i = f.hybegin; i < f.hyend; ++i)
 			{
-				hydrogens[i] = origins[k] + orientations_m[k] * this->hydrogens[i].coordinate;
+				hydrogens[i]   = origins[k] + orientations_m[k] * this->hydrogens[i].coordinate;
 			}
 		}
 
