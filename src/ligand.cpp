@@ -27,13 +27,18 @@ namespace idock
 		// Initialize necessary variables for constructing a ligand.
 		lines.reserve(200); // A ligand typically consists of <= 200 lines.
 		frames.reserve(30); // A ligand typically consists of <= 30 frames.
-		frames.push_back(frame(0, 0, 0, 0)); // ROOT is also treated as a frame. The parent and rotorX of ROOT frame are dummy.
+		frames.push_back(frame(0, 0, 1, 0, 0, 0)); // ROOT is also treated as a frame. The parent and rotorX of ROOT frame are dummy.
 		heavy_atoms.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
 		hydrogens.reserve(50); // A ligand typically consists of <= 50 hydrogens.
 
 		// Initialize helper variables for parsing.
 		vector<size_t> numbers; ///< Atom serial numbers.
 		numbers.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
+		vector<vector<size_t>> bonds(100); ///< Covalent bonds.
+		for (auto i = bonds.begin(); i < bonds.end(); ++i)
+		{
+			(*i).reserve(4); // An atom typically consists of <= 4 bonds.
+		}
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
 		frame* f = &frames.front(); // Pointer to the current frame.
 		f->rotorY = 0; // Assume the rotorY of ROOT frame is the first atom.
@@ -61,7 +66,7 @@ namespace idock
 				if (ad == AD_TYPE_SIZE) throw parsing_error(p, num_lines, "Atom type " + ad_type_string + " is not supported by idock.");
 
 				// Parse the Cartesian coordinate.
-				const atom a(vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				atom a(vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				// For a hydrogen, save it.
 				if (a.is_hydrogen())
@@ -85,8 +90,34 @@ namespace idock
 				}
 				else // It is a heavy atom.
 				{
-					heavy_atoms.push_back(a);
+					// Find bonds between the current atom and the other atoms of the same frame.
+					for (size_t i = heavy_atoms.size(); i > f->habegin;)
+					{
+						atom& b = heavy_atoms[--i];
+						if (a.is_neighbor(b))
+						{
+							bonds[heavy_atoms.size()].push_back(i);
+							bonds[i].push_back(heavy_atoms.size());
+							
+							// If carbon atom b is bonded to hetero atom a, b is no longer a hydrophobic atom.
+							if (a.is_hetero() && !b.is_hetero())
+							{
+								b.dehydrophobicize();
+							}
+							// If carbon atom a is bonded to hetero atom b, a is no longer a hydrophobic atom.
+							else if (!a.is_hetero() && b.is_hetero())
+							{
+								a.dehydrophobicize();
+							}
+						}
+					}
+
 					numbers.push_back(right_cast<size_t>(line, 7, 11));
+					if (current && (numbers.back() == f->rotorYsrn)) // current > 0, i.e. BRANCH frame.
+					{
+						f->rotorY = heavy_atoms.size();
+					}
+					heavy_atoms.push_back(a);
 				}
 			}
 			else if (starts_with(line, "BRANCH"))
@@ -95,15 +126,16 @@ namespace idock
 				lines.push_back(line);
 
 				// Parse "BRANCH   X   Y". X and Y are right-justified and 4 characters wide.
-				const size_t x = right_cast<size_t>(line, 7, 10);
+				const size_t rotorXsrn = right_cast<size_t>(line,  7, 10);
+				const size_t rotorYsrn = right_cast<size_t>(line, 11, 14);
 
 				// Find the corresponding heavy atom with x as its atom serial number in the current frame.
 				for (size_t i = f->habegin; true; ++i)
 				{
-					if (numbers[i] == x)
+					if (numbers[i] == rotorXsrn)
 					{
 						// Insert a new frame whose parent is the current frame.
-						frames.push_back(frame(current, i, heavy_atoms.size(), hydrogens.size()));
+						frames.push_back(frame(current, rotorXsrn, rotorYsrn, i, heavy_atoms.size(), hydrogens.size()));
 						break;
 					}
 				}
@@ -127,20 +159,6 @@ namespace idock
 				// This emptiness is likely to be caused by invalid input structure, especially when all the atoms are located in the same plane.
 				if (f->habegin == heavy_atoms.size()) throw parsing_error(p, num_lines, "An empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
 
-				// Parse "ENDBRANCH   X   Y". X and Y are right-justified and 4 characters wide.
-				const size_t y = right_cast<size_t>(line, 14, 17);
-
-				// Find the corresponding heavy atom with y as its atom serial number in the current frame.
-				for (size_t i = f->habegin; true; ++i)
-				{
-					if (numbers[i] == y)
-					{
-						// Set rotorY of current frame.
-						f->rotorY = i;
-						break;
-					}
-				}
-
 				// If the current frame consists of rotor Y and a few hydrogens only, e.g. -OH and -NH2,
 				// the torsion of this frame will have no effect on scoring and is thus redundant.
 				if ((current == frames.size() - 1) && (f->habegin + 1 == heavy_atoms.size()))
@@ -152,8 +170,23 @@ namespace idock
 					++num_active_torsions;
 				}
 
+				// Set up bonds between rotorX and rotorY.
+				bonds[f->rotorY].push_back(f->rotorX);
+				bonds[f->rotorX].push_back(f->rotorY);
+
+				// Dehydrophobicize rotorX or rotorY if necessary.
+				atom& rotorY = heavy_atoms[f->rotorY];
+				atom& rotorX = heavy_atoms[f->rotorX];
+				if ((rotorY.is_hetero()) && (!rotorX.is_hetero())) rotorX.dehydrophobicize();
+				if ((rotorX.is_hetero()) && (!rotorY.is_hetero())) rotorY.dehydrophobicize();
+
+				// Calculate parent_rotorY_to_current_rotorY and parent_rotorX_to_current_rotorY.
+				const frame& p = frames[f->parent];
+				f->parent_rotorY_to_current_rotorY =  rotorY.coordinate - heavy_atoms[p.rotorY].coordinate;
+				f->parent_rotorX_to_current_rotorY = (rotorY.coordinate - rotorX.coordinate).normalize();
+
 				// Now the parent of the following frame is the parent of current frame.
-				current = frames[current].parent;
+				current = f->parent;
 
 				// Update the pointer to the current frame.
 				f = &frames[current];
@@ -183,77 +216,6 @@ namespace idock
 		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
 		frames.back().haend = num_heavy_atoms;
 		frames.back().hyend = num_hydrogens;
-
-		// Dehydrophobicize carbons if necessary.
-		for (size_t k = 0; k < num_frames; ++k)
-		{
-			frame& f = frames[k];
-			for (size_t i = f.habegin; i < f.haend; ++i)
-			{
-				const atom& a = heavy_atoms[i];
-				if (!a.is_hetero()) continue; // a is a hetero atom.
-
-				for (size_t j = f.habegin; j < f.haend; ++j)
-				{
-					atom& b = heavy_atoms[j];
-					if (b.is_hetero()) continue; // b is a carbon atom.
-
-					// If the carbon atom b is bonded to the hetero atom a, it is no longer a hydrophobic atom.
-					if (a.is_neighbor(b))
-					{
-						b.dehydrophobicize();
-					}
-				}
-			}
-
-			if (k) // k > 0
-			{
-				atom& rotorY = heavy_atoms[f.rotorY];
-				atom& rotorX = heavy_atoms[f.rotorX];
-				if ((rotorY.is_hetero()) && (!rotorX.is_hetero())) rotorX.dehydrophobicize();
-				if ((rotorX.is_hetero()) && (!rotorY.is_hetero())) rotorY.dehydrophobicize();
-			}
-		}
-
-		// Initialize parent_rotorY_to_current_rotorY and parent_rotorX_to_current_rotorY of BRANCH frames.
-		for (size_t k = 1; k < num_frames; ++k)
-		{
-			frame& f = frames[k];
-			const frame& p = frames[f.parent];
-			f.parent_rotorY_to_current_rotorY =  heavy_atoms[f.rotorY].coordinate - heavy_atoms[p.rotorY].coordinate;
-			f.parent_rotorX_to_current_rotorY = (heavy_atoms[f.rotorY].coordinate - heavy_atoms[f.rotorX].coordinate).normalize();
-		}
-
-		// Reserve enough capacity for bonds.
-		vector<vector<size_t>> bonds(num_heavy_atoms);
-		for (size_t i = 0; i < num_heavy_atoms; ++i)
-		{
-			bonds[i].reserve(4); // An atom typically consists of <= 4 bonds.
-		}
-
-		for (size_t k = 0; k < num_frames; ++k)
-		{
-			const frame& f = frames[k];
-			for (size_t i = f.habegin; i < f.haend; ++i)
-			{
-				const atom& a1 = heavy_atoms[i];
-
-				for (size_t j = i + 1; j < f.haend; ++j)
-				{
-					const atom& a2 = heavy_atoms[j];
-					if (a1.is_neighbor(a2))
-					{
-						bonds[i].push_back(j);
-						bonds[j].push_back(i);
-					}
-				}
-			}
-			if (k) // k > 0
-			{
-				bonds[f.rotorY].push_back(f.rotorX);
-				bonds[f.rotorX].push_back(f.rotorY);
-			}
-		}
 
 		// Find intra-ligand interacting pairs that are not 1-4.
 		interacting_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
