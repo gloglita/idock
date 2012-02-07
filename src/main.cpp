@@ -442,8 +442,7 @@ int main(int argc, char* argv[])
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					BOOST_ASSERT(result_containers[i].empty());
-					const size_t seed = eng(); // Each Monte Carlo task has its own random seed.
-					mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), seed, num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
