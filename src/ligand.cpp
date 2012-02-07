@@ -36,6 +36,7 @@ namespace idock
 		numbers.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
 		frame* f = &frames.front(); // Pointer to the current frame.
+		f->rotorY = 0; // Assume the rotorY of ROOT frame is the first atom.
 		size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 		string line;
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
@@ -167,8 +168,7 @@ namespace idock
 		BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 
 		BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
-		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
-		f->rotorY = 0; // Assume the rotorY of ROOT frame is the first atom.
+		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.		
 
 		// Determine num_frames, num_torsions, flexibility_penalty_factor, and num_heavy_atoms_inverse.
 		num_frames = frames.size();
@@ -188,7 +188,6 @@ namespace idock
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
-			f.origin = heavy_atoms[f.rotorY].coordinate;
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
 				const atom& a = heavy_atoms[i];
@@ -220,9 +219,9 @@ namespace idock
 		for (size_t k = 1; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
-			const frame& pf = frames[f.parent];
-			f.parent_rotorY_to_current_rotorY =  f.origin - pf.origin;
-			f.parent_rotorX_to_current_rotorY = (f.origin - heavy_atoms[f.rotorX].coordinate).normalize();
+			const frame& p = frames[f.parent];
+			f.parent_rotorY_to_current_rotorY =  heavy_atoms[f.rotorY].coordinate - heavy_atoms[p.rotorY].coordinate;
+			f.parent_rotorX_to_current_rotorY = (heavy_atoms[f.rotorY].coordinate - heavy_atoms[f.rotorX].coordinate).normalize();
 		}
 
 		// Reserve enough capacity for bonds.
@@ -318,19 +317,16 @@ namespace idock
 		for (size_t k = 0; k < num_frames; ++k)
 		{
 			frame& f = frames[k];
+			const vec3 origin = heavy_atoms[f.rotorY].coordinate;
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
-				heavy_atoms[i].coordinate -= f.origin;
+				heavy_atoms[i].coordinate -= origin;
 			}
 			for (size_t i = f.hybegin; i < f.hyend; ++i)
 			{
-				hydrogens[i].coordinate -= f.origin;
+				hydrogens[i].coordinate -= origin;
 			}
 		}
-
-		coordinates.resize(num_heavy_atoms);
-		derivatives.resize(num_heavy_atoms);
-		energies.resize(num_heavy_atoms);
 	}
 
 	vector<size_t> ligand::get_atom_types() const
@@ -345,19 +341,42 @@ namespace idock
 		return atom_types;
 	}
 
-	bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g)
+	bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g) const
 	{
 		if (!b.within(conf.position))
 			return false;
+		
+		// Define frame-wide conformational variables.
+		vector<vec3> origin; ///< Origin coordinate, which is rotorY.
+		vector<qt>   orientation_q; ///< Orientation in the form of quaternion.
+		vector<mat3> orientation_m; ///< Orientation in the form of 3x3 matrix.
+		vector<vec3> axis; ///< Vector pointing from rotor Y to rotor X.
+		vector<vec3> force; ///< Aggregated derivatives of heavy atoms.
+		vector<vec3> torque; /// Torque of the force.
+		origin.resize(num_frames);
+		orientation_q.resize(num_frames);
+		orientation_m.resize(num_frames);
+		axis.resize(num_frames);
+		force.resize(num_frames);
+		torque.resize(num_frames);
+
+		// Define atom-wide conformational variables.
+		vector<vec3> coordinates; ///< Heavy atom coordinates.
+		vector<vec3> derivatives; ///< Heavy atom derivatives.
+		vector<fl> energies; ///< Heavy atom free energies.
+		coordinates.resize(num_heavy_atoms);
+		derivatives.resize(num_heavy_atoms);
+		energies.resize(num_heavy_atoms);
+
 
 		// Apply position and orientation to ROOT frame.
-		frame& root = frames.front();
-		root.origin = conf.position;
-		root.orientation_q = conf.orientation;
-		root.orientation_m = quaternion_to_matrix(conf.orientation);
+		const frame& root = frames.front();
+		origin.front() = conf.position;
+		orientation_q.front() = conf.orientation;
+		orientation_m.front() = quaternion_to_matrix(conf.orientation);
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
-			coordinates[i] = root.origin + root.orientation_m * heavy_atoms[i].coordinate;
+			coordinates[i] = origin.front() + orientation_m.front() * heavy_atoms[i].coordinate;
 			if (!b.within(coordinates[i]))
 				return false;
 		}
@@ -365,12 +384,11 @@ namespace idock
 		// Apply torsions to BRANCH frames.
 		for (size_t k = 1, t = 0; k < num_frames; ++k)
 		{
-			frame& f = frames[k];
-			const frame& pf = frames[f.parent];
+			const frame& f = frames[k];
 
 			// Update origin.
-			f.origin = pf.origin + pf.orientation_m * f.parent_rotorY_to_current_rotorY;
-			if (!b.within(f.origin))
+			origin[k] = origin[f.parent] + orientation_m[f.parent] * f.parent_rotorY_to_current_rotorY;
+			if (!b.within(origin[k]))
 				return false;
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
@@ -378,22 +396,22 @@ namespace idock
 			{
 				BOOST_ASSERT(f.habegin + 1 == f.haend);
 				BOOST_ASSERT(f.habegin == f.rotorY);
-				coordinates[f.rotorY] = f.origin;
+				coordinates[f.rotorY] = origin[k];
 				continue;
 			}
 
 			// Update orientation.
 			BOOST_ASSERT(f.parent_rotorX_to_current_rotorY.normalized());
-			f.axis = pf.orientation_m * f.parent_rotorX_to_current_rotorY;
-			BOOST_ASSERT(f.axis.normalized());
-			f.orientation_q = axis_angle_to_quaternion(f.axis, conf.torsions[t++]) * pf.orientation_q;
-			BOOST_ASSERT(quaternion_is_normalized(f.orientation_q));
-			f.orientation_m = quaternion_to_matrix(f.orientation_q);
+			axis[k] = orientation_m[f.parent] * f.parent_rotorX_to_current_rotorY;
+			BOOST_ASSERT(axis[k].normalized());
+			orientation_q[k] = axis_angle_to_quaternion(axis[k], conf.torsions[t++]) * orientation_q[f.parent];
+			BOOST_ASSERT(quaternion_is_normalized(orientation_q[k]));
+			orientation_m[k] = quaternion_to_matrix(orientation_q[k]);
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
-				coordinates[i] = f.origin + f.orientation_m * heavy_atoms[i].coordinate;
+				coordinates[i] = origin[k] + orientation_m[k] * heavy_atoms[i].coordinate;
 				if (!b.within(coordinates[i]))
 					return false;
 			}
@@ -475,19 +493,17 @@ namespace idock
 		// If the free energy is no better than the upper bound, refuse this conformation.
 		if (e >= e_upper_bound) return false;
 
-		// Initialize force and torque.
+		// Initialize force and torque. TODO: try assign().
 		for (size_t k = 0; k < num_frames; ++k)
 		{
-			frame& f = frames[k];
-			f.force  = zero3; // Initialize force to zero.
-			f.torque = zero3; // Initialize torque to zero.
+			force[k]  = zero3; // Initialize force to zero.
+			torque[k] = zero3; // Initialize torque to zero.
 		}
 
 		// Calculate and aggregate the force and torque of BRANCH frames to their parent frame.
 		for (size_t k = num_frames - 1, t = num_active_torsions; k > 0; --k)
 		{
-			frame&  f = frames[k];
-			frame& pf = frames[f.parent];
+			const frame&  f = frames[k];
 
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
@@ -496,31 +512,31 @@ namespace idock
 				// the negative total torque, and the negative torque projections, respectively,
 				// where the projections refer to the torque applied to the branch moved by the torsion,
 				// projected on its rotation axis.
-				f.force  += derivatives[i];
-				f.torque += cross_product(coordinates[i] - f.origin, derivatives[i]);
+				force[k]  += derivatives[i];
+				torque[k] += cross_product(coordinates[i] - origin[k], derivatives[i]);
 			}
 
 			// Aggregate the force and torque of current frame to its parent frame.
-			pf.force  += f.force;
-			pf.torque += f.torque + cross_product(f.origin - pf.origin, f.force);
+			force[f.parent]  += force[k];
+			torque[f.parent] += torque[k] + cross_product(origin[k] - origin[f.parent], force[k]);
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active) continue;
 
 			// Save the aggregated torque to torsion.
-			g.torsions[--t] = f.torque * f.axis; // dot product
+			g.torsions[--t] = torque[k] * axis[k]; // dot product
 		}
 
 		// Calculate and aggregate the force and torque of ROOT frame.
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
-			root.force  += derivatives[i];
-			root.torque += cross_product(coordinates[i] - root.origin, derivatives[i]);
+			force.front()  += derivatives[i];
+			torque.front() += cross_product(coordinates[i] - origin.front(), derivatives[i]);
 		}
 
 		// Save the aggregated force and torque to g.position and g.orientation.
-		g.position    = root.force;
-		g.orientation = root.torque;
+		g.position    = force.front();
+		g.orientation = torque.front();
 
 		return true;
 	}

@@ -47,23 +47,14 @@ namespace idock
 		vec3 parent_rotorY_to_current_rotorY; ///< Vector pointing from the origin of parent frame to the origin of current frame.
 		vec3 parent_rotorX_to_current_rotorY; ///< Normalized vector pointing from rotor X of parent frame to rotor Y of current frame.
 
-		// These fields are optional to a frame.
-		// They vary from time to time during parsing or Monte Carlo simulation.
-		vec3 origin; ///< Origin coordinate, which is rotorY.
-		qt orientation_q; ///< Orientation in the form of quaternion.
-		mat3 orientation_m; ///< Orientation in the form of 3x3 matrix.
-		vec3 axis; ///< Vector pointing from rotor Y to rotor X.
-		vec3 force; ///< Aggregated derivatives of heavy atoms.
-		vec3 torque; /// Torque of the force.
-
 		/// Constructs an active frame, and relates it to its parent frame.
 		explicit frame(const size_t parent, const size_t rotorX, const size_t habegin, const size_t hybegin) : parent(parent), rotorX(rotorX), habegin(habegin), hybegin(hybegin), active(true) {}
 
 		/// Copy constructor.
-		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
+		frame(const frame& f) : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY) {}
 
 		/// Move constructor.
-		frame(frame&& f)      : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY), origin(f.origin), orientation_q(f.orientation_q), orientation_m(f.orientation_m), axis(f.axis), force(f.force), torque(f.torque) {}
+		frame(frame&& f)      : parent(f.parent), rotorX(f.rotorX), rotorY(f.rotorY), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY) {}
 
 #ifdef __clang__ // In order to pass compilation by clang.
 		/// Copy assignment operator.
@@ -85,9 +76,6 @@ namespace idock
 		fl flexibility_penalty_factor; ///< A value in (0, 1] to penalize ligand flexibility.
 		size_t num_heavy_atoms; ///< Number of heavy atoms.
 		size_t num_hydrogens; ///< Number of hydrogens.
-		vector<vec3> coordinates; ///< Heavy atom coordinates.
-		vector<vec3> derivatives; ///< Heavy atom derivatives.
-		vector<fl> energies; ///< Heavy atom free energies.
 
 		/// Constructs a ligand by parsing a ligand file in pdbqt format.
 		/// @exception parsing_error Thrown when an atom type is not recognized or an empty branch is detected.
@@ -97,7 +85,7 @@ namespace idock
 		vector<size_t> get_atom_types() const;
 
 		/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
-		bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g);
+		bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g) const;
 
 		/// Composes a result from free energy, force f, and conformation conf.
 		result compose_result(const fl e, const fl f, const conformation& conf) const;

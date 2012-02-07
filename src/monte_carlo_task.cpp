@@ -20,11 +20,8 @@
 
 namespace idock
 {
-	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig_, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps)
+	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps)
 	{
-		// Make a copy of the ligand.
-		ligand lig(lig_);
-
 		// Define constants.
 		const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 		const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
