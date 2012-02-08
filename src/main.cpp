@@ -497,10 +497,11 @@ int main(int argc, char* argv[])
 				log << std::setw(4) << num_conformations << " |";
 
 				// Write the conformations to the output folder.
+				const path output_ligand_path = output_folder_path / ligand_filename;
 				if (num_conformations)
 				{
 					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
-					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
+					lig.write_models(output_ligand_path, results, num_conformations);
 				}
 
 				// Display the free energies of the top 4 conformations.
@@ -517,7 +518,7 @@ int main(int argc, char* argv[])
 				{
 					energies[i] = results[i].e;
 				}
-				summaries.push_back(new summary(ligand_path, static_cast<vector<fl>&&>(energies)));
+				summaries.push_back(new summary(output_ligand_path, static_cast<vector<fl>&&>(energies)));
 
 				// Clear the results of the current ligand.
 				results.clear();

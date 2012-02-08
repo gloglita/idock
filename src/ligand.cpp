@@ -547,7 +547,7 @@ namespace idock
 		return result(e, f, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 	}
 
-	void ligand::write_models(const path& output_ligand, const ptr_vector<result>& results, const size_t num_conformations)
+	void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const size_t num_conformations)
 	{
 		BOOST_ASSERT(num_conformations > 0);
 		BOOST_ASSERT(num_conformations <= results.size());
@@ -556,7 +556,7 @@ namespace idock
 
 		// Dump binding conformations to the output ligand file.
 		using namespace std;
-		ofstream out(output_ligand); // Dumping starts. Open the file stream as late as possible.
+		ofstream out(output_ligand_path); // Dumping starts. Open the file stream as late as possible.
 		out.setf(ios::fixed, ios::floatfield);
 		out << setprecision(3);
 		for (size_t i = 0; i < num_conformations; ++i)
