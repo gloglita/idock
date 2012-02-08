@@ -67,11 +67,11 @@ namespace idock
 	{
 	public:
 		vector<string> lines; ///< Input PDBQT file lines.
-		vector<frame> frames; ///< ROOT and BRANCH frames.		
+		vector<frame> frames; ///< ROOT and BRANCH frames.
 		vector<atom> heavy_atoms; ///< Heavy atoms. Coordinates are relative to frame origin, which is the first atom by default.
 		vector<atom> hydrogens; ///< Hydrogen atoms. Coordinates are relative to frame origin, which is the first atom by default.
 		size_t num_heavy_atoms; ///< Number of heavy atoms.
-		size_t num_hydrogens; ///< Number of hydrogens.		
+		size_t num_hydrogens; ///< Number of hydrogens.
 		size_t num_frames; ///< Number of frames.
 		size_t num_torsions; ///< Number of torsions.
 		size_t num_active_torsions; ///< Number of active torsions.

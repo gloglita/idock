@@ -84,7 +84,7 @@ namespace idock
 							}
 						}
 					}
-					
+
 					// Save the hydrogen.
 					hydrogens.push_back(a);
 				}
@@ -98,7 +98,7 @@ namespace idock
 						{
 							bonds[heavy_atoms.size()].push_back(i);
 							bonds[i].push_back(heavy_atoms.size());
-							
+
 							// If carbon atom b is bonded to hetero atom a, b is no longer a hydrophobic atom.
 							if (a.is_hetero() && !b.is_hetero())
 							{
@@ -118,7 +118,7 @@ namespace idock
 					{
 						f->rotorYidx = heavy_atoms.size();
 					}
-					
+
 					// Save the heavy atom.
 					heavy_atoms.push_back(a);
 				}
@@ -203,15 +203,15 @@ namespace idock
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
 		BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 		BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
-		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.		
-		
+		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
+
 		// Determine num_heavy_atoms, num_hydrogens, and num_heavy_atoms_inverse.
 		num_heavy_atoms = heavy_atoms.size();
-		num_hydrogens = hydrogens.size();		
+		num_hydrogens = hydrogens.size();
 		frames.back().haend = num_heavy_atoms;
 		frames.back().hyend = num_hydrogens;
 		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
-		
+
 		// Determine num_frames, num_torsions, flexibility_penalty_factor.
 		num_frames = frames.size();
 		BOOST_ASSERT(num_frames >= 1);
@@ -236,7 +236,7 @@ namespace idock
 				hydrogens[i].coordinate -= origin;
 			}
 		}
-		
+
 		// Find intra-ligand interacting pairs that are not 1-4.
 		interacting_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
 		vector<size_t> neighbors;
@@ -312,18 +312,18 @@ namespace idock
 	{
 		if (!b.within(conf.position))
 			return false;
-		
+
 		// Initialize frame-wide conformational variables.
 		vector<vec3> origins; ///< Origin coordinate, which is rotorY.
 		vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
 		vector<qt>   orientations_q; ///< Orientation in the form of quaternion.
-		vector<mat3> orientations_m; ///< Orientation in the form of 3x3 matrix.		
+		vector<mat3> orientations_m; ///< Orientation in the form of 3x3 matrix.
 		vector<vec3> forces; ///< Aggregated derivatives of heavy atoms.
 		vector<vec3> torques; /// Torque of the force.
 		origins.resize(num_frames);
 		axes.resize(num_frames);
 		orientations_q.resize(num_frames);
-		orientations_m.resize(num_frames);		
+		orientations_m.resize(num_frames);
 		forces.resize(num_frames, zero3); // Initialize forces to zero3 for subsequent aggregation.
 		torques.resize(num_frames, zero3); // Initialize torques to zero3 for subsequent aggregation.
 
@@ -394,7 +394,7 @@ namespace idock
 		//			const frame& f2 = frames[k2];
 		//			for (size_t i2 = f2.habegin; i2 < f2.haend; ++i2)
 		//			{
-		//				if ((distance_sqr(coordinates[i1], coordinates[i2]) < sqr(heavy_atoms[i1].covalent_radius() + heavy_atoms[i2].covalent_radius())) && (!((k2 == f1.parent) && (i1 == f1.rotorY) && (i2 == f1.rotorX))))
+		//				if ((distance_sqr(coordinates[i1], coordinates[i2]) < sqr(heavy_atoms[i1].covalent_radius() + heavy_atoms[i2].covalent_radius())) && (!((k2 == f1.parent) && (i1 == f1.rotorYidx) && (i2 == f1.rotorXidx))))
 		//					return false;
 		//			}
 		//		}
@@ -412,7 +412,7 @@ namespace idock
 			const array<size_t, 3> index = b.grid_index(coordinates[i]);
 
 			// Assert the validity of index.
-			BOOST_ASSERT(index[0] < b.num_grids[0]);				
+			BOOST_ASSERT(index[0] < b.num_grids[0]);
 			BOOST_ASSERT(index[1] < b.num_grids[1]);
 			BOOST_ASSERT(index[2] < b.num_grids[2]);
 

@@ -96,7 +96,7 @@ namespace idock
 				c1 = c0;
 
 				// Determine an entity to mutate.
-				mutation_entity = uniform_entity_gen();				
+				mutation_entity = uniform_entity_gen();
 				BOOST_ASSERT(mutation_entity < num_entities);
 				if (mutation_entity < lig.num_active_torsions) // Mutate an active torsion.
 				{

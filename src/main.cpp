@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
-			("conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
+			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
 			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference in kcal/mol between the best binding conformation and the worst one")
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("config", value<path>(), "options can be loaded from a configuration file")
@@ -220,7 +220,7 @@ int main(int argc, char* argv[])
 		}
 		if (!max_conformations)
 		{
-			std::cerr << "Option modes must be 1 or greater\n";
+			std::cerr << "Option max_conformations must be 1 or greater\n";
 			return 1;
 		}
 		if (energy_range < 0)
@@ -467,7 +467,7 @@ int main(int argc, char* argv[])
 				tp.sync();
 				mc_tasks.clear();
 
-				// Output full progress bar to log file to make it consistent with std::cout.s
+				// Output full progress bar to log file to make it consistent with std::cout.
 				log.file << "##########";
 
 				// Proceed to number of conformations.
@@ -503,7 +503,7 @@ int main(int argc, char* argv[])
 					lig.write_models(output_folder_path / ligand_filename, results, num_conformations);
 				}
 
-				// Flush the free energies of the top 5 conformations.
+				// Display the free energies of the top 4 conformations.
 				const size_t num_energies = std::min<size_t>(num_conformations, 4);
 				for (size_t i = 0; i < num_energies; ++i)
 				{
