@@ -41,7 +41,7 @@ namespace idock
 		}
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
 		frame* f = &frames.front(); // Pointer to the current frame.
-		f->rotorY = 0; // Assume the rotorY of ROOT frame is the first atom.
+		f->rotorYidx = 0; // Assume the rotorY of ROOT frame is the first atom.
 		size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 		string line;
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
@@ -68,11 +68,8 @@ namespace idock
 				// Parse the Cartesian coordinate.
 				atom a(vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
-				// For a hydrogen, save it.
-				if (a.is_hydrogen())
+				if (a.is_hydrogen()) // Current atom is a hydrogen.
 				{
-					hydrogens.push_back(a);
-
 					// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 					if (ad == AD_TYPE_HD)
 					{
@@ -87,8 +84,11 @@ namespace idock
 							}
 						}
 					}
+					
+					// Save the hydrogen.
+					hydrogens.push_back(a);
 				}
-				else // It is a heavy atom.
+				else // Current atom is a heavy atom.
 				{
 					// Find bonds between the current atom and the other atoms of the same frame.
 					for (size_t i = heavy_atoms.size(); i > f->habegin;)
@@ -112,11 +112,14 @@ namespace idock
 						}
 					}
 
+					// Set rotorYidx if the serial number of current atom is rotorYsrn.
 					numbers.push_back(right_cast<size_t>(line, 7, 11));
 					if (current && (numbers.back() == f->rotorYsrn)) // current > 0, i.e. BRANCH frame.
 					{
-						f->rotorY = heavy_atoms.size();
+						f->rotorYidx = heavy_atoms.size();
 					}
+					
+					// Save the heavy atom.
 					heavy_atoms.push_back(a);
 				}
 			}
@@ -171,18 +174,18 @@ namespace idock
 				}
 
 				// Set up bonds between rotorX and rotorY.
-				bonds[f->rotorY].push_back(f->rotorX);
-				bonds[f->rotorX].push_back(f->rotorY);
+				bonds[f->rotorYidx].push_back(f->rotorXidx);
+				bonds[f->rotorXidx].push_back(f->rotorYidx);
 
-				// Dehydrophobicize rotorX or rotorY if necessary.
-				atom& rotorY = heavy_atoms[f->rotorY];
-				atom& rotorX = heavy_atoms[f->rotorX];
+				// Dehydrophobicize rotorX and rotorY if necessary.
+				atom& rotorY = heavy_atoms[f->rotorYidx];
+				atom& rotorX = heavy_atoms[f->rotorXidx];
 				if ((rotorY.is_hetero()) && (!rotorX.is_hetero())) rotorX.dehydrophobicize();
 				if ((rotorX.is_hetero()) && (!rotorY.is_hetero())) rotorY.dehydrophobicize();
 
 				// Calculate parent_rotorY_to_current_rotorY and parent_rotorX_to_current_rotorY.
 				const frame& p = frames[f->parent];
-				f->parent_rotorY_to_current_rotorY =  rotorY.coordinate - heavy_atoms[p.rotorY].coordinate;
+				f->parent_rotorY_to_current_rotorY =  rotorY.coordinate - heavy_atoms[p.rotorYidx].coordinate;
 				f->parent_rotorX_to_current_rotorY = (rotorY.coordinate - rotorX.coordinate).normalize();
 
 				// Now the parent of the following frame is the parent of current frame.
@@ -199,24 +202,41 @@ namespace idock
 		}
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
 		BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
-
 		BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 		BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.		
-
-		// Determine num_frames, num_torsions, flexibility_penalty_factor, and num_heavy_atoms_inverse.
+		
+		// Determine num_heavy_atoms, num_hydrogens, and num_heavy_atoms_inverse.
+		num_heavy_atoms = heavy_atoms.size();
+		num_hydrogens = hydrogens.size();		
+		frames.back().haend = num_heavy_atoms;
+		frames.back().hyend = num_hydrogens;
+		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
+		
+		// Determine num_frames, num_torsions, flexibility_penalty_factor.
 		num_frames = frames.size();
 		BOOST_ASSERT(num_frames >= 1);
 		num_torsions = num_frames - 1;
 		BOOST_ASSERT(num_torsions + 1 == num_frames);
 		BOOST_ASSERT(num_torsions >= num_active_torsions);
+		BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 == lines.size()); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines == lines.size()
 		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * (num_torsions - num_active_torsions)));
-		num_heavy_atoms = heavy_atoms.size();
-		num_hydrogens = hydrogens.size();
-		BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 <= num_lines); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines + REMARK lines (if any) == num_lines
-		num_heavy_atoms_inverse = static_cast<fl>(1) / num_heavy_atoms;
-		frames.back().haend = num_heavy_atoms;
-		frames.back().hyend = num_hydrogens;
+		BOOST_ASSERT(flexibility_penalty_factor < 1);
 
+		// Update heavy_atoms[].coordinate and hydrogens[].coordinate relative to frame origin.
+		for (size_t k = 0; k < num_frames; ++k)
+		{
+			const frame& f = frames[k];
+			const vec3 origin = heavy_atoms[f.rotorYidx].coordinate;
+			for (size_t i = f.habegin; i < f.haend; ++i)
+			{
+				heavy_atoms[i].coordinate -= origin;
+			}
+			for (size_t i = f.hybegin; i < f.hyend; ++i)
+			{
+				hydrogens[i].coordinate -= origin;
+			}
+		}
+		
 		// Find intra-ligand interacting pairs that are not 1-4.
 		interacting_pairs.reserve(num_heavy_atoms * num_heavy_atoms);
 		vector<size_t> neighbors;
@@ -264,7 +284,7 @@ namespace idock
 					const frame& f2 = frames[k2];
 					for (size_t j = f2.habegin; j < f2.haend; ++j)
 					{
-						if (((k1 == f2.parent) && ((j == f2.rotorY) || (i == f2.rotorX))) || (find(neighbors.begin(), neighbors.end(), j) != neighbors.end())) continue;
+						if (((k1 == f2.parent) && ((j == f2.rotorYidx) || (i == f2.rotorXidx))) || (find(neighbors.begin(), neighbors.end(), j) != neighbors.end())) continue;
 						const size_t type_pair_index = triangular_matrix_permissive_index(heavy_atoms[i].xs, heavy_atoms[j].xs);
 						interacting_pairs.push_back(interacting_pair(i, j, type_pair_index));
 					}
@@ -272,21 +292,6 @@ namespace idock
 
 				// Clear the current neighbor set for the next atom.
 				neighbors.clear();
-			}
-		}
-
-		// Update heavy_atoms[].coordinate and hydrogens[] to relative coordinates.
-		for (size_t k = 0; k < num_frames; ++k)
-		{
-			frame& f = frames[k];
-			const vec3 origin = heavy_atoms[f.rotorY].coordinate;
-			for (size_t i = f.habegin; i < f.haend; ++i)
-			{
-				heavy_atoms[i].coordinate -= origin;
-			}
-			for (size_t i = f.hybegin; i < f.hyend; ++i)
-			{
-				hydrogens[i].coordinate -= origin;
 			}
 		}
 	}
@@ -308,21 +313,21 @@ namespace idock
 		if (!b.within(conf.position))
 			return false;
 		
-		// Define frame-wide conformational variables.
-		vector<vec3> origin; ///< Origin coordinate, which is rotorY.
-		vector<qt>   orientation_q; ///< Orientation in the form of quaternion.
-		vector<mat3> orientation_m; ///< Orientation in the form of 3x3 matrix.
-		vector<vec3> axis; ///< Vector pointing from rotor Y to rotor X.
-		vector<vec3> force; ///< Aggregated derivatives of heavy atoms.
-		vector<vec3> torque; /// Torque of the force.
-		origin.resize(num_frames);
-		orientation_q.resize(num_frames);
-		orientation_m.resize(num_frames);
-		axis.resize(num_frames);
-		force.resize(num_frames);
-		torque.resize(num_frames);
+		// Initialize frame-wide conformational variables.
+		vector<vec3> origins; ///< Origin coordinate, which is rotorY.
+		vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
+		vector<qt>   orientations_q; ///< Orientation in the form of quaternion.
+		vector<mat3> orientations_m; ///< Orientation in the form of 3x3 matrix.		
+		vector<vec3> forces; ///< Aggregated derivatives of heavy atoms.
+		vector<vec3> torques; /// Torque of the force.
+		origins.resize(num_frames);
+		axes.resize(num_frames);
+		orientations_q.resize(num_frames);
+		orientations_m.resize(num_frames);		
+		forces.resize(num_frames, zero3); // Initialize forces to zero3 for subsequent aggregation.
+		torques.resize(num_frames, zero3); // Initialize torques to zero3 for subsequent aggregation.
 
-		// Define atom-wide conformational variables.
+		// Initialize atom-wide conformational variables.
 		vector<vec3> coordinates; ///< Heavy atom coordinates.
 		vector<vec3> derivatives; ///< Heavy atom derivatives.
 		vector<fl> energies; ///< Heavy atom free energies.
@@ -330,15 +335,14 @@ namespace idock
 		derivatives.resize(num_heavy_atoms);
 		energies.resize(num_heavy_atoms);
 
-
 		// Apply position and orientation to ROOT frame.
 		const frame& root = frames.front();
-		origin.front() = conf.position;
-		orientation_q.front() = conf.orientation;
-		orientation_m.front() = quaternion_to_matrix(conf.orientation);
+		origins.front() = conf.position;
+		orientations_q.front() = conf.orientation;
+		orientations_m.front() = quaternion_to_matrix(conf.orientation);
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
-			coordinates[i] = origin.front() + orientation_m.front() * heavy_atoms[i].coordinate;
+			coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
 			if (!b.within(coordinates[i]))
 				return false;
 		}
@@ -349,31 +353,31 @@ namespace idock
 			const frame& f = frames[k];
 
 			// Update origin.
-			origin[k] = origin[f.parent] + orientation_m[f.parent] * f.parent_rotorY_to_current_rotorY;
-			if (!b.within(origin[k]))
+			origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
+			if (!b.within(origins[k]))
 				return false;
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active)
 			{
 				BOOST_ASSERT(f.habegin + 1 == f.haend);
-				BOOST_ASSERT(f.habegin == f.rotorY);
-				coordinates[f.rotorY] = origin[k];
+				BOOST_ASSERT(f.habegin == f.rotorYidx);
+				coordinates[f.rotorYidx] = origins[k];
 				continue;
 			}
 
 			// Update orientation.
 			BOOST_ASSERT(f.parent_rotorX_to_current_rotorY.normalized());
-			axis[k] = orientation_m[f.parent] * f.parent_rotorX_to_current_rotorY;
-			BOOST_ASSERT(axis[k].normalized());
-			orientation_q[k] = axis_angle_to_quaternion(axis[k], conf.torsions[t++]) * orientation_q[f.parent];
-			BOOST_ASSERT(quaternion_is_normalized(orientation_q[k]));
-			orientation_m[k] = quaternion_to_matrix(orientation_q[k]);
+			axes[k] = orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY;
+			BOOST_ASSERT(axes[k].normalized());
+			orientations_q[k] = axis_angle_to_quaternion(axes[k], conf.torsions[t++]) * orientations_q[f.parent];
+			BOOST_ASSERT(quaternion_is_normalized(orientations_q[k]));
+			orientations_m[k] = quaternion_to_matrix(orientations_q[k]);
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
-				coordinates[i] = origin[k] + orientation_m[k] * heavy_atoms[i].coordinate;
+				coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coordinate;
 				if (!b.within(coordinates[i]))
 					return false;
 			}
@@ -383,16 +387,14 @@ namespace idock
 		//for (size_t k1 = num_frames - 1; k1 > 0; --k1)
 		//{
 		//	const frame& f1 = frames[k1];
-		//	const size_t num_heavy_atoms1 = f1.heavy_atoms.size();
-		//	for (size_t i1 = 0; i1 < num_heavy_atoms1; ++i1)
+		//	for (size_t i1 = f1.habegin; i1 < f1.haend; ++i1)
 		//	{
 		//		for (size_t k2 = 0; k2 < k1; ++k2)
 		//		{
 		//			const frame& f2 = frames[k2];
-		//			const size_t num_heavy_atoms2 = f2.heavy_atoms.size();
-		//			for (size_t i2 = 0; i2 < num_heavy_atoms2; ++i2)
+		//			for (size_t i2 = f2.habegin; i2 < f2.haend; ++i2)
 		//			{
-		//				if ((distance_sqr(f1.coordinates[i1], f2.coordinates[i2]) < sqr(f1.heavy_atoms[i1].covalent_radius() + f2.heavy_atoms[i2].covalent_radius())) && (!((k2 == f1.parent) && (i1 == 0) && (i2 == f1.rotorX))))
+		//				if ((distance_sqr(coordinates[i1], coordinates[i2]) < sqr(heavy_atoms[i1].covalent_radius() + heavy_atoms[i2].covalent_radius())) && (!((k2 == f1.parent) && (i1 == f1.rotorY) && (i2 == f1.rotorX))))
 		//					return false;
 		//			}
 		//		}
@@ -455,13 +457,6 @@ namespace idock
 		// If the free energy is no better than the upper bound, refuse this conformation.
 		if (e >= e_upper_bound) return false;
 
-		// Initialize force and torque. TODO: try assign().
-		for (size_t k = 0; k < num_frames; ++k)
-		{
-			force[k]  = zero3; // Initialize force to zero.
-			torque[k] = zero3; // Initialize torque to zero.
-		}
-
 		// Calculate and aggregate the force and torque of BRANCH frames to their parent frame.
 		for (size_t k = num_frames - 1, t = num_active_torsions; k > 0; --k)
 		{
@@ -474,31 +469,31 @@ namespace idock
 				// the negative total torque, and the negative torque projections, respectively,
 				// where the projections refer to the torque applied to the branch moved by the torsion,
 				// projected on its rotation axis.
-				force[k]  += derivatives[i];
-				torque[k] += cross_product(coordinates[i] - origin[k], derivatives[i]);
+				forces[k]  += derivatives[i];
+				torques[k] += cross_product(coordinates[i] - origins[k], derivatives[i]);
 			}
 
 			// Aggregate the force and torque of current frame to its parent frame.
-			force[f.parent]  += force[k];
-			torque[f.parent] += torque[k] + cross_product(origin[k] - origin[f.parent], force[k]);
+			forces[f.parent]  += forces[k];
+			torques[f.parent] += torques[k] + cross_product(origins[k] - origins[f.parent], forces[k]);
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active) continue;
 
 			// Save the aggregated torque to torsion.
-			g.torsions[--t] = torque[k] * axis[k]; // dot product
+			g.torsions[--t] = torques[k] * axes[k]; // dot product
 		}
 
 		// Calculate and aggregate the force and torque of ROOT frame.
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
-			force.front()  += derivatives[i];
-			torque.front() += cross_product(coordinates[i] - origin.front(), derivatives[i]);
+			forces.front()  += derivatives[i];
+			torques.front() += cross_product(coordinates[i] - origins.front(), derivatives[i]);
 		}
 
 		// Save the aggregated force and torque to g.position and g.orientation.
-		g.position    = force.front();
-		g.orientation = torque.front();
+		g.position    = forces.front();
+		g.orientation = torques.front();
 
 		return true;
 	}
