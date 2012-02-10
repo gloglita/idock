@@ -130,14 +130,14 @@ namespace idock
 				{
 					fl sum = 0;
 					for (size_t j = 0; j < num_variables; ++j)
-						sum += h[triangular_matrix_permissive_index(i, j)] * g1(j);
-					p(i) = -sum;
+						sum += h[triangular_matrix_permissive_index(i, j)] * g1[j];
+					p[i] = -sum;
 				}
 
 				// Calculate pg = p*g = -h*g^2 < 0
 				pg1 = 0;
 				for (size_t i = 0; i < num_variables; ++i)
-					pg1 += p(i) * g1(i);
+					pg1 += p[i] * g1[i];
 
 				// Perform a line search to find an appropriate alpha.
 				// Try different alpha values for num_alphas times.
@@ -148,13 +148,13 @@ namespace idock
 					alpha = alphas[num_alpha_trials];
 
 					// Calculate c2 = c1 + ap.
-					c2.position = c1.position + alpha * p.position;
+					c2.position = c1.position + alpha * vec3(p[0], p[1], p[2]);
 					BOOST_ASSERT(c1.orientation.is_normalized());
-					c2.orientation = qtn4(alpha * p.orientation) * c1.orientation;
+					c2.orientation = qtn4(alpha * vec3(p[3], p[4], p[5])) * c1.orientation;
 					BOOST_ASSERT(c2.orientation.is_normalized());
 					for (size_t i = 0; i < lig.num_active_torsions; ++i)
 					{
-						c2.torsions[i] = c1.torsions[i] + alpha * p.torsions[i];
+						c2.torsions[i] = c1.torsions[i] + alpha * p[6 + i];
 					}
 
 					// Evaluate c2, subject to Wolfe conditions http://en.wikipedia.org/wiki/Wolfe_conditions
@@ -164,7 +164,7 @@ namespace idock
 					{
 						pg2 = 0;
 						for (size_t i = 0; i < num_variables; ++i)
-							pg2 += p(i) * g2(i);
+							pg2 += p[i] * g2[i];
 						if (pg2 >= 0.9 * pg1)
 							break; // An appropriate alpha is found.
 					}
@@ -175,26 +175,26 @@ namespace idock
 
 				// Update Hessian matrix h.
 				for (size_t i = 0; i < num_variables; ++i) // Calculate y = g2 - g1.
-					y(i) = g2(i) - g1(i);
+					y[i] = g2[i] - g1[i];
 				for (size_t i = 0; i < num_variables; ++i) // Calculate mhy = -h * y.
 				{
 					fl sum = 0;
 					for (size_t j = 0; j < num_variables; ++j)
-						sum += h[triangular_matrix_permissive_index(i, j)] * y(j);
-					mhy(i) = -sum;
+						sum += h[triangular_matrix_permissive_index(i, j)] * y[j];
+					mhy[i] = -sum;
 				}
 				yhy = 0;
 				for (size_t i = 0; i < num_variables; ++i) // Calculate yhy = -y * mhy = -y * (-hy).
-					yhy -= y(i) * mhy(i);
+					yhy -= y[i] * mhy[i];
 				yp = 0;
 				for (size_t i = 0; i < num_variables; ++i) // Calculate yp = y * p.
-					yp += y(i) * p(i);
+					yp += y[i] * p[i];
 				r = 1 / (alpha * yp); // rho = 1 / (s^T * y) , where s = alpha * p, T means transpose.
 				for (size_t i = 0; i < num_variables; ++i)
 				for (size_t j = i; j < num_variables; ++j) // includes i
 				{
-					h(i, j) += alpha * r * (mhy(i) * p(j) + mhy(j) * p(i))
-							+  alpha * alpha * (r*r * yhy  + r) * p(i) * p(j); // s * s == alpha * alpha * p * p
+					h(i, j) += alpha * r * (mhy[i] * p[j] + mhy[j] * p[i])
+							+  alpha * alpha * (r*r * yhy  + r) * p[i] * p[j]; // s * s == alpha * alpha * p * p
 				}
 
 				// Move to the next iteration.

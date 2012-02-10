@@ -37,31 +37,11 @@ namespace idock
 	};
 
 	/// Represents a transition from one conformation to another.
-	class change
+	class change : public vector<fl>
 	{
 	public:
-		vec3 position;
-		vec3 orientation;
-		vector<fl> torsions;
-
 		/// Constructs a zero change.
-		explicit change(const size_t num_active_torsions) : position(zero3), orientation(zero3), torsions(num_active_torsions, 0) {}
-
-		/// Returns a constant reference to an element as if all the variables were flattened into a 1D array.
-		const fl& operator()(size_t index) const
-		{
-			if (index < 3) return position[index];
-			index -= 3;
-			if (index < 3) return orientation[index];
-			index -= 3;
-			return torsions[index];
-		}
-
-		/// Returns a mutable reference to an element as if all the variables were flattened into a 1D array.
-		fl& operator()(const size_t index)
-		{
-			return const_cast<fl&>(static_cast<const change&>(*this)(index));
-		}
+		explicit change(const size_t num_active_torsions) : vector<fl>(6 + num_active_torsions, 0) {}
 	};
 }
 

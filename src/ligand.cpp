@@ -480,8 +480,8 @@ namespace idock
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active) continue;
 
-			// Save the aggregated torque to torsion.
-			g.torsions[--t] = torques[k] * axes[k]; // dot product
+			// Save the torsion.
+			g[6 + (--t)] = torques[k] * axes[k]; // dot product
 		}
 
 		// Calculate and aggregate the force and torque of ROOT frame.
@@ -491,9 +491,13 @@ namespace idock
 			torques.front() += cross_product(coordinates[i] - origins.front(), derivatives[i]);
 		}
 
-		// Save the aggregated force and torque to g.position and g.orientation.
-		g.position    = forces.front();
-		g.orientation = torques.front();
+		// Save the aggregated force and torque to g.
+		g[0] = forces.front()[0];
+		g[1] = forces.front()[1];
+		g[2] = forces.front()[2];
+		g[3] = torques.front()[0];
+		g[4] = torques.front()[1];
+		g[5] = torques.front()[2];
 
 		return true;
 	}
