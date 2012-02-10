@@ -71,7 +71,6 @@ namespace idock
     }
 
 	const qtn4 qtn4id(1, 0, 0, 0); ///< Identity quaternion.
-	const fl pi = static_cast<fl>(3.1415926535897932); ///< Pi.
 }
 
 #endif

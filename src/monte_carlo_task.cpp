@@ -20,14 +20,16 @@
 
 namespace idock
 {
-	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps)
+	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps)
 	{
 		// Define constants.
+		const size_t num_mc_iterations = 100 * lig.num_heavy_atoms; ///< The number of iterations correlates to the complexity of ligand.
 		const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 		const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
 		const size_t num_alphas = alphas.size(); // Number of precalculated alpha values for determining step size in BFGS.
 		const fl e_upper_bound = static_cast<fl>(4 * lig.num_heavy_atoms); // A conformation will be droped if its free energy is not better than e_upper_bound.
 		const fl required_square_error = static_cast<fl>(1 * lig.num_heavy_atoms); // Ligands with RMSD < 1.0 will be clustered into the same cluster.
+		const fl pi = static_cast<fl>(3.1415926535897932); ///< Pi.
 
 		// On Linux, the std namespace contains std::mt19937 and std::normal_distribution.
 		// In order to avoid ambiguity, use the complete scope.

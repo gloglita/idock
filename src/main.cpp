@@ -434,15 +434,12 @@ int main(int argc, char* argv[])
 				log << std::setw(7) << num_ligands << " | " << std::setw(12) << ligand_filename.stem().string() << " | ";
 				std::cout << std::flush;
 
-				// The number of iterations correlates to the complexity of ligand.
-				const size_t num_mc_iterations = 100 * lig.num_heavy_atoms;
-
 				// Populate the Monte Carlo task container.
 				BOOST_ASSERT(mc_tasks.empty());
 				for (size_t i = 0; i < num_mc_tasks; ++i)
 				{
 					BOOST_ASSERT(result_containers[i].empty());
-					mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), num_mc_iterations, boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+					mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 				}
 
 				// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.

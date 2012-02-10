@@ -42,7 +42,7 @@ namespace idock
 	/// uses precalculated alpha values for line search during BFGS local search,
 	/// clusters free energies and heavy atom coordinate vectors of the best conformations into results,
 	/// and sorts the results in the ascending order of free energies.
-	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const size_t num_mc_iterations, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps);
+	void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const array<fl, num_alphas>& alphas, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps);
 }
 
 #endif
