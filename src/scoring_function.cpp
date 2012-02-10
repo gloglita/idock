@@ -44,7 +44,7 @@ namespace idock
 
 	void scoring_function::precalculate(const size_t t1, const size_t t2, const vector<fl>& rs)
 	{
-		vector<scoring_function_element>& p = (*this)(t1, t2);
+		vector<scoring_function_element>& p = (*this)[triangular_matrix_restrictive_index(t1, t2)];
 		BOOST_ASSERT(p.size() == Num_Samples);
 
 		// Calculate the value of scoring function evaluated at (t1, t2, d).

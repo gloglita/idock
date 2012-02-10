@@ -77,7 +77,7 @@ namespace idock
 		// See N&R for a recipe to find this initializer.
 		triangular_matrix<fl> identity_hessian(num_variables, 0); // Symmetric triangular matrix.
 		for (size_t i = 0; i < num_variables; ++i)
-			identity_hessian(i, i) = 1;
+			identity_hessian[triangular_matrix_restrictive_index(i, i)] = 1;
 
 		// Initialize necessary variables for updating the Hessian matrix h.
 		triangular_matrix<fl> h(identity_hessian);
@@ -193,7 +193,7 @@ namespace idock
 				for (size_t i = 0; i < num_variables; ++i)
 				for (size_t j = i; j < num_variables; ++j) // includes i
 				{
-					h(i, j) += alpha * r * (mhy[i] * p[j] + mhy[j] * p[i])
+					h[triangular_matrix_restrictive_index(i, j)] += alpha * r * (mhy[i] * p[j] + mhy[j] * p[i])
 							+  alpha * alpha * (r*r * yhy  + r) * p[i] * p[j]; // s * s == alpha * alpha * p * p
 				}
 

@@ -50,12 +50,6 @@ namespace idock
 	public:
 		/// Constructs a triangular matrix with specified 1D size and value to fill.
 		triangular_matrix(const size_t n, const T& filler_val) : vector<T>(n * (n+1) / 2, filler_val) {}
-
-		/// Returns a mutable reference to the element at 2D index (i, j) where j is the lowest dimension.
-		T& operator()(const size_t i, const size_t j)
-		{
-			return (*this)[triangular_matrix_restrictive_index(i, j)];
-		}
 	};
 }
 
