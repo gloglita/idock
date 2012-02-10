@@ -20,46 +20,56 @@
 
 namespace idock
 {
-	fl quaternion_norm_sqr(const qt& q)
-	{
-		// Functionally equivalent to boost::math::norm(q) and sqr(boost::math::abs(q)), but faster.
-		return sqr(q.R_component_1()) + sqr(q.R_component_2()) + sqr(q.R_component_3()) + sqr(q.R_component_4());
-	}
+	qtn4::qtn4(const fl a, const fl b, const fl c, const fl d) : a(a), b(b), c(c), d(d) {}
 
-	bool quaternion_is_normalized(const qt& q)
-	{
-		return eq(quaternion_norm_sqr(q), 1);
-	}
-
-	void normalize_quaternion(qt& q)
-	{
-		q /= boost::math::abs(q);
-		BOOST_ASSERT(quaternion_is_normalized(q));
-	}
-
-	qt axis_angle_to_quaternion(const vec3& axis, const fl angle)
+	qtn4::qtn4(const vec3& axis, const fl angle)
 	{
 		BOOST_ASSERT(axis.normalized());
-		const fl c = cos(angle * 0.5);
+		a = cos(angle * 0.5);
 		const fl s = sin(angle * 0.5);
-		return qt(c, s * axis[0], s * axis[1], s * axis[2]);
+		b = s * axis[0];
+		c = s * axis[1];
+		d = s * axis[2];
 	}
 
-	qt rotation_vector_to_quaternion(const vec3& rotation)
+	qtn4::qtn4(const vec3& rotation)
 	{
-		if (rotation.zero()) return qt_identity;
-		const fl angle = rotation.norm(); // sqrt involved.
-		const vec3 axis = (1 / angle) * rotation;
-		return axis_angle_to_quaternion(axis, angle); // The result is a unit quaternion.
+		if (rotation.zero())
+		{
+			*this = qtn4id;
+		}
+		else
+		{
+			const fl angle = rotation.norm();
+			const vec3 axis = (1 / angle) * rotation;
+			*this = qtn4(axis, angle);
+		}
 	}
 
-	mat3 quaternion_to_matrix(const qt& q)
+	fl qtn4::norm_sqr() const
 	{
-		BOOST_ASSERT(quaternion_is_normalized(q));
-		const fl a = q.R_component_1();
-		const fl b = q.R_component_2();
-		const fl c = q.R_component_3();
-		const fl d = q.R_component_4();
+		return a * a + b * b + c * c + d * d;
+	}
+
+	fl qtn4::norm() const
+	{
+		return sqrt(norm_sqr());
+	}
+
+	bool qtn4::is_normalized() const
+	{
+		return eq(norm_sqr(), 1);
+	}
+
+	qtn4 qtn4::normalize() const
+	{
+		const fl norm_inv = static_cast<fl>(1) / norm();
+		return qtn4(a * norm_inv, b * norm_inv, c * norm_inv, d * norm_inv); 
+	}
+
+	mat3 qtn4::mat3() const
+	{
+		BOOST_ASSERT(this->is_normalized());
 		const fl aa = a*a;
 		const fl ab = a*b;
 		const fl ac = a*c;
@@ -73,7 +83,7 @@ namespace idock
 
 		// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
 		// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-		return mat3
+		return idock::mat3
 		(
 			aa+bb-cc-dd, 2*(-ad+bc), 2*(ac+bd),
 			2*(ad+bc), aa-bb+cc-dd, 2*(-ab+cd),

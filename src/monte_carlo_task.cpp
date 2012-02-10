@@ -53,8 +53,7 @@ namespace idock
 		{
 			// Randomize conformation c0.
 			c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
-			c0.orientation = qt(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen());
-			normalize_quaternion(c0.orientation);
+			c0.orientation = qtn4(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen()).normalize();
 			for (size_t i = 0; i < lig.num_active_torsions; ++i)
 			{
 				c0.torsions[i] = uniform_pi_gen();
@@ -108,8 +107,8 @@ namespace idock
 				}
 				else // Mutate orientation.
 				{
-					c1.orientation = rotation_vector_to_quaternion(static_cast<fl>(0.01) * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation;
-					BOOST_ASSERT(quaternion_is_normalized(c1.orientation));
+					c1.orientation = qtn4(static_cast<fl>(0.01) * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation;
+					BOOST_ASSERT(c1.orientation.is_normalized());
 				}
 				++num_mutations;
 			} while (!lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1));
@@ -148,9 +147,9 @@ namespace idock
 
 					// Calculate c2 = c1 + ap.
 					c2.position = c1.position + alpha * p.position;
-					BOOST_ASSERT(quaternion_is_normalized(c1.orientation));
-					c2.orientation = rotation_vector_to_quaternion(alpha * p.orientation) * c1.orientation;
-					BOOST_ASSERT(quaternion_is_normalized(c2.orientation));
+					BOOST_ASSERT(c1.orientation.is_normalized());
+					c2.orientation = qtn4(alpha * p.orientation) * c1.orientation;
+					BOOST_ASSERT(c2.orientation.is_normalized());
 					for (size_t i = 0; i < lig.num_active_torsions; ++i)
 					{
 						c2.torsions[i] = c1.torsions[i] + alpha * p.torsions[i];

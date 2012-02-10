@@ -316,7 +316,7 @@ namespace idock
 		// Initialize frame-wide conformational variables.
 		vector<vec3> origins; ///< Origin coordinate, which is rotorY.
 		vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
-		vector<qt>   orientations_q; ///< Orientation in the form of quaternion.
+		vector<qtn4> orientations_q; ///< Orientation in the form of quaternion.
 		vector<mat3> orientations_m; ///< Orientation in the form of 3x3 matrix.
 		vector<vec3> forces; ///< Aggregated derivatives of heavy atoms.
 		vector<vec3> torques; /// Torque of the force.
@@ -339,7 +339,7 @@ namespace idock
 		const frame& root = frames.front();
 		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
-		orientations_m.front() = quaternion_to_matrix(conf.orientation);
+		orientations_m.front() = conf.orientation.mat3();
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
 			coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
@@ -370,9 +370,9 @@ namespace idock
 			BOOST_ASSERT(f.parent_rotorX_to_current_rotorY.normalized());
 			axes[k] = orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY;
 			BOOST_ASSERT(axes[k].normalized());
-			orientations_q[k] = axis_angle_to_quaternion(axes[k], conf.torsions[t++]) * orientations_q[f.parent];
-			BOOST_ASSERT(quaternion_is_normalized(orientations_q[k]));
-			orientations_m[k] = quaternion_to_matrix(orientations_q[k]);
+			orientations_q[k] = qtn4(axes[k], conf.torsions[t++]) * orientations_q[f.parent];
+			BOOST_ASSERT(orientations_q[k].is_normalized());
+			orientations_m[k] = orientations_q[k].mat3();
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)
@@ -501,14 +501,14 @@ namespace idock
 	result ligand::compose_result(const fl e, const fl f, const conformation& conf) const
 	{
 		vector<vec3> origins(num_frames);
-		vector<qt>   orientations_q(num_frames);
+		vector<qtn4> orientations_q(num_frames);
 		vector<mat3> orientations_m(num_frames);
 		vector<vec3> heavy_atoms(num_heavy_atoms);
 		vector<vec3> hydrogens(num_hydrogens);
 
 		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
-		orientations_m.front() = quaternion_to_matrix(conf.orientation);
+		orientations_m.front() = conf.orientation.mat3();
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
 		const frame& root = frames.front();
@@ -530,8 +530,8 @@ namespace idock
 			origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
 
 			// Update orientation.
-			orientations_q[k] = axis_angle_to_quaternion(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
-			orientations_m[k] = quaternion_to_matrix(orientations_q[k]);
+			orientations_q[k] = qtn4(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
+			orientations_m[k] = orientations_q[k].mat3();
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)

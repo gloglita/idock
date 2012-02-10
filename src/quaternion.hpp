@@ -20,36 +20,58 @@
 #ifndef IDOCK_QUATERNION_HPP
 #define IDOCK_QUATERNION_HPP
 
-#include <boost/math/quaternion.hpp>
 #include "mat3.hpp"
 
 namespace idock
 {
-	// This class encapsulates quaternions operations.
-	using boost::math::quaternion;
+	/// Represents a quaternion.
+	class qtn4
+	{
+	public:
+		fl a, b, c, d;
 
-	typedef quaternion<fl> qt; ///< boost::math::quaternion is generic. Define a specific quaternion type.
-	const qt qt_identity(1, 0, 0, 0); ///< Identity quaternion.
-	const mat3 mat_identity(1, 0, 0, 0, 1, 0, 0, 0, 1); ///< Identity 3x3 transformation matrix.
+		/// Constructs an uninitialized quaternion.
+		explicit qtn4() {}
+
+		/// Constructs a quaternion by its four components. 
+		explicit qtn4(const fl a, const fl b, const fl c, const fl d);
+
+		/// Constructs a quaternion by a normalized axis and a rotation angle.
+		explicit qtn4(const vec3& axis, const fl angle);
+
+		/// Constructs a quaternion by a rotation vector.
+		explicit qtn4(const vec3& rotation);
+
+		/// Returns the square norm of current quaternion.
+		fl norm_sqr() const;
+
+		/// Returns the norm of current quaternion.
+		fl norm() const;
+
+		/// Returns true if the current quaternion is normalized.
+		bool is_normalized() const;
+
+		/// Returns a normalized quaternion of current quaternion.
+		qtn4 normalize() const;
+
+		/// Transforms the current quaternion into a 3x3 transformation matrix, e.g. quaternion(1, 0, 0, 0) => identity matrix.
+		mat3 mat3() const;
+	};
+
+	/// Returns the product of two quaternions.
+    inline qtn4 operator *(const qtn4& q1, const qtn4& q2)
+    {
+        return qtn4
+		(
+			q1.a * q2.a - q1.b * q2.b - q1.c * q2.c - q1.d * q2.d,
+			q1.a * q2.b + q1.b * q2.a + q1.c * q2.d - q1.d * q2.c,
+			q1.a * q2.c - q1.b * q2.d + q1.c * q2.a + q1.d * q2.b,
+			q1.a * q2.d + q1.b * q2.c - q1.c * q2.b + q1.d * q2.a
+		);
+    }
+
+	const qtn4 qtn4id(1, 0, 0, 0); ///< Identity quaternion.
 	const fl pi = static_cast<fl>(3.1415926535897932); ///< Pi.
-
-	/// Returns the square norm of a quaternion. Used only in assertions.
-	fl quaternion_norm_sqr(const qt& q);
-
-	/// Returns true if the square norm of a quaternion equals 1. Used only in assertions.
-	bool quaternion_is_normalized(const qt& q);
-
-	/// Normalizes a quaternion.
-	void normalize_quaternion(qt& q);
-
-	/// Transforms a unit axis and an angle within [-pi, pi] into a quaternion.
-	qt axis_angle_to_quaternion(const vec3& axis, fl angle);
-
-	/// Transforms a rotation vector into a quaternion.
-	qt rotation_vector_to_quaternion(const vec3& rotation);
-
-	/// Transforms a quaternion into a 3x3 transformation matrix, e.g. qt(1, 0, 0, 0) => identity matrix.
-	mat3 quaternion_to_matrix(const qt& q);
 }
 
 #endif

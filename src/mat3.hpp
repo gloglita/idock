@@ -72,6 +72,8 @@ namespace idock
 			);
 		}
 	};
+
+	const mat3 mat3id(1, 0, 0, 0, 1, 0, 0, 0, 1); ///< Identity 3x3 transformation matrix.
 }
 
 #endif
