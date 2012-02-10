@@ -55,7 +55,7 @@ namespace idock
 		qtn4 normalize() const;
 
 		/// Transforms the current quaternion into a 3x3 transformation matrix, e.g. quaternion(1, 0, 0, 0) => identity matrix.
-		mat3 mat3() const;
+		mat3 to_mat3() const;
 	};
 
 	/// Returns the product of two quaternions.

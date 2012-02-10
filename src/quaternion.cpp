@@ -67,7 +67,7 @@ namespace idock
 		return qtn4(a * norm_inv, b * norm_inv, c * norm_inv, d * norm_inv); 
 	}
 
-	mat3 qtn4::mat3() const
+	mat3 qtn4::to_mat3() const
 	{
 		BOOST_ASSERT(this->is_normalized());
 		const fl aa = a*a;
@@ -83,7 +83,7 @@ namespace idock
 
 		// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
 		// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-		return idock::mat3
+		return mat3
 		(
 			aa+bb-cc-dd, 2*(-ad+bc), 2*(ac+bd),
 			2*(ad+bc), aa-bb+cc-dd, 2*(-ab+cd),

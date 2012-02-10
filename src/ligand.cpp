@@ -339,7 +339,7 @@ namespace idock
 		const frame& root = frames.front();
 		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
-		orientations_m.front() = conf.orientation.mat3();
+		orientations_m.front() = conf.orientation.to_mat3();
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
 			coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
@@ -372,7 +372,7 @@ namespace idock
 			BOOST_ASSERT(axes[k].normalized());
 			orientations_q[k] = qtn4(axes[k], conf.torsions[t++]) * orientations_q[f.parent];
 			BOOST_ASSERT(orientations_q[k].is_normalized());
-			orientations_m[k] = orientations_q[k].mat3();
+			orientations_m[k] = orientations_q[k].to_mat3();
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)
@@ -508,7 +508,7 @@ namespace idock
 
 		origins.front() = conf.position;
 		orientations_q.front() = conf.orientation;
-		orientations_m.front() = conf.orientation.mat3();
+		orientations_m.front() = conf.orientation.to_mat3();
 
 		// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
 		const frame& root = frames.front();
@@ -531,7 +531,7 @@ namespace idock
 
 			// Update orientation.
 			orientations_q[k] = qtn4(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
-			orientations_m[k] = orientations_q[k].mat3();
+			orientations_m[k] = orientations_q[k].to_mat3();
 
 			// Update coordinates.
 			for (size_t i = f.habegin; i < f.haend; ++i)
