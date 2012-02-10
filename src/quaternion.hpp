@@ -39,9 +39,6 @@ namespace idock
 	/// Returns true if the square norm of a quaternion equals 1. Used only in assertions.
 	bool quaternion_is_normalized(const qt& q);
 
-	/// Normalizes an angle to be within [-pi, pi].
-	void normalize_angle(fl& x);
-
 	/// Normalizes a quaternion.
 	void normalize_quaternion(qt& q);
 

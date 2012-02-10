@@ -31,43 +31,15 @@ namespace idock
 		return eq(quaternion_norm_sqr(q), 1);
 	}
 
-	void normalize_angle(fl& x)
-	{
-		// Subtract or add enough 2*pi's to make x be in [-pi, pi].
-		if (x > 3 * pi)
-		{
-			x -= 2 * pi * ceil(( x - pi) / (2 * pi));
-		}
-		else if (x < -3 * pi)
-		{
-			x += 2 * pi * ceil((-x - pi) / (2 * pi));
-		}
-		// The two branches below can possibly be merged into the two branches above,
-		// but ceil can be very slow, and it is often the case that x is in (pi, 3*pi] or [-3*pi, -pi),
-		// so these two branches can avoid calling ceil.
-		else if (x > pi)  // x is in (   pi, 3*pi].
-		{
-			x -= 2 * pi;
-		}
-		else if (x < -pi) // x is in [-3*pi,  -pi).
-		{
-			x += 2 * pi;
-		}
-		BOOST_ASSERT(x >= -pi);
-		BOOST_ASSERT(x <=  pi);
-	}
-
 	void normalize_quaternion(qt& q)
 	{
 		q /= boost::math::abs(q);
 		BOOST_ASSERT(quaternion_is_normalized(q));
 	}
 
-	qt axis_angle_to_quaternion(const vec3& axis, fl angle)
+	qt axis_angle_to_quaternion(const vec3& axis, const fl angle)
 	{
 		BOOST_ASSERT(axis.normalized());
-		// Normalize angle to [-pi, pi]. This is probably only necessary if angles can be very big.
-		normalize_angle(angle);
 		const fl c = cos(angle * 0.5);
 		const fl s = sin(angle * 0.5);
 		return qt(c, s * axis[0], s * axis[1], s * axis[2]);

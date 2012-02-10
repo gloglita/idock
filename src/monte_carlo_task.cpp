@@ -154,7 +154,6 @@ namespace idock
 					for (size_t i = 0; i < lig.num_active_torsions; ++i)
 					{
 						c2.torsions[i] = c1.torsions[i] + alpha * p.torsions[i];
-						normalize_angle(c2.torsions[i]); // Normalize torsions[i] to [-pi, pi].
 					}
 
 					// Evaluate c2, subject to Wolfe conditions http://en.wikipedia.org/wiki/Wolfe_conditions
