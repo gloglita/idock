@@ -83,7 +83,7 @@ namespace idock
 		triangular_matrix<fl> h(identity_hessian);
 		change y(lig.num_active_torsions); // y = g2 - g1.
 		change mhy(lig.num_active_torsions); // mhy = -h * y.
-		fl yhy, yp, r;
+		fl yhy, yp, ryp, pco;
 
 		for (size_t mc_i = 0; mc_i < num_mc_iterations; ++mc_i)
 		{
@@ -189,12 +189,12 @@ namespace idock
 				yp = 0;
 				for (size_t i = 0; i < num_variables; ++i) // Calculate yp = y * p.
 					yp += y[i] * p[i];
-				r = 1 / (alpha * yp); // rho = 1 / (s^T * y) , where s = alpha * p, T means transpose.
+				ryp = 1 / yp;
+				pco = ryp * (ryp * yhy + alpha);
 				for (size_t i = 0; i < num_variables; ++i)
 				for (size_t j = i; j < num_variables; ++j) // includes i
 				{
-					h[triangular_matrix_restrictive_index(i, j)] += alpha * r * (mhy[i] * p[j] + mhy[j] * p[i])
-							+  alpha * alpha * (r*r * yhy  + r) * p[i] * p[j]; // s * s == alpha * alpha * p * p
+					h[triangular_matrix_restrictive_index(i, j)] += ryp * (mhy[i] * p[j] + mhy[j] * p[i]) + pco * p[i] * p[j];
 				}
 
 				// Move to the next iteration.
