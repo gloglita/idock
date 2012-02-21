@@ -1,7 +1,7 @@
 idock
 =====
 
-idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is inspired by [AutoDock Vina], and is hosted by GitHub at https://github.com/HongjianLi/idock under [Apache License 2.0].
+idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is inspired by [AutoDock Vina], and is hosted by GitHub at https://GitHub.com/HongjianLi/idock under [Apache License 2.0].
 
 
 Features
@@ -111,9 +111,17 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.0 (2011-07-20)
+### 1.2 (2012-02-06)
 
-* Initial release at [CodePlex].
+* Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
+* Profiled by the Valgrind tool suite to ensure zero memory leak.
+* Replaced a switch statement by table lookup to decrease indirect branch misprediction rate.
+* Added move constructors for several classes to boost performance.
+* Revised the precision of coordinates and free energy to be 3 digits.
+* Parallelized the precalculation of scoring function.
+* Fixed a numerical bug when docking a ligand of only one single heavy atom.
+* Added support for Mac OS X 10.7.2 and FreeBSD 9.0.
+* Added support for docking ligands created by igrow.
 
 ### 1.1 (2011-12-20)
 
@@ -127,17 +135,16 @@ Change Log
 * Output predicted free energy of the top 5 conformations.
 * Reverted the evaluation of intra-molecular free energy to Vina's implementation to obtain better RMSD for certain cases.
 
-### 1.2 (2012-02-06)
+### 1.0 (2011-07-20)
 
-* Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
-* Profiled by the Valgrind tool suite to ensure zero memory leak.
-* Replaced a switch statement by table lookup to decrease indirect branch misprediction rate.
-* Added move constructors for several classes to boost performance.
-* Revised the precision of coordinates and free energy to be 3 digits.
-* Parallelized the precalculation of scoring function.
-* Fixed a numerical bug when docking a ligand of only one single heavy atom.
-* Added support for Mac OS X 10.7.2 and FreeBSD 9.0.
-* Added support for docking ligands created by igrow.
+* Initial release at [CodePlex].
+
+
+Citation
+--------
+
+Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 5-9 May 2012. Accepted manuscript.
+
 
 Contact Author
 --------------
