@@ -33,6 +33,7 @@ Makefile_nb
 build
 dist
 .dep.inc
+log
 log.txt
 log.csv
 output
