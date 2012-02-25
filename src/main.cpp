@@ -40,6 +40,9 @@
  * \subsection prepare_ligand Prepare ligand files in PDBQT format
  * pythonsh prepare_ligand4.py -l ligand.mol2
  *
+ * \section citation Citation
+ * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 5-9 May 2012. Accepted manuscript.
+ *
  * \author Hongjian Li, The Chinese University of Hong Kong.
  * \date 5 February 2012
  *
