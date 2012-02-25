@@ -498,7 +498,7 @@ int main(int argc, char* argv[])
 				if (num_conformations)
 				{
 					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
-					lig.write_models(output_ligand_path, results, num_conformations);
+					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
 				}
 
 				// Display the free energies of the top 4 conformations.

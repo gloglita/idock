@@ -330,10 +330,8 @@ namespace idock
 		// Initialize atom-wide conformational variables.
 		vector<vec3> coordinates; ///< Heavy atom coordinates.
 		vector<vec3> derivatives; ///< Heavy atom derivatives.
-		vector<fl> energies; ///< Heavy atom free energies.
 		coordinates.resize(num_heavy_atoms);
 		derivatives.resize(num_heavy_atoms);
-		energies.resize(num_heavy_atoms);
 
 		// Apply position and orientation to ROOT frame.
 		const frame& root = frames.front();
@@ -421,7 +419,6 @@ namespace idock
 			const size_t y0 = index[1];
 			const size_t z0 = index[2];
 			const fl e000 = grid_map(x0, y0, z0);
-			energies[i] = e000;
 
 			// The derivative of probe atoms can be precalculated at the cost of massive memory storage.
 			const fl e100 = grid_map(x0 + 1, y0,     z0    );
@@ -551,7 +548,7 @@ namespace idock
 		return result(e, f, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 	}
 
-	void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const size_t num_conformations)
+	void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const size_t num_conformations, const box& b, const vector<array3d<fl>>& grid_maps)
 	{
 		BOOST_ASSERT(num_conformations > 0);
 		BOOST_ASSERT(num_conformations <= results.size());
@@ -568,7 +565,7 @@ namespace idock
 			const result& r = results[i];
 			out << "MODEL     " << setw(4) << (i + 1) << '\n'
 				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
-				<< "REMARK              NET FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
+				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
 				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n";
 			for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
@@ -576,12 +573,15 @@ namespace idock
 				const string& line = lines[j];
 				if (line.size() >= 79) // This line starts with "ATOM" or "HETATM"
 				{
+					const fl   free_energy = line[77] == 'H' ? 0 : grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom]));
 					const vec3& coordinate = line[77] == 'H' ? r.hydrogens[hydrogen++] : r.heavy_atoms[heavy_atom++];
 					out << line.substr(0, 30)
 						<< setw(8) << coordinate[0]
 						<< setw(8) << coordinate[1]
 						<< setw(8) << coordinate[2]
-						<< line.substr(54);
+						<< line.substr(54, 16)
+						<< setw(6) << free_energy
+						<< line.substr(76);
 				}
 				else // This line starts with "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", TORSDOF", which will not change during docking.
 				{
