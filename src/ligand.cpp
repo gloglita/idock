@@ -567,7 +567,10 @@ namespace idock
 		{
 			const result& r = results[i];
 			out << "MODEL     " << setw(4) << (i + 1) << '\n'
-				<< "REMARK     FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e << " KCAL/MOL\n";
+				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
+				<< "REMARK              NET FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
+				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
+				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n";
 			for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 			{
 				const string& line = lines[j];

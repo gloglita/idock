@@ -33,6 +33,7 @@ namespace idock
 	public:
 		fl e; ///< Free energy.
 		fl f; ///< Inter-molecular free energy.
+		fl e_nd; ///< Normalized free energy, only for output purpose.
 		vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 		vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 

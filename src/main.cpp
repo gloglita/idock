@@ -483,7 +483,7 @@ int main(int argc, char* argv[])
 				const fl best_result_intra_e = best_result.e - best_result.f;
 				for (size_t i = 0; i < num_results; ++i)
 				{
-					results[i].e = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
+					results[i].e_nd = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
 				}
 
 				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
