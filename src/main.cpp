@@ -44,7 +44,7 @@
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 5-9 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 5 February 2012
+ * \date 26 February 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -490,17 +490,17 @@ int main(int argc, char* argv[])
 				}
 
 				// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
-				const fl energy_upper_bound = best_result.e + energy_range;
-				for (num_conformations = 1; (num_conformations < num_results) && (results[num_conformations].e <= energy_upper_bound); ++num_conformations);
+				const fl energy_upper_bound = best_result.e_nd + energy_range;
+				for (num_conformations = 1; (num_conformations < num_results) && (results[num_conformations].e_nd <= energy_upper_bound); ++num_conformations);
 
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
 
 				// Write the conformations to the output folder.
+				// Operator /= is overloaded to concatenate the output folder and the ligand filename.
 				const path output_ligand_path = output_folder_path / ligand_filename;
 				if (num_conformations)
 				{
-					// Operator /= is overloaded to concatenate the output folder and the ligand filename.
 					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
 				}
 
@@ -508,7 +508,7 @@ int main(int argc, char* argv[])
 				const size_t num_energies = std::min<size_t>(num_conformations, 4);
 				for (size_t i = 0; i < num_energies; ++i)
 				{
-					log << std::setw(8) << results[i].e;
+					log << std::setw(8) << results[i].e_nd;
 				}
 				log << '\n';
 
@@ -516,7 +516,7 @@ int main(int argc, char* argv[])
 				vector<fl> energies(num_conformations);
 				for (size_t i = 0; i < num_conformations; ++i)
 				{
-					energies[i] = results[i].e;
+					energies[i] = results[i].e_nd;
 				}
 				summaries.push_back(new summary(output_ligand_path, static_cast<vector<fl>&&>(energies)));
 
