@@ -36,7 +36,7 @@ Supported operating systems and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0 and 1.49.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, and `Program Options`.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0 and 1.49.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem` and `Program Options`.
 
 ### Compilation on Linux
 
@@ -114,7 +114,7 @@ Change Log
 ### 1.3 (under construction)
 
 * Used a more compact and constant data structure for ligand representation.
-* Refactored program option `conformations` to 'max_conformations`.
+* Refactored program option `conformations` to `max_conformations`.
 * Output full path to docked ligands to csv.
 * Removed boost::math::quaternion and implemented a lightweight quaternion class.
 * Added BibTeX citation to the idock paper accepted and to be published in CIBCB 2012.
