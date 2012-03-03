@@ -30,7 +30,7 @@ Supported operating systems and compilers
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
-* Windows 8 Developer Preview x64 and Visual Studio 11 Express
+* Windows 8 Consumer Preview x64 and Visual Studio 11 Ultimate Beta
 
 
 Compilation
@@ -111,6 +111,20 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
+### 1.3 (under construction)
+
+* Used a more compact and constant data structure for ligand representation.
+* Refactored program option `conformations` to 'max_conformations`.
+* Output full path to docked ligands to csv.
+* Removed boost::math::quaternion and implemented a lightweight quaternion class.
+* Added BibTeX citation to the idock paper accepted and to be published in CIBCB 2012.
+* Added bash scripts for running AutoDock Vina for docking ZINC clean drug-like ligands.
+* Output predicted total free energy, predicted inter-ligand free energy and predicted intra-ligand free energy to docked PDBQT files.
+* Output predicted free energy for each heavy atom to docked PDBQT files.
+* Updated Boost from 1.48.0 to 1.49.0.
+* Supported compilation on Windows 8 Consumer Preview x64 with Visual Studio 11 Ultimate Beta.
+* Added a new example with PDB code 1V9U.
+
 ### 1.2 (2012-02-06)
 
 * Added program option `csv` for dumping docking summary sorted in the ascending of predicted free energy.
@@ -171,4 +185,3 @@ Green gooseberry is chosen as the logo for idock because it is one of the author
 [CodePlex]: http://idock.codeplex.com
 [Jacky Lee]: http://www.cse.cuhk.edu.hk/~hjli
 [Open Clip Art]: http://www.openclipart.org
-
