@@ -29,7 +29,7 @@
  * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
  *
  * \section availability Availability
- * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X and FreeBSD are provided.
+ * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris are provided.
  *
  * \section installation Installation
  * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is not supported at the moment.
@@ -44,7 +44,7 @@
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 5-9 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 26 February 2012
+ * \date 4 March 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -63,7 +63,7 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "idock 1.2\n";
+	std::cout << "idock 1.3\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;

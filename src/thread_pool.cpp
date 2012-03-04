@@ -49,7 +49,7 @@ namespace idock
 	using namespace boost::flyweights;
 	typedef	flyweight<key_value<size_t, progress_bar, progress_bar_num_tasks_extractor>, no_tracking> progress_bar_flyweight;
 
-	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), tasks_ptr(nullptr), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_bar_index(0), exiting(false)
+	thread_pool::thread_pool(const size_t num_threads) : num_threads(num_threads), num_tasks(0), num_started_tasks(0), num_completed_tasks(0), next_bar_index(0), exiting(false)
 	{
 		// Create threads to call (*this)().
 		for (size_t i = 0; i < num_threads; ++i)
