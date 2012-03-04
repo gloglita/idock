@@ -26,6 +26,7 @@ Supported operating systems and compilers
 * Arch Linux 3.2.4 x86_64 and CLANG 3.0
 * Arch Linux 3.2.4 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.0
+* Solaris 11 11/11 and GCC 4.5.2
 * Mac OS X 10.7.2 x86_64 and CLANG 3.0
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
@@ -124,6 +125,7 @@ Change Log
 * Updated Boost from 1.48.0 to 1.49.0.
 * Supported compilation on Windows 8 Consumer Preview x64 with Visual Studio 11 Ultimate Beta.
 * Added a new example with PDB code 1V9U.
+* Supported compilation on Solaris 11 11/11 with GCC 4.5.2.
 
 ### 1.2 (2012-02-06)
 
