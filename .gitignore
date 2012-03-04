@@ -38,7 +38,6 @@ log.txt
 log.csv
 output
 doc
-timing
 testcases
 verification
 screening
@@ -46,7 +45,8 @@ hits
 ideal
 special
 design
+parsetime
+time.csv
 pipeline.cpp
-DIH.png
-examples/2ZD1/13_p0.362
-examples/3KFN/CH4
+11_p0.18.*
+13_p0.76.*
