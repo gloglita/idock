@@ -112,7 +112,7 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.3 (under construction)
+### 1.3 (2012-03-05)
 
 * Used a more compact and constant data structure for ligand representation.
 * Refactored program option `conformations` to `max_conformations`.
