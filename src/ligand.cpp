@@ -34,11 +34,8 @@ namespace idock
 		// Initialize helper variables for parsing.
 		vector<size_t> numbers; ///< Atom serial numbers.
 		numbers.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
-		vector<vector<size_t>> bonds(100); ///< Covalent bonds.
-		for (auto i = bonds.begin(); i < bonds.end(); ++i)
-		{
-			(*i).reserve(4); // An atom typically consists of <= 4 bonds.
-		}
+		vector<vector<size_t>> bonds; ///< Covalent bonds.
+		bonds.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
 		frame* f = &frames.front(); // Pointer to the current frame.
 		f->rotorYidx = 0; // Assume the rotorY of ROOT frame is the first atom.
@@ -91,6 +88,9 @@ namespace idock
 				else // Current atom is a heavy atom.
 				{
 					// Find bonds between the current atom and the other atoms of the same frame.
+					BOOST_ASSERT(bonds.size() == heavy_atoms.size());
+					bonds.push_back(vector<size_t>());
+					bonds.back().reserve(4); // An atom typically consists of <= 4 bonds.
 					for (size_t i = heavy_atoms.size(); i > f->habegin;)
 					{
 						atom& b = heavy_atoms[--i];
