@@ -117,7 +117,7 @@ Change Log
 * Fixed a segmentation fault bug when the number of heavy atoms exceeds 100.
 * Added two new examples 2IQH and 1HCL.
 * To penalize atoms that are out of search box.
-* To automatically restart starting from the previous failure point.
+* To automatically restart docking from the previous failure point.
 
 ### 1.3 (2012-03-05)
 
