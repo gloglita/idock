@@ -50,5 +50,4 @@ time.csv
 pipeline.cpp
 11_p0.18.*
 13_p0.76.*
-11_p0.18
-TCM
+*.tar.bz2
