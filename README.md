@@ -22,9 +22,9 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.2.9 x86_64 and GCC 4.6.3
-* Arch Linux 3.2.9 x86_64 and CLANG 3.0
-* Arch Linux 3.2.9 x86_64 and Intel C++ Compiler 12.1.2
+* Arch Linux 3.2.12 x86_64 and GCC 4.6.3
+* Arch Linux 3.2.12 x86_64 and CLANG 3.0
+* Arch Linux 3.2.12 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.0
 * Solaris 11 11/11 and GCC 4.5.2
 * Mac OS X 10.7.2 x86_64 and CLANG 3.0
@@ -111,6 +111,13 @@ The generated PDF will be `refman.pdf`.
 
 Change Log
 ----------
+
+### 1.4 (under construction)
+
+* Fixed a segmentation fault bug when the number of heavy atoms exceeds 100.
+* Added two new examples 2IQH and 1HCL.
+* To penalize atoms that are out of search box.
+* To automatically restart starting from the previous failure point.
 
 ### 1.3 (2012-03-05)
 
