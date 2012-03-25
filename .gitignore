@@ -46,9 +46,12 @@ ideal
 special
 design
 parsetime
+combinelogcsv
 time.csv
 pipeline.cpp
 11_p0.18.*
 13_p0.76.*
 16_p0.*
 *.tar.bz2
+pdb
+best
