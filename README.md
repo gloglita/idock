@@ -116,8 +116,10 @@ Change Log
 
 * Fixed a segmentation fault bug when the number of heavy atoms exceeds 100.
 * Added two new examples 2IQH and 1HCL.
-* To penalize atoms that are out of search box.
+* To revert to relative path in log.csv to shrink size.
+* To add enough commas in log.csv to align rows.
 * To automatically restart docking from the previous failure point.
+* To penalize atoms that are out of search box.
 
 ### 1.3 (2012-03-05)
 
