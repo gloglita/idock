@@ -46,7 +46,8 @@ ideal
 special
 design
 parsetime
-combinelogcsv
+combinelog
+extractelitists
 time.csv
 pipeline.cpp
 11_p0.18.*
