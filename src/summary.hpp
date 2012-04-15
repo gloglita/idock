@@ -29,9 +29,9 @@ namespace idock
 	class summary
 	{
 	public:
-		const path filename;
+		const string filestem;
 		const vector<fl> energies;
-		explicit summary(const path& filename, vector<fl>&& energies_) : filename(filename), energies(static_cast<vector<fl>&&>(energies_)) {}
+		explicit summary(string&& filestem_, vector<fl>&& energies_) : filestem(static_cast<string&&>(filestem_)), energies(static_cast<vector<fl>&&>(energies_)) {}
 	};
 
 	/// For sorting ptr_vector<summary>.

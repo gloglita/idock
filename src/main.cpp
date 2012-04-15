@@ -44,7 +44,7 @@
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 5-9 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 4 March 2012
+ * \date 15 April 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -63,7 +63,7 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "idock 1.3\n";
+	std::cout << "idock 1.4 alpha\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
@@ -150,7 +150,6 @@ int main(int argc, char* argv[])
 			std::cerr << "Receptor " << receptor_path << " is not a regular file\n";
 			return 1;
 		}
-		receptor_path = canonical(receptor_path).make_preferred();
 
 		// Validate ligand_folder.
 		if (!exists(ligand_folder_path))
@@ -163,10 +162,9 @@ int main(int argc, char* argv[])
 			std::cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
-		//ligand_folder_path = canonical(ligand_folder_path).make_preferred();
 
 		// Validate size_x, size_y, size_z.
-		if (size_x < box::Default_Partition_Granularity ||
+		if (	size_x < box::Default_Partition_Granularity ||
 			size_y < box::Default_Partition_Granularity ||
 			size_z < box::Default_Partition_Granularity)
 		{
@@ -194,7 +192,6 @@ int main(int argc, char* argv[])
 				return 1;
 			}
 		}
-		output_folder_path = canonical(output_folder_path).make_preferred();
 
 		// Validate log_path.
 		if (is_directory(log_path))
@@ -247,7 +244,7 @@ int main(int argc, char* argv[])
 	{
 		// Initialize the log.
 		tee log(log_path);
-		std::cout << "Logging to " << canonical(log_path).make_preferred() << '\n';
+		std::cout << "Logging to " << log_path << '\n';
 
 		// Initialize a Mersenne Twister random number generator.
 		log << "Using random seed " << seed << '\n';
@@ -368,7 +365,7 @@ int main(int argc, char* argv[])
 		log << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 
 		// Perform docking for each file in the ligand folder.
-		log << "  index |       ligand |   progress | conf | top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
+		log << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
 		using boost::filesystem::directory_iterator;
@@ -383,10 +380,8 @@ int main(int argc, char* argv[])
 
 			try // The try-catch block ensures the remaining ligands will be docked should the current ligand fail.
 			{
-				const path ligand_path = dir_iter->path();
-				const path ligand_filename = ligand_path.filename();
-
 				// Parse the ligand.
+				const path ligand_path = dir_iter->path();
 				ligand lig(ligand_path);
 
 				// Create grid maps on the fly if necessary.
@@ -434,7 +429,9 @@ int main(int argc, char* argv[])
 				}
 
 				// Dump the ligand filename.
-				log << std::setw(7) << num_ligands << " | " << std::setw(12) << ligand_filename.stem().string() << " | ";
+				const path ligand_filename = ligand_path.filename();
+				const string ligand_filestem = ligand_filename.stem().string();
+				log << std::setw(7) << num_ligands << " | " << std::setw(12) << ligand_filestem << " | ";
 				std::cout << std::flush;
 
 				// Populate the Monte Carlo task container.
@@ -498,10 +495,9 @@ int main(int argc, char* argv[])
 
 				// Write the conformations to the output folder.
 				// Operator /= is overloaded to concatenate the output folder and the ligand filename.
-				const path output_ligand_path = output_folder_path / ligand_filename;
 				if (num_conformations)
 				{
-					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
+					lig.write_models(output_folder_path / ligand_filename, results, num_conformations, b, grid_maps);
 				}
 
 				// Display the free energies of the top 4 conformations.
@@ -518,7 +514,7 @@ int main(int argc, char* argv[])
 				{
 					energies[i] = results[i].e_nd;
 				}
-				summaries.push_back(new summary(output_ligand_path, static_cast<vector<fl>&&>(energies)));
+				summaries.push_back(new summary(const_cast<string&&>(ligand_filestem), static_cast<vector<fl>&&>(energies)));
 
 				// Clear the results of the current ligand.
 				results.clear();
@@ -534,10 +530,10 @@ int main(int argc, char* argv[])
 		summaries.sort(); // Might be a bottleneck for a large number of summaries.
 
 		ofstream csv(csv_path);
-		csv << "ligand,no. of conformations";
+		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)
 		{
-			csv << ",free energy in kcal/mol of conformation " << i;
+			csv << ",FE" << i;
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
 		csv << '\n' << std::setprecision(3);
@@ -546,10 +542,14 @@ int main(int argc, char* argv[])
 		{
 			const summary& s = summaries[i];
 			const size_t num_conformations = s.energies.size();
-			csv << s.filename << ',' << num_conformations;
+			csv << s.filestem << ',' << num_conformations;
 			for (size_t j = 0; j < num_conformations; ++j)
 			{
 				csv << ',' << s.energies[j];
+			}
+			for (size_t j = num_conformations; j < max_conformations; ++j)
+			{
+				csv << ',';
 			}
 			csv << '\n';
 		}
