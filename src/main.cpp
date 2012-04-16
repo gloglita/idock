@@ -324,9 +324,6 @@ int main(int argc, char* argv[])
 		vector<size_t> atom_types_to_populate;
 		atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
-		// Initialize a summary container. ptr_vector is used for fast sorting.
-		ptr_vector<summary> summaries(1000); // A virtual screening typically docks <= 1000 ligands.
-
 		// Initialize a thread pool and create worker threads for later use.
 		log << "Creating a thread pool of " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << '\n';
 		thread_pool tp(num_threads);
@@ -380,9 +377,15 @@ int main(int argc, char* argv[])
 
 			try // The try-catch block ensures the remaining ligands will be docked should the current ligand fail.
 			{
+				// Obtain a ligand.
+				const path input_ligand_path = dir_iter->path();
+				
+				// Skip the current ligand if it has been docked.
+				const path output_ligand_path = output_folder_path / input_ligand_path.filename();
+				if (exists(output_ligand_path)) continue;
+				
 				// Parse the ligand.
-				const path ligand_path = dir_iter->path();
-				ligand lig(ligand_path);
+				ligand lig(input_ligand_path);
 
 				// Create grid maps on the fly if necessary.
 				BOOST_ASSERT(atom_types_to_populate.empty());
@@ -428,10 +431,8 @@ int main(int argc, char* argv[])
 					std::cout << '\r' << std::setw(36) << '\r';
 				}
 
-				// Dump the ligand filename.
-				const path ligand_filename = ligand_path.filename();
-				const string ligand_filestem = ligand_filename.stem().string();
-				log << std::setw(7) << num_ligands << " | " << std::setw(12) << ligand_filestem << " | ";
+				// Dump the ligand filename.				
+				log << std::setw(7) << num_ligands << " | " << std::setw(12) << output_ligand_path.stem().string() << " | ";
 				std::cout << std::flush;
 
 				// Populate the Monte Carlo task container.
@@ -472,7 +473,7 @@ int main(int argc, char* argv[])
 
 				// If no conformation can be found, skip the current ligand and proceed with the next one.
 				const size_t num_results = std::min<size_t>(results.size(), max_conformations);
-				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >=1 is enforced when parsing command line arguments.
+				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >= 1 is enforced when parsing command line arguments.
 				{
 					log << std::setw(4) << 0 << '\n';
 					continue;
@@ -493,11 +494,10 @@ int main(int argc, char* argv[])
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
 
-				// Write the conformations to the output folder.
-				// Operator /= is overloaded to concatenate the output folder and the ligand filename.
+				// Write the conformations to the output folder.				
 				if (num_conformations)
 				{
-					lig.write_models(output_folder_path / ligand_filename, results, num_conformations, b, grid_maps);
+					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
 				}
 
 				// Display the free energies of the top 4 conformations.
@@ -507,14 +507,6 @@ int main(int argc, char* argv[])
 					log << std::setw(8) << results[i].e_nd;
 				}
 				log << '\n';
-
-				// Aggregate the summary of current ligand for subsequent ranking.
-				vector<fl> energies(num_conformations);
-				for (size_t i = 0; i < num_conformations; ++i)
-				{
-					energies[i] = results[i].e_nd;
-				}
-				summaries.push_back(new summary(const_cast<string&&>(ligand_filestem), static_cast<vector<fl>&&>(energies)));
 
 				// Clear the results of the current ligand.
 				results.clear();
@@ -526,9 +518,34 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		// Sort the summaries.
-		summaries.sort(); // Might be a bottleneck for a large number of summaries.
+		// Initialize necessary variables for storing ligand summaries.
+		ptr_vector<summary> summaries(num_ligands);
+		vector<fl> energies;
+		energies.reserve(max_conformations);
+		string line;
+		line.reserve(79);
+		
+		// Scan the output folder to retrieve ligand summaries.
+		for (directory_iterator dir_iter(output_folder_path); dir_iter != end_dir_iter; ++dir_iter)
+		{
+			const path p = dir_iter->path();
+			ifstream in(p); // Parsing starts. Open the file stream as late as possible.
+			while (getline(in, line))
+			{
+				if (starts_with(line, "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:"))
+				{
+					energies.push_back(right_cast<fl>(line, 56, 63));
+				}
+			}
+			in.close(); // Parsing finishes. Close the file stream as soon as possible.
+			summaries.push_back(new summary(p.stem().string(), energies));
+			energies.clear();
+		}
 
+		// Sort the summaries.
+		summaries.sort();
+
+		// Dump ligand summaries to the csv file.
 		ofstream csv(csv_path);
 		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)
@@ -537,7 +554,7 @@ int main(int argc, char* argv[])
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
 		csv << '\n' << std::setprecision(3);
-		const size_t num_summaries = summaries.size(); // num_summaries == num_ligands may not always hold should any ligands fail.
+		const size_t num_summaries = summaries.size();
 		for (size_t i = 0; i < num_summaries; ++i)
 		{
 			const summary& s = summaries[i];

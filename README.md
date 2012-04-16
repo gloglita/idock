@@ -118,7 +118,7 @@ Change Log
 * Added two new examples 2IQH and 1HCL.
 * Reverted to file stem only in the ligand column in log.csv to shrink size.
 * Added sufficient commas in log.csv to align rows.
-* To automatically restart docking from the previous failure point.
+* Skipped already docked ligands.
 * To penalize atoms that are out of search box.
 
 ### 1.3 (2012-03-05)
