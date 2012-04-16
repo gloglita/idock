@@ -112,14 +112,14 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.4 (under construction)
+### 1.4 (2012-04-16)
 
 * Fixed a segmentation fault bug when the number of heavy atoms exceeds 100.
 * Added two new examples 2IQH and 1HCL.
 * Reverted to file stem only in the ligand column in log.csv to shrink size.
 * Added sufficient commas in log.csv to align rows.
 * Skipped already docked ligands.
-* To penalize atoms that are out of search box.
+* Prevented dead loop by limiting the number of initial conformation trials.
 
 ### 1.3 (2012-03-05)
 
