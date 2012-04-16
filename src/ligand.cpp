@@ -310,9 +310,6 @@ namespace idock
 
 	bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g) const
 	{
-		if (!b.within(conf.position))
-			return false;
-
 		// Initialize frame-wide conformational variables.
 		vector<vec3> origins; ///< Origin coordinate, which is rotorY.
 		vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
@@ -341,8 +338,6 @@ namespace idock
 		for (size_t i = root.habegin; i < root.haend; ++i)
 		{
 			coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
-			if (!b.within(coordinates[i]))
-				return false;
 		}
 
 		// Apply torsions to BRANCH frames.
@@ -352,8 +347,6 @@ namespace idock
 
 			// Update origin.
 			origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
-			if (!b.within(origins[k]))
-				return false;
 
 			// If the current BRANCH frame does not have an active torsion, skip it.
 			if (!f.active)
@@ -376,8 +369,6 @@ namespace idock
 			for (size_t i = f.habegin; i < f.haend; ++i)
 			{
 				coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coordinate;
-				if (!b.within(coordinates[i]))
-					return false;
 			}
 		}
 
@@ -402,6 +393,14 @@ namespace idock
 		e = 0;
 		for (size_t i = 0; i < num_heavy_atoms; ++i)
 		{
+			// Penalize free energy if the atom is outside the search box.
+			if (!b.within(coordinates[i]))
+			{
+				e += Out_of_Box_Penalty;
+				derivatives[i] = zero3;
+				continue;
+			}
+			
 			// Retrieve the grid map in need.
 			const array3d<fl>& grid_map = grid_maps[heavy_atoms[i].xs];
 			BOOST_ASSERT(grid_map.initialized());
@@ -573,7 +572,7 @@ namespace idock
 				const string& line = lines[j];
 				if (line.size() >= 79) // This line starts with "ATOM" or "HETATM"
 				{
-					const fl   free_energy = line[77] == 'H' ? 0 : grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom]));
+					const fl   free_energy = line[77] == 'H' ? 0 : b.within(r.heavy_atoms[heavy_atom]) ? grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom])) : Out_of_Box_Penalty;
 					const vec3& coordinate = line[77] == 'H' ? r.hydrogens[hydrogen++] : r.heavy_atoms[heavy_atom++];
 					out << line.substr(0, 30)
 						<< setw(8) << coordinate[0]
