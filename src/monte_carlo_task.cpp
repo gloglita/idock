@@ -51,7 +51,8 @@ namespace idock
 		conformation c0(lig.num_active_torsions);
 		fl e0, f0;
 		change g0(lig.num_active_torsions);
-		do
+		bool valid_conformation = false;
+		for (size_t i = 0; (i < 1000) && (!valid_conformation); ++i)
 		{
 			// Randomize conformation c0.
 			c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
@@ -60,7 +61,9 @@ namespace idock
 			{
 				c0.torsions[i] = uniform_pi_gen();
 			}
-		} while (!lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0));
+			valid_conformation = lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
+		}
+		if (!valid_conformation) return;
 		fl best_e = e0; // The best free energy so far.
 
 		// Initialize necessary variables for BFGS.
