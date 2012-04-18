@@ -1,3 +1,4 @@
-for file in ../../../ligands/ZINC/*; do
-  vina --config vina.cfg --ligand $file --out out/${file:22:${#file}-22} --log log/${file:22:${#file}-28}.txt
+for f in ../../../ligands/ZINC/*; do
+	s=${f:22:${#f}-28}
+	vina --config vina.cfg --ligand $f --out out/$s.pdbqt --log log/$s.txt
 done
