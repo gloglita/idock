@@ -48,6 +48,8 @@ design
 parsetime
 combinelog
 extractelitists
+rmsd
+pdbqt2csv
 time.csv
 pipeline.cpp
 11_p0.18.*
