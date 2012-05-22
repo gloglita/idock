@@ -53,7 +53,8 @@ namespace idock
 	const size_t AD_TYPE_Co   = 25; ///< Cobalt.
 	const size_t AD_TYPE_Cd   = 26; ///< Cadmium.
 	const size_t AD_TYPE_As   = 27; ///< Arsenic.
-	const size_t AD_TYPE_SIZE = 28; ///< Number of supported AutoDock4 atom types.
+	const size_t AD_TYPE_Sr   = 28; ///< Strontium.
+	const size_t AD_TYPE_SIZE = 29; ///< Number of supported AutoDock4 atom types.
 
 	const string ad_type_strings[] = ///< AutoDock4 atom type names.
 	{
@@ -85,6 +86,7 @@ namespace idock
 		"Co", // 25 = AD_TYPE_Co
 		"Cd", // 26 = AD_TYPE_Cd
 		"As", // 27 = AD_TYPE_As
+		"Sr", // 28 = AD_TYPE_Sr
 	};
 
 	/// Parses AutoDock4 atom type name, and returns AD_TYPE_SIZE if it does not match any supported AutoDock4 atom types.
@@ -130,7 +132,8 @@ namespace idock
 		1.331, // 24 = AD_TYPE_Ni, 1.331 = 1.1 * 1.21
 		1.386, // 25 = AD_TYPE_Co, 1.386 = 1.1 * 1.26
 		1.628, // 26 = AD_TYPE_Cd, 1.628 = 1.1 * 1.48
-		1.309  // 27 = AD_TYPE_As, 1.309 = 1.1 * 1.19
+		1.309, // 27 = AD_TYPE_As, 1.309 = 1.1 * 1.19
+		2.112, // 28 = AD_TYPE_Sr, 2.112 = 1.1 * 1.92
 	};
 
 	/// Returns covalent radius from an AutoDock4 atom type.
@@ -252,6 +255,7 @@ namespace idock
 		XS_TYPE_Met_D, // 25 = AD_TYPE_Co
 		XS_TYPE_Met_D, // 26 = AD_TYPE_Cd
 		XS_TYPE_Met_D, // 27 = AD_TYPE_As
+		XS_TYPE_Met_D, // 28 = AD_TYPE_Sr
 	};
 
 	/// Represents an atom by very simple fields.
