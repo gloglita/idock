@@ -3,6 +3,8 @@ idock
 
 idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is inspired by [AutoDock Vina], and is hosted by GitHub at https://GitHub.com/HongjianLi/idock under [Apache License 2.0].
 
+[istar] is a [SaaS] platform for idock.
+
 
 Features
 --------
@@ -188,7 +190,9 @@ Green gooseberry is chosen as the logo for idock because it is one of the author
 [virtual screening]: http://en.wikipedia.org/wiki/Virtual_screening
 [docking]: http://en.wikipedia.org/wiki/Docking_(molecular)
 [AutoDock Vina]: http://vina.scripps.edu
-[Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0.html
+[Apache License 2.0]: http://www.apache.org/licenses/LICENSE-2.0
+[SaaS]: http://en.wikipedia.org/wiki/Software_as_a_service
+[istar]: https://github.com/HongjianLi/istar
 [C++11]: http://en.wikipedia.org/wiki/C++11
 [igrow]: https://github.com/HongjianLi/igrow
 [Boost C++ Libraries]: http://www.boost.org
