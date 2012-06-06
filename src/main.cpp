@@ -363,6 +363,7 @@ int main(int argc, char* argv[])
 
 		// Perform docking for each file in the ligand folder.
 		log << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
+		path input_ligand_path;
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
 		using boost::filesystem::directory_iterator;
@@ -378,12 +379,12 @@ int main(int argc, char* argv[])
 			try // The try-catch block ensures the remaining ligands will be docked should the current ligand fail.
 			{
 				// Obtain a ligand.
-				const path input_ligand_path = dir_iter->path();
-				
+				input_ligand_path = dir_iter->path();
+
 				// Skip the current ligand if it has been docked.
 				const path output_ligand_path = output_folder_path / input_ligand_path.filename();
 				if (exists(output_ligand_path)) continue;
-				
+
 				// Parse the ligand.
 				ligand lig(input_ligand_path);
 
@@ -431,7 +432,7 @@ int main(int argc, char* argv[])
 					std::cout << '\r' << std::setw(36) << '\r';
 				}
 
-				// Dump the ligand filename.				
+				// Dump the ligand filename.
 				log << std::setw(7) << num_ligands << " | " << std::setw(12) << output_ligand_path.stem().string() << " | ";
 				std::cout << std::flush;
 
@@ -494,7 +495,7 @@ int main(int argc, char* argv[])
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
 
-				// Write the conformations to the output folder.				
+				// Write the conformations to the output folder.
 				if (num_conformations)
 				{
 					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
@@ -513,7 +514,7 @@ int main(int argc, char* argv[])
 			}
 			catch (const std::exception& e)
 			{
-				log << e.what() << '\n';
+				std::cout << input_ligand_path.stem().string() << ' ' << e.what() << '\n';
 				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
@@ -524,7 +525,7 @@ int main(int argc, char* argv[])
 		energies.reserve(max_conformations);
 		string line;
 		line.reserve(79);
-		
+
 		// Scan the output folder to retrieve ligand summaries.
 		for (directory_iterator dir_iter(output_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
@@ -538,6 +539,11 @@ int main(int argc, char* argv[])
 				}
 			}
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
+			if (energies.empty())
+			{
+				log << p.stem().string() << " no energy\n";
+				continue;
+			}
 			summaries.push_back(new summary(p.stem().string(), energies));
 			energies.clear();
 		}
@@ -546,7 +552,8 @@ int main(int argc, char* argv[])
 		summaries.sort();
 
 		// Dump ligand summaries to the csv file.
-		log << "Writing " << csv_path << '\n';
+		const size_t num_summaries = summaries.size();
+		log << "Writing summary of " << num_summaries << " ligands to " << csv_path << '\n';
 		ofstream csv(csv_path);
 		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)
@@ -555,7 +562,6 @@ int main(int argc, char* argv[])
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
 		csv << '\n' << std::setprecision(3);
-		const size_t num_summaries = summaries.size();
 		for (size_t i = 0; i < num_summaries; ++i)
 		{
 			const summary& s = summaries[i];
