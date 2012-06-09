@@ -16,6 +16,7 @@
 
 */
 
+#include <boost/iostreams/filtering_stream.hpp>
 #include "fstream.hpp"
 #include "parsing_error.hpp"
 #include "ligand.hpp"
@@ -44,8 +45,13 @@ namespace idock
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 		// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
+		using namespace boost::iostreams;
 		ifstream in(p); // Parsing starts. Open the file stream as late as possible.
-		while (getline(in, line))
+		filtering_istream fis;
+		const string ext = p.extension().string();
+		if (ext == ".gz") fis.push(gzip_dec); else if (ext == ".bz2") fis.push(bzip2_dec);
+		fis.push(in);
+		while (getline(fis, line))
 		{
 			++num_lines;
 			if (starts_with(line, "ATOM") || starts_with(line, "HETATM"))
@@ -558,12 +564,16 @@ namespace idock
 		// Dump binding conformations to the output ligand file.
 		using namespace std;
 		ofstream out(output_ligand_path); // Dumping starts. Open the file stream as late as possible.
-		out.setf(ios::fixed, ios::floatfield);
-		out << setprecision(3);
+		filtering_ostream fos;
+		const string ext = output_ligand_path.extension().string();
+		if (ext == ".gz") fos.push(gzip_com); else if (ext == ".bz2") fos.push(bzip2_com);
+		fos.push(out);
+		fos.setf(ios::fixed, ios::floatfield);
+		fos << setprecision(3);
 		for (size_t i = 0; i < num_conformations; ++i)
 		{
 			const result& r = results[i];
-			out << "MODEL     " << setw(4) << (i + 1) << '\n'
+			fos << "MODEL     " << setw(4) << (i + 1) << '\n'
 				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
 				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
@@ -575,7 +585,7 @@ namespace idock
 				{
 					const fl   free_energy = line[77] == 'H' ? 0 : grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom]));
 					const vec3& coordinate = line[77] == 'H' ? r.hydrogens[hydrogen++] : r.heavy_atoms[heavy_atom++];
-					out << line.substr(0, 30)
+					fos << line.substr(0, 30)
 						<< setw(8) << coordinate[0]
 						<< setw(8) << coordinate[1]
 						<< setw(8) << coordinate[2]
@@ -585,12 +595,11 @@ namespace idock
 				}
 				else // This line starts with "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", TORSDOF", which will not change during docking.
 				{
-					out << line;
+					fos << line;
 				}
-				out << '\n';
+				fos << '\n';
 			}
-			out << "ENDMDL\n";
+			fos << "ENDMDL\n";
 		}
-		out.close(); // Dumping finishes. Close the file stream as soon as possible.
 	}
 }

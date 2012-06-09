@@ -1,6 +1,6 @@
 /*
 
-	Copyright (c) 2011, The Chinese University of Hong Kong
+	Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
 	Licensed under the Apache License, Version 2.0 (the "License");
 	you may not use this file except in compliance with the License.
@@ -44,7 +44,7 @@
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 9-12 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 16 April 2012
+ * \date 9 June 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -52,6 +52,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
 #include "seed.hpp"
 #include "tee.hpp"
 #include "receptor.hpp"
@@ -258,6 +259,7 @@ int main(int argc, char* argv[])
 		const receptor rec(receptor_path);
 
 		// Divide the box into coarse-grained partitions for subsequent grid map creation.
+		using boost::array;
 		array3d<vector<size_t>> partitions(b.num_partitions);
 		{
 			// Find all the heavy receptor atoms that are within 8A of the box.
@@ -380,6 +382,7 @@ int main(int argc, char* argv[])
 			{
 				// Obtain a ligand.
 				input_ligand_path = dir_iter->path();
+				const string stem = input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string();
 
 				// Skip the current ligand if it has been docked.
 				const path output_ligand_path = output_folder_path / input_ligand_path.filename();
@@ -433,7 +436,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Dump the ligand filename.
-				log << std::setw(7) << num_ligands << " | " << std::setw(12) << output_ligand_path.stem().string() << " | ";
+				log << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | ";
 				std::cout << std::flush;
 
 				// Populate the Monte Carlo task container.
@@ -514,7 +517,7 @@ int main(int argc, char* argv[])
 			}
 			catch (const std::exception& e)
 			{
-				std::cout << input_ligand_path.stem().string() << ' ' << e.what() << '\n';
+				std::cout << input_ligand_path.filename().string() << ' ' << e.what() << '\n';
 				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
@@ -531,7 +534,12 @@ int main(int argc, char* argv[])
 		{
 			const path p = dir_iter->path();
 			ifstream in(p); // Parsing starts. Open the file stream as late as possible.
-			while (getline(in, line))
+			filtering_istream fis;
+			const string ext = p.extension().string();
+			const string stem = ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string();
+			if (ext == ".gz") fis.push(gzip_dec); else if (ext == ".bz2") fis.push(bzip2_dec);
+			fis.push(in);
+			while (getline(fis, line))
 			{
 				if (starts_with(line, "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:"))
 				{
@@ -541,10 +549,10 @@ int main(int argc, char* argv[])
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
 			if (energies.empty())
 			{
-				log << p.stem().string() << " no energy\n";
+				log << p.filename().string() << " no energy\n";
 				continue;
 			}
-			summaries.push_back(new summary(p.stem().string(), energies));
+			summaries.push_back(new summary(stem, energies));
 			energies.clear();
 		}
 

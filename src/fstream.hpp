@@ -22,13 +22,21 @@
 
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
 
 namespace idock
 {
 	using namespace boost::system;
+	using namespace boost::iostreams;
 	using boost::filesystem::path;
 	using boost::filesystem::filesystem_error;
 
+	static const gzip_decompressor gzip_dec;
+	static const bzip2_decompressor bzip2_dec;
+	static const gzip_compressor gzip_com;
+	static const bzip2_compressor bzip2_com;
+		
 	/// Represents a file reading stream.
 	class ifstream : public boost::filesystem::ifstream
 	{
