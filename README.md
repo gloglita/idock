@@ -24,12 +24,12 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.3.2 x86_64 and GCC 4.7.0
-* Arch Linux 3.3.2 x86_64 and CLANG 3.0
-* Arch Linux 3.3.2 x86_64 and Intel C++ Compiler 12.1.2
-* FreeBSD 9.0 x86_64 and CLANG 3.0
+* Arch Linux 3.4.1 x86_64 and GCC 4.7.0
+* Arch Linux 3.4.1 x86_64 and CLANG 3.1
+* Arch Linux 3.4.1 x86_64 and Intel C++ Compiler 12.1.2
+* FreeBSD 9.0 x86_64 and CLANG 3.1
 * Solaris 11 11/11 and GCC 4.5.2
-* Mac OS X 10.7.2 x86_64 and CLANG 3.0
+* Mac OS X 10.7.2 x86_64 and CLANG 3.1
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
@@ -113,6 +113,15 @@ The generated PDF will be `refman.pdf`.
 
 Change Log
 ----------
+
+### 1.5 (under construction)
+
+* Added a new example 2ZNL.
+* Supported a new chemical element Strontium (Sr).
+* Updated clang from 3.0 to 3.1.
+* Supported file error detection in output folder.
+* Supported reading and writing ligands in gzip and/or bzip2 format.
+* To output the number of hydrogen bonds and pi interactions for each conformation.
 
 ### 1.4 (2012-04-16)
 
