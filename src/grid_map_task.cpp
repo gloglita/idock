@@ -20,7 +20,7 @@
 
 namespace idock
 {
-	void grid_map_task(vector<array3d<fl>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec, const array3d<vector<size_t>>& partitions)
+	void grid_map_task(vector<array3d<fl>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
 	{
 		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 		vector<fl> e(num_atom_types_to_populate);
@@ -34,7 +34,7 @@ namespace idock
 			// Find the possibly interacting receptor atoms via partitions.
 			const array<size_t, 3> grid_index = {{ x, y, z }};
 			const vec3 probe_coords = b.grid_corner1(grid_index);
-			const vector<size_t>& receptor_atoms = partitions(b.partition_index(probe_coords));
+			const vector<size_t>& receptor_atoms = rec.partitions(b.partition_index(probe_coords));
 
 			// Accumulate individual free energies for each atom types to populate.
 			fill(e.begin(), e.end(), 0);

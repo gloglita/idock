@@ -20,14 +20,11 @@
 #ifndef IDOCK_MATRIX_HPP
 #define IDOCK_MATRIX_HPP
 
-#include "atom.hpp"
-
 namespace idock
 {
 	/// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
 	inline size_t triangular_matrix_restrictive_index(const size_t i, const size_t j)
 	{
-		BOOST_ASSERT(j < XS_TYPE_SIZE);
 		BOOST_ASSERT(i <= j);
 		return i + j * (j + 1) / 2;
 	}
