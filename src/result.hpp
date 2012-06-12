@@ -34,6 +34,7 @@ namespace idock
 		fl e; ///< Free energy.
 		fl f; ///< Inter-molecular free energy.
 		fl e_nd; ///< Normalized free energy, only for output purpose.
+		size_t num_hbonds; ///< Number of hydrogen bonds.
 		vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 		vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 

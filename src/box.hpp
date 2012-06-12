@@ -55,10 +55,10 @@ namespace idock
 		bool within(const vec3& coordinate) const;
 
 		/// Returns true if the distance between a coordinate and the surface of a box determined by boundary corner1 and corner2 is within cutoff.
-		bool within_cutoff(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const;
+		fl project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const;
 
 		/// Returns true if the distance between a coordinate and the surface of current box is within cutoff.
-		bool within_cutoff(const vec3& coordinate) const;
+		fl project_distance_sqr(const vec3& coordinate) const;
 
 		/// Returns the coordinate of boundary corner1 of the grid at the given 3D index.
 		vec3 grid_corner1(const array<size_t, 3>& index) const;

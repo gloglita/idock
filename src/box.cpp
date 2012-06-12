@@ -17,7 +17,6 @@
 */
 
 #include "box.hpp"
-#include "scoring_function.hpp"
 
 namespace idock
 {
@@ -59,7 +58,7 @@ namespace idock
 		return true;
 	}
 
-	bool box::within_cutoff(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
+	fl box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
 	{
 		// Calculate the projection point of the given coordinate onto the surface of the given box.
 		vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.
@@ -70,12 +69,12 @@ namespace idock
 		}
 
 		// Check if the distance between the projection and the given coordinate is within cutoff.
-		return distance_sqr(projection, coordinate) < scoring_function::Cutoff_Sqr;
+		return distance_sqr(projection, coordinate);
 	}
 
-	bool box::within_cutoff(const vec3& coordinate) const
+	fl box::project_distance_sqr(const vec3& coordinate) const
 	{
-		return within_cutoff(corner1, corner2, coordinate);
+		return project_distance_sqr(corner1, corner2, coordinate);
 	}
 
 	vec3 box::grid_corner1(const array<size_t, 3>& index) const

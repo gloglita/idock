@@ -261,6 +261,7 @@ int main(int argc, char* argv[])
 		// Divide the box into coarse-grained partitions for subsequent grid map creation.
 		using boost::array;
 		array3d<vector<size_t>> partitions(b.num_partitions);
+		array3d<vector<size_t>> rec_hbda_3d(b.num_partitions);
 		{
 			// Find all the heavy receptor atoms that are within 8A of the box.
 			vector<size_t> receptor_atoms_within_cutoff;
@@ -269,7 +270,7 @@ int main(int argc, char* argv[])
 			for (size_t i = 0; i < num_rec_atoms; ++i)
 			{
 				const atom& a = rec.atoms[i];
-				if (b.within_cutoff(a.coordinate))
+				if (b.project_distance_sqr(a.coordinate) < scoring_function::Cutoff_Sqr)
 				{
 					receptor_atoms_within_cutoff.push_back(i);
 				}
@@ -282,6 +283,7 @@ int main(int argc, char* argv[])
 			for (size_t z = 0; z < b.num_partitions[2]; ++z)
 			{
 				partitions(x, y, z).reserve(num_receptor_atoms_within_cutoff);
+				rec_hbda_3d(x, y, z).reserve(num_receptor_atoms_within_cutoff);
 				const array<size_t, 3> index1 = {{ x,     y,     z     }};
 				const array<size_t, 3> index2 = {{ x + 1, y + 1, z + 1 }};
 				const vec3 corner1 = b.partition_corner1(index1);
@@ -289,9 +291,17 @@ int main(int argc, char* argv[])
 				for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
 				{
 					const size_t i = receptor_atoms_within_cutoff[l];
-					if (b.within_cutoff(corner1, corner2, rec.atoms[i].coordinate))
+					const atom& a = rec.atoms[i];
+					const fl proj_dist_sqr = b.project_distance_sqr(corner1, corner2, a.coordinate);
+					if (proj_dist_sqr < scoring_function::Cutoff_Sqr)
 					{
 						partitions(x, y, z).push_back(i);
+						
+						// Find hydrogen bond donors and acceptors.
+						if (proj_dist_sqr < hbond_dist_sqr)
+						{
+							if (xs_is_donor_acceptor(a.xs)) rec_hbda_3d(x, y, z).push_back(i);
+						}
 					}
 				}
 			}
@@ -498,17 +508,45 @@ int main(int argc, char* argv[])
 				// Flush the number of conformations to output.
 				log << std::setw(4) << num_conformations << " |";
 
-				// Write the conformations to the output folder.
 				if (num_conformations)
 				{
-					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
-				}
+					// Find the number of hydrogen bonds.
+					const size_t num_lig_hbda = lig.hbda.size();
+					for (size_t k = 0; k < num_conformations; ++k)
+					{
+						result& r = results[k];
+						r.num_hbonds = 0;
+						for (size_t i = 0; i < num_lig_hbda; ++i)
+						{
+							const size_t lig_xs = lig.heavy_atoms[lig.hbda[i]].xs;
+							BOOST_ASSERT(xs_is_donor_acceptor(lig_xs));
 
-				// Display the free energies of the top 4 conformations.
-				const size_t num_energies = std::min<size_t>(num_conformations, 4);
-				for (size_t i = 0; i < num_energies; ++i)
-				{
-					log << std::setw(8) << results[i].e_nd;
+							// Find the possibly interacting receptor atoms via partitions.
+							const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
+							const vector<size_t>& rec_hbda = rec_hbda_3d(b.partition_index(lig_coords));
+
+							// Accumulate individual free energies for each atom types to populate.
+							const size_t num_rec_hbda = rec_hbda.size();
+							for (size_t l = 0; l < num_rec_hbda; ++l)
+							{
+								const atom& a = rec.atoms[rec_hbda[l]];
+								BOOST_ASSERT(xs_is_donor_acceptor(a.xs));
+								if (!xs_hbond(lig_xs, a.xs)) continue;
+								const fl r2 = distance_sqr(lig_coords, a.coordinate);
+								if (r2 <= hbond_dist_sqr) ++r.num_hbonds;
+							}
+						}
+					}
+
+					// Write models to file.
+					lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
+
+					// Display the free energies of the top 4 conformations.
+					const size_t num_energies = std::min<size_t>(num_conformations, 4);
+					for (size_t i = 0; i < num_energies; ++i)
+					{
+						log << std::setw(8) << results[i].e_nd;
+					}
 				}
 				log << '\n';
 
@@ -526,6 +564,8 @@ int main(int argc, char* argv[])
 		ptr_vector<summary> summaries(num_ligands);
 		vector<fl> energies;
 		energies.reserve(max_conformations);
+		vector<size_t> hbonds;
+		hbonds.reserve(max_conformations);
 		string line;
 		line.reserve(79);
 
@@ -545,14 +585,18 @@ int main(int argc, char* argv[])
 				{
 					energies.push_back(right_cast<fl>(line, 56, 63));
 				}
+				else if (starts_with(line, "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:"))
+				{
+					hbonds.push_back(right_cast<size_t>(line, 56, 59));
+				}
 			}
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
-			if (energies.empty())
+			if (energies.empty() || hbonds.empty())
 			{
-				log << p.filename().string() << " no energy\n";
+				log << p.filename().string() << " no energy or hydrogen bonds\n";
 				continue;
 			}
-			summaries.push_back(new summary(stem, energies));
+			summaries.push_back(new summary(stem, energies, hbonds));
 			energies.clear();
 		}
 
@@ -566,7 +610,7 @@ int main(int argc, char* argv[])
 		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)
 		{
-			csv << ",FE" << i;
+			csv << ",FE" << i << ",HB" << i;
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
 		csv << '\n' << std::setprecision(3);
@@ -577,7 +621,7 @@ int main(int argc, char* argv[])
 			csv << s.filestem << ',' << num_conformations;
 			for (size_t j = 0; j < num_conformations; ++j)
 			{
-				csv << ',' << s.energies[j];
+				csv << ',' << s.energies[j] << ',' << s.hbonds[j];
 			}
 			for (size_t j = num_conformations; j < max_conformations; ++j)
 			{

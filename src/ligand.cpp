@@ -227,6 +227,13 @@ namespace idock
 		BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 == lines.size()); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines == lines.size()
 		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * (num_torsions - num_active_torsions)));
 		BOOST_ASSERT(flexibility_penalty_factor < 1);
+		
+		// Find hydrogen bond donors and acceptors.
+		hbda.reserve(num_heavy_atoms);
+		for (size_t i = 0; i < num_heavy_atoms; ++i)
+		{
+			if (xs_is_donor_acceptor(heavy_atoms[i].xs)) hbda.push_back(i);
+		}
 
 		// Update heavy_atoms[].coordinate and hydrogens[].coordinate relative to frame origin.
 		for (size_t k = 0; k < num_frames; ++k)
@@ -577,7 +584,8 @@ namespace idock
 				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
 				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
-				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n";
+				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n"
+				<< "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << r.num_hbonds << '\n';
 			for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 			{
 				const string& line = lines[j];

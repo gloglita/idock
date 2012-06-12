@@ -31,7 +31,7 @@ namespace idock
 		for (size_t y = 0; y < num_y_probes; ++y)
 		for (size_t z = 0; z < num_z_probes; ++z)
 		{
-			// Find the possibly interacting receptor atoms via partitions,
+			// Find the possibly interacting receptor atoms via partitions.
 			const array<size_t, 3> grid_index = {{ x, y, z }};
 			const vec3 probe_coords = b.grid_corner1(grid_index);
 			const vector<size_t>& receptor_atoms = partitions(b.partition_index(probe_coords));

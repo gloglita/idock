@@ -216,6 +216,13 @@ namespace idock
 			|| xs == XS_TYPE_O_A
 			|| xs == XS_TYPE_O_DA;
 	}
+	
+	/// Returns true if the XScore atom type is either a hydrogen bond donor or a hydrogen bond acceptor.
+	inline bool xs_is_donor_acceptor(const size_t xs)
+	{
+		BOOST_ASSERT(xs < XS_TYPE_SIZE);
+		return xs_is_donor(xs) || xs_is_acceptor(xs);
+	}
 
 	/// Returns true if the two XScore atom types are a pair of hydrogen bond donor and acceptor.
 	inline bool xs_hbond(const size_t xs1, const size_t xs2)
@@ -257,6 +264,9 @@ namespace idock
 		XS_TYPE_Met_D, // 27 = AD_TYPE_As
 		XS_TYPE_Met_D, // 28 = AD_TYPE_Sr
 	};
+
+	/// Distance requirement of forming hydrogen bonds.
+	const fl hbond_dist_sqr = sqr(3.5);
 
 	/// Represents an atom by very simple fields.
 	class atom

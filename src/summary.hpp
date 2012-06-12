@@ -31,7 +31,8 @@ namespace idock
 	public:
 		const string filestem;
 		const vector<fl> energies;
-		explicit summary(const string& filestem, const vector<fl>& energies) : filestem(filestem), energies(energies) {}
+		const vector<size_t> hbonds;
+		explicit summary(const string& filestem, const vector<fl>& energies, const vector<size_t>& hbonds) : filestem(filestem), energies(energies), hbonds(hbonds) {}
 	};
 
 	/// For sorting ptr_vector<summary>.
