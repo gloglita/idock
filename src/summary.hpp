@@ -29,10 +29,10 @@ namespace idock
 	class summary
 	{
 	public:
-		const string filestem;
+		const string stem;
 		const vector<fl> energies;
 		const vector<size_t> hbonds;
-		explicit summary(const string& filestem, const vector<fl>& energies, const vector<size_t>& hbonds) : filestem(filestem), energies(energies), hbonds(hbonds) {}
+		explicit summary(const string& stem, vector<fl>&& energies_, vector<size_t>&& hbonds_) : stem(stem), energies(static_cast<vector<fl>&&>(energies_)), hbonds(static_cast<vector<size_t>&&>(hbonds_)) {}
 	};
 
 	/// For sorting ptr_vector<summary>.

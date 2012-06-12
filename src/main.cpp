@@ -44,7 +44,7 @@
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 9-12 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 9 June 2012
+ * \date 12 June 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -576,7 +576,6 @@ int main(int argc, char* argv[])
 			ifstream in(p); // Parsing starts. Open the file stream as late as possible.
 			filtering_istream fis;
 			const string ext = p.extension().string();
-			const string stem = ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string();
 			if (ext == ".gz") fis.push(gzip_dec); else if (ext == ".bz2") fis.push(bzip2_dec);
 			fis.push(in);
 			while (getline(fis, line))
@@ -596,8 +595,7 @@ int main(int argc, char* argv[])
 				log << p.filename().string() << " no energy or hydrogen bonds\n";
 				continue;
 			}
-			summaries.push_back(new summary(stem, energies, hbonds));
-			energies.clear();
+			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<size_t>&&>(hbonds)));
 		}
 
 		// Sort the summaries.
@@ -618,7 +616,7 @@ int main(int argc, char* argv[])
 		{
 			const summary& s = summaries[i];
 			const size_t num_conformations = s.energies.size();
-			csv << s.filestem << ',' << num_conformations;
+			csv << s.stem << ',' << num_conformations;
 			for (size_t j = 0; j < num_conformations; ++j)
 			{
 				csv << ',' << s.energies[j] << ',' << s.hbonds[j];
