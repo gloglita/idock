@@ -1,6 +1,6 @@
 /*
 
-   Copyright (c) 2011, The Chinese University of Hong Kong
+   Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -22,10 +22,13 @@
 
 #include <iostream>
 #include <iomanip>
-#include "fstream.hpp"
+#include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 
 namespace idock
 {
+	using namespace boost::filesystem;
+
 	/// Represents a log with both stdout and a custom log file as output.
 	class tee
 	{

@@ -1,6 +1,6 @@
 /*
 
-   Copyright (c) 2011, The Chinese University of Hong Kong
+   Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 #include <boost/filesystem/path.hpp>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/random.hpp>
 #include <boost/assert.hpp>
 
@@ -34,6 +35,8 @@ namespace idock
 	using std::string;
 	using boost::lexical_cast;
 	using boost::filesystem::path;
+	using boost::filesystem::ifstream;
+	using boost::filesystem::ofstream;
 
 	/// igrow uses double precision floating point computation by default.
 	/// This could possible be demoted to single precision for better performance.

@@ -1,6 +1,6 @@
 /*
 
-   Copyright (c) 2011, The Chinese University of Hong Kong
+   Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this p except in compliance with the License.
@@ -16,7 +16,7 @@
 
 */
 
-#include "fstream.hpp"
+#include <boost/filesystem/fstream.hpp>
 #include "parsing_error.hpp"
 #include "scoring_function.hpp"
 #include "receptor.hpp"
@@ -131,8 +131,10 @@ namespace idock
 		for (size_t y = 0; y < b.num_partitions[1]; ++y)
 		for (size_t z = 0; z < b.num_partitions[2]; ++z)
 		{
-			partitions(x, y, z).reserve(num_receptor_atoms_within_cutoff);
-			hbda_3d(x, y, z).reserve(num_receptor_atoms_within_cutoff);
+			vector<size_t>& par = partitions(x, y, z);
+			vector<size_t>& hbda = hbda_3d(x, y, z);
+			par.reserve(num_receptor_atoms_within_cutoff);
+			hbda.reserve(num_receptor_atoms_within_cutoff);
 			const array<size_t, 3> index1 = {{ x,     y,     z     }};
 			const array<size_t, 3> index2 = {{ x + 1, y + 1, z + 1 }};
 			const vec3 corner1 = b.partition_corner1(index1);
@@ -144,12 +146,12 @@ namespace idock
 				const fl proj_dist_sqr = b.project_distance_sqr(corner1, corner2, a.coordinate);
 				if (proj_dist_sqr < scoring_function::Cutoff_Sqr)
 				{
-					partitions(x, y, z).push_back(i);
+					par.push_back(i);
 						
 					// Find hydrogen bond donors and acceptors.
 					if (proj_dist_sqr < hbond_dist_sqr)
 					{
-						if (xs_is_donor_acceptor(a.xs)) hbda_3d(x, y, z).push_back(i);
+						if (xs_is_donor_acceptor(a.xs)) hbda.push_back(i);
 					}
 				}
 			}

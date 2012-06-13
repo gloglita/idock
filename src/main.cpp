@@ -32,19 +32,19 @@
  * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris are provided.
  *
  * \section installation Installation
- * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is not supported at the moment.
+ * idock requires receptor and ligand files in PDBQT format as input, so MGLTools must be installed in advance as a prerequisite. OpenBabel is also supported.
  *
  * \subsection prepare_receptor Prepare receptor files in PDBQT format
- * pythonsh prepare_receptor4.py -r receptor.pdb -A hydrogens -U nphs_lps_waters_deleteAltB
+ * pythonsh prepare_receptor4.py -r receptor.pdb -A hydrogens -U lps_waters_deleteAltB
  *
  * \subsection prepare_ligand Prepare ligand files in PDBQT format
- * pythonsh prepare_ligand4.py -l ligand.mol2
+ * pythonsh prepare_ligand4.py -U '' -l ligand.mol2
  *
  * \section citation Citation
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 9-12 May 2012. Accepted manuscript.
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 12 June 2012
+ * \date 13 June 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -53,6 +53,8 @@
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
 #include "seed.hpp"
 #include "tee.hpp"
 #include "receptor.hpp"
@@ -64,7 +66,7 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "idock 1.4\n";
+	std::cout << "idock 1.5\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
@@ -330,12 +332,12 @@ int main(int argc, char* argv[])
 		path input_ligand_path;
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
-		using boost::filesystem::directory_iterator;
+		using namespace boost::filesystem;
 		const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 		for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
 			// Skip non-regular files such as folders.
-			if (!boost::filesystem::is_regular_file(dir_iter->status())) continue;
+			if (!is_regular_file(dir_iter->status())) continue;
 
 			// Increment the ligand counter.
 			++num_ligands;
@@ -522,13 +524,14 @@ int main(int argc, char* argv[])
 		line.reserve(79);
 
 		// Scan the output folder to retrieve ligand summaries.
+		using namespace boost::iostreams;
 		for (directory_iterator dir_iter(output_folder_path); dir_iter != end_dir_iter; ++dir_iter)
 		{
 			const path p = dir_iter->path();
 			ifstream in(p); // Parsing starts. Open the file stream as late as possible.
 			filtering_istream fis;
 			const string ext = p.extension().string();
-			if (ext == ".gz") fis.push(gzip_dec); else if (ext == ".bz2") fis.push(bzip2_dec);
+			if (ext == ".gz") fis.push(gzip_decompressor()); else if (ext == ".bz2") fis.push(bzip2_decompressor());
 			fis.push(in);
 			while (getline(fis, line))
 			{

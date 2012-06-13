@@ -1,6 +1,6 @@
 /*
 
-   Copyright (c) 2011, The Chinese University of Hong Kong
+   Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,12 +17,15 @@
 */
 
 #include <boost/iostreams/filtering_stream.hpp>
-#include "fstream.hpp"
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
 #include "parsing_error.hpp"
 #include "ligand.hpp"
 
 namespace idock
 {
+	using namespace boost::iostreams;
+
 	ligand::ligand(const path& p) : num_active_torsions(0)
 	{
 		// Initialize necessary variables for constructing a ligand.
@@ -45,11 +48,10 @@ namespace idock
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 		// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
-		using namespace boost::iostreams;
 		ifstream in(p); // Parsing starts. Open the file stream as late as possible.
 		filtering_istream fis;
 		const string ext = p.extension().string();
-		if (ext == ".gz") fis.push(gzip_dec); else if (ext == ".bz2") fis.push(bzip2_dec);
+		if (ext == ".gz") fis.push(gzip_decompressor()); else if (ext == ".bz2") fis.push(bzip2_decompressor());
 		fis.push(in);
 		while (getline(fis, line))
 		{
@@ -573,7 +575,7 @@ namespace idock
 		ofstream out(output_ligand_path); // Dumping starts. Open the file stream as late as possible.
 		filtering_ostream fos;
 		const string ext = output_ligand_path.extension().string();
-		if (ext == ".gz") fos.push(gzip_com); else if (ext == ".bz2") fos.push(bzip2_com);
+		if (ext == ".gz") fos.push(gzip_compressor()); else if (ext == ".bz2") fos.push(bzip2_compressor());
 		fos.push(out);
 		fos.setf(ios::fixed, ios::floatfield);
 		fos << setprecision(3);

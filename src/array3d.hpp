@@ -1,6 +1,6 @@
 /*
 
-   Copyright (c) 2011, The Chinese University of Hong Kong
+   Copyright (c) 2011-2012, The Chinese University of Hong Kong
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -48,9 +48,7 @@ namespace idock
 		/// Resizes the 3D array.
 		void resize(const array<size_t, 3>& n)
 		{
-			this->n[0] = n[0];
-			this->n[1] = n[1];
-			this->n[2] = n[2];
+			this->n = n;
 			static_cast<vector<T>&>(*this).resize(n[0] * n[1] * n[2]);
 		}
 
