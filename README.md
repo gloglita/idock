@@ -10,9 +10,12 @@ Features
 --------
 
 * idock invents its own thread pool in order to reuse threads and maintain a high CPU utilization throughout the entire screening procedure. The thread pool parallelizes the precalculation of scoring function, the creation of grid maps, and the execution of Monte Carlo tasks.
-* idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
+* idock estimates the capacity of every vector structure and intensively utilizes right-value reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
+* idock supports reading and writing compressed ligand files with gzip and bzip2.
+* idock enables automatic recovery and restarts docking from the previous stopping point.
+* idock provides precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris.
 * idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
 
 
@@ -24,12 +27,12 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.4.1 x86_64 and GCC 4.7.0
-* Arch Linux 3.4.1 x86_64 and CLANG 3.1
-* Arch Linux 3.4.1 x86_64 and Intel C++ Compiler 12.1.2
+* Arch Linux 3.4.2 x86_64 and GCC 4.7.0
+* Arch Linux 3.4.2 x86_64 and CLANG 3.1
+* Arch Linux 3.4.2 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.1
 * Solaris 11 11/11 and GCC 4.5.2
-* Mac OS X 10.7.2 x86_64 and CLANG 3.1
+* Mac OS X 10.7.4 x86_64 and CLANG 3.1
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
@@ -114,14 +117,14 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.5 (under construction)
+### 1.5 (2012-06-13)
 
 * Added a new example 2ZNL.
-* Supported a new chemical element Strontium (Sr).
+* Supported a new chemical element strontium (Sr).
 * Updated clang from 3.0 to 3.1.
 * Supported file error detection in output folder.
 * Supported reading and writing ligands in gzip and/or bzip2 format.
-* To output the number of hydrogen bonds and pi interactions for each conformation.
+* Output the number of hydrogen bonds for each conformation.
 
 ### 1.4 (2012-04-16)
 
