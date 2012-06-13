@@ -94,9 +94,6 @@
     <ClInclude Include="..\src\vec3.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\fstream.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\summary.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
