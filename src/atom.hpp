@@ -216,7 +216,7 @@ namespace idock
 			|| xs == XS_TYPE_O_A
 			|| xs == XS_TYPE_O_DA;
 	}
-	
+
 	/// Returns true if the XScore atom type is either a hydrogen bond donor or a hydrogen bond acceptor.
 	inline bool xs_is_donor_acceptor(const size_t xs)
 	{

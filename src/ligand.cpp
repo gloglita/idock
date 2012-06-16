@@ -229,7 +229,7 @@ namespace idock
 		BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 == lines.size()); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines == lines.size()
 		flexibility_penalty_factor = 1 / (1 + 0.05846 * (num_active_torsions + 0.5 * (num_torsions - num_active_torsions)));
 		BOOST_ASSERT(flexibility_penalty_factor < 1);
-		
+
 		// Find hydrogen bond donors and acceptors.
 		hbda.reserve(num_heavy_atoms);
 		for (size_t i = 0; i < num_heavy_atoms; ++i)

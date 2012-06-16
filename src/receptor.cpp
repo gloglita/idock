@@ -147,7 +147,7 @@ namespace idock
 				if (proj_dist_sqr < scoring_function::Cutoff_Sqr)
 				{
 					par.push_back(i);
-						
+
 					// Find hydrogen bond donors and acceptors.
 					if (proj_dist_sqr < hbond_dist_sqr)
 					{

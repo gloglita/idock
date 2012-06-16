@@ -33,7 +33,7 @@ namespace idock
 		/// Constructs an uninitialized quaternion.
 		explicit qtn4() {}
 
-		/// Constructs a quaternion by its four components. 
+		/// Constructs a quaternion by its four components.
 		explicit qtn4(const fl a, const fl b, const fl c, const fl d);
 
 		/// Constructs a quaternion by a normalized axis and a rotation angle.

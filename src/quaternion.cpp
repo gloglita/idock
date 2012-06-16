@@ -64,7 +64,7 @@ namespace idock
 	qtn4 qtn4::normalize() const
 	{
 		const fl norm_inv = static_cast<fl>(1) / norm();
-		return qtn4(a * norm_inv, b * norm_inv, c * norm_inv, d * norm_inv); 
+		return qtn4(a * norm_inv, b * norm_inv, c * norm_inv, d * norm_inv);
 	}
 
 	mat3 qtn4::to_mat3() const
