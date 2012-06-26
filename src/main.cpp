@@ -443,7 +443,7 @@ int main(int argc, char* argv[])
 				const size_t num_results = std::min<size_t>(results.size(), max_conformations);
 				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >= 1 is enforced when parsing command line arguments.
 				{
-					log << std::setw(4) << 0 << '\n';
+					log << std::setw(4) << 0 << " |\n";
 					continue;
 				}
 
@@ -551,6 +551,10 @@ int main(int argc, char* argv[])
 				continue;
 			}
 			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<size_t>&&>(hbonds)));
+#ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
+			energies.clear();
+			hbonds.clear();
+#endif
 		}
 
 		// Sort the summaries.
