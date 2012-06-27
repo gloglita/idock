@@ -27,7 +27,7 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.4.2 x86_64 and GCC 4.7.0
+* Arch Linux 3.4.4 x86_64 and GCC 4.7.1
 * Arch Linux 3.4.2 x86_64 and CLANG 3.1
 * Arch Linux 3.4.2 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.1
@@ -44,7 +44,7 @@ Compilation
 
 idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0 and 1.49.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
 
-### Compilation on Linux
+### Compilation on Linux, Mac OS X, Solaris and FreeBSD
 
 The Makefile uses GCC as the default compiler. To compile, simply run
 
