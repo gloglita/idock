@@ -182,7 +182,7 @@ Change Log
 Citation
 --------
 
-Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 9-12 May 2012. Accepted manuscript.
+Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), pp.77-84, San Diego, United States, 9-12 May 2012. DOI: 10.1109/CIBCB.2012.6217214
 
 
 Contact Author
@@ -210,5 +210,6 @@ Green gooseberry is chosen as the logo for idock because it is one of the author
 [Boost C++ Libraries]: http://www.boost.org
 [doxygen]: http://www.doxygen.org
 [CodePlex]: http://idock.codeplex.com
+[DOI: 10.1109/CIBCB.2012.6217214]: http://dx.doi.org/10.1109/CIBCB.2012.6217214
 [Jacky Lee]: http://www.cse.cuhk.edu.hk/~hjli
 [Open Clip Art]: http://www.openclipart.org

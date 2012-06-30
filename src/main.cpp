@@ -27,6 +27,10 @@
  * idock estimates the capacity of every vector structure and intensively utilizes Rvalue reference, a new feature in the C++11 standard, to avoid frequent memory reallocation.
  * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
  * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
+ * idock supports reading and writing compressed ligand files with gzip and bzip2.
+ * idock enables automatic recovery and restarts docking from the previous stopping point.
+ * idock provides precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris.
+ * idock can be used as a backend docking engine for igrow, a multithreaded ligand growing tool for structure-based molecule design.
  *
  * \section availability Availability
  * idock is free and open source available at https://GitHub.com/HongjianLi/idock under Apache License 2.0. Precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris are provided.
@@ -41,7 +45,7 @@
  * pythonsh prepare_ligand4.py -U '' -l ligand.mol2
  *
  * \section citation Citation
- * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), San Diego, United States, 9-12 May 2012. Accepted manuscript.
+ * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), pp.77-84, San Diego, United States, 9-12 May 2012. DOI: 10.1109/CIBCB.2012.6217214
  *
  * \author Hongjian Li, The Chinese University of Hong Kong.
  * \date 13 June 2012
