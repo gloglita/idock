@@ -47,6 +47,7 @@ pdbqt2csv
 time.csv
 pipeline.cpp
 *.tar.bz2
+*.tgz
 *.csv
 *.xlsb
 pdb
