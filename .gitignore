@@ -42,6 +42,7 @@ design
 parsetime
 combinelog
 extractelitists
+extractmodel
 rmsd
 pdbqt2csv
 time.csv
