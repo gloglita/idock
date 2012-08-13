@@ -3,8 +3,6 @@ idock
 
 idock is a multithreaded [virtual screening] tool for flexible ligand [docking] for computational drug discovery. It is inspired by [AutoDock Vina], and is hosted by GitHub at https://GitHub.com/HongjianLi/idock under [Apache License 2.0].
 
-[istar] is a [SaaS] platform for idock.
-
 
 Features
 --------
@@ -17,6 +15,7 @@ Features
 * idock enables automatic recovery and restarts docking from the previous stopping point.
 * idock provides precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris.
 * idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
+* idock is now available as a service at [istar].
 
 
 Supported operating systems and compilers
@@ -27,7 +26,7 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.4.4 x86_64 and GCC 4.7.1
+* Arch Linux 3.4.8 x86_64 and GCC 4.7.1
 * Arch Linux 3.4.2 x86_64 and CLANG 3.1
 * Arch Linux 3.4.2 x86_64 and Intel C++ Compiler 12.1.2
 * FreeBSD 9.0 x86_64 and CLANG 3.1
@@ -36,7 +35,7 @@ Supported operating systems and compilers
 * Windows 7 SP1 x64 and Windows SDK 7.1
 * Windows 7 SP1 x64 and Visual Studio 2010 SP1
 * Windows 7 SP1 x64 and Intel C++ Compiler 12.1.2
-* Windows 8 Consumer Preview x64 and Visual Studio 11 Ultimate Beta
+* Windows 8 x64 and Visual Studio 2012 Ultimate
 
 
 Compilation
