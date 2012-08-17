@@ -586,7 +586,7 @@ int main(int argc, char* argv[])
 			}
 			for (size_t j = num_conformations; j < max_conformations; ++j)
 			{
-				csv << ',';
+				csv << ",,";
 			}
 			csv << '\n';
 		}
