@@ -41,6 +41,7 @@ ideal
 design
 parsetime
 combinelog
+combinelog2
 extractelitists
 extractmodel
 rmsd
