@@ -28,7 +28,7 @@ namespace idock
 	class hbond
 	{
 	public:
-		const string& receptor, ligand;
+		string receptor, ligand;
 		explicit hbond(const string& receptor, const string& ligand) : receptor(receptor), ligand(ligand) {}
 //		hbond(const hbond&) = default;
 //		hbond(hbond&&) = default;
