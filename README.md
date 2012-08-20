@@ -29,6 +29,7 @@ Supported operating systems and compilers
 * Arch Linux 3.4.8 x86_64 and GCC 4.7.1
 * Arch Linux 3.4.2 x86_64 and CLANG 3.1
 * Arch Linux 3.4.2 x86_64 and Intel C++ Compiler 12.1.2
+* CentOS 6.3 x86_64 and GCC 4.4.6
 * FreeBSD 9.0 x86_64 and CLANG 3.1
 * Solaris 11 11/11 and GCC 4.5.2
 * Mac OS X 10.7.4 x86_64 and CLANG 3.1
@@ -124,6 +125,7 @@ Change Log
 * Upgraded Visual Studio project from 2010 to 2012.
 * Fixed a bug of aligning columns in log.csv.
 * Fixed a bug of writing repeated energies to log.csv when compiling idock with clang 3.1 on Mac OS X and FreeBSD.
+* Supported CentOS 6.3.
 * To upgraded boost from 1.50.0 to 1.51.0.
 
 ### 1.5 (2012-06-13)
