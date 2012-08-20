@@ -116,6 +116,16 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
+### 1.6 (under construction)
+
+* Added a new example 2VQZ.
+* Output hydrogen bonds for each conformation.
+* Precompiled idock for Windows using Visual Studio 2012.
+* Upgraded Visual Studio project from 2010 to 2012.
+* Fixed a bug of aligning columns in log.csv.
+* Fixed a bug of writing repeated energies to log.csv when compiling idock with clang 3.1 on Mac OS X and FreeBSD.
+* To upgraded boost from 1.50.0 to 1.51.0.
+
 ### 1.5 (2012-06-13)
 
 * Added a new example 2ZNL.
