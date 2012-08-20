@@ -591,13 +591,11 @@ namespace idock
 				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
 				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n"
-				<< "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds << '\n'
-				<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK: ";
+				<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds;
 			for (size_t i = 0; i < num_hbonds; ++i)
 			{
-				if (i) fos << " | ";
 				const hbond& hb = r.hbonds[i];
-				fos << hb.receptor << " - " << hb.ligand;
+				fos << " | " << hb.receptor << " - " << hb.ligand;
 			}
 			fos << '\n';
 			for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
