@@ -31,8 +31,8 @@ namespace idock
 	public:
 		const string stem;
 		const vector<fl> energies;
-		const vector<size_t> hbonds;
-		explicit summary(const string& stem, vector<fl>&& energies_, vector<size_t>&& hbonds_) : stem(stem), energies(static_cast<vector<fl>&&>(energies_)), hbonds(static_cast<vector<size_t>&&>(hbonds_)) {}
+		const vector<string> hbonds;
+		explicit summary(const string& stem, vector<fl>&& energies_, vector<string>&& hbonds_) : stem(stem), energies(static_cast<vector<fl>&&>(energies_)), hbonds(static_cast<vector<string>&&>(hbonds_)) {}
 	};
 
 	/// For sorting ptr_vector<summary>.

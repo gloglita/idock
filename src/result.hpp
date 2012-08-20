@@ -25,6 +25,17 @@
 
 namespace idock
 {
+	class hbond
+	{
+	public:
+		const string& receptor, ligand;
+		explicit hbond(const string& receptor, const string& ligand) : receptor(receptor), ligand(ligand) {}
+//		hbond(const hbond&) = default;
+//		hbond(hbond&&) = default;
+//		hbond& operator=(const hbond&) = default;
+//		hbond& operator=(hbond&&) = default;
+	};
+
 	using boost::ptr_vector;
 
 	/// Represents a result found by BFGS local optimization for later clustering.
@@ -34,7 +45,7 @@ namespace idock
 		fl e; ///< Free energy.
 		fl f; ///< Inter-molecular free energy.
 		fl e_nd; ///< Normalized free energy, only for output purpose.
-		size_t num_hbonds; ///< Number of hydrogen bonds.
+		vector<hbond> hbonds; ///< Hydrogen bonds.
 		vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 		vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 

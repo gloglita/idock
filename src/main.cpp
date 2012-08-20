@@ -70,7 +70,9 @@
 
 int main(int argc, char* argv[])
 {
-	std::cout << "idock 1.5\n";
+	using std::cout;
+	using std::cerr;
+	cout << "idock 1.6\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
@@ -131,7 +133,7 @@ int main(int argc, char* argv[])
 		// If no command line argument is supplied, simply print the usage and exit.
 		if (argc == 1)
 		{
-			std::cout << all_options;
+			cout << all_options;
 			return 0;
 		}
 
@@ -149,33 +151,33 @@ int main(int argc, char* argv[])
 		// Validate receptor.
 		if (!exists(receptor_path))
 		{
-			std::cerr << "Receptor " << receptor_path << " does not exist\n";
+			cerr << "Receptor " << receptor_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_regular_file(receptor_path))
 		{
-			std::cerr << "Receptor " << receptor_path << " is not a regular file\n";
+			cerr << "Receptor " << receptor_path << " is not a regular file\n";
 			return 1;
 		}
 
 		// Validate ligand_folder.
 		if (!exists(ligand_folder_path))
 		{
-			std::cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
+			cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
 			return 1;
 		}
 		if (!is_directory(ligand_folder_path))
 		{
-			std::cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
+			cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
 			return 1;
 		}
 
 		// Validate size_x, size_y, size_z.
-		if (	size_x < box::Default_Partition_Granularity ||
-			size_y < box::Default_Partition_Granularity ||
-			size_z < box::Default_Partition_Granularity)
+		if (size_x < box::Default_Partition_Granularity ||
+		    size_y < box::Default_Partition_Granularity ||
+		    size_z < box::Default_Partition_Granularity)
 		{
-			std::cerr << "Search space must be "
+			cerr << "Search space must be "
 				 << box::Default_Partition_Granularity << "A x "
 				 << box::Default_Partition_Granularity << "A x "
 				 << box::Default_Partition_Granularity << "A or larger\n";
@@ -187,7 +189,7 @@ int main(int argc, char* argv[])
 		{
 			if (!is_directory(output_folder_path))
 			{
-				std::cerr << "Output folder " << output_folder_path << " is not a directory\n";
+				cerr << "Output folder " << output_folder_path << " is not a directory\n";
 				return 1;
 			}
 		}
@@ -195,7 +197,7 @@ int main(int argc, char* argv[])
 		{
 			if (!create_directories(output_folder_path))
 			{
-				std::cerr << "Failed to create output folder " << output_folder_path << '\n';
+				cerr << "Failed to create output folder " << output_folder_path << '\n';
 				return 1;
 			}
 		}
@@ -203,47 +205,47 @@ int main(int argc, char* argv[])
 		// Validate log_path.
 		if (is_directory(log_path))
 		{
-			std::cerr << "Log path " << log_path << " is a directory\n";
+			cerr << "Log path " << log_path << " is a directory\n";
 			return 1;
 		}
 
 		// Validate csv_path.
 		if (is_directory(csv_path))
 		{
-			std::cerr << "csv path " << csv_path << " is a directory\n";
+			cerr << "csv path " << csv_path << " is a directory\n";
 			return 1;
 		}
 
 		// Validate miscellaneous options.
 		if (!num_threads)
 		{
-			std::cerr << "Option threads must be 1 or greater\n";
+			cerr << "Option threads must be 1 or greater\n";
 			return 1;
 		}
 		if (!num_mc_tasks)
 		{
-			std::cerr << "Option tasks must be 1 or greater\n";
+			cerr << "Option tasks must be 1 or greater\n";
 			return 1;
 		}
 		if (!max_conformations)
 		{
-			std::cerr << "Option max_conformations must be 1 or greater\n";
+			cerr << "Option max_conformations must be 1 or greater\n";
 			return 1;
 		}
 		if (energy_range < 0)
 		{
-			std::cerr << "Option energy_range must be 0 or greater\n";
+			cerr << "Option energy_range must be 0 or greater\n";
 			return 1;
 		}
 		if (grid_granularity <= 0)
 		{
-			std::cerr << "Option granularity must be positive\n";
+			cerr << "Option granularity must be positive\n";
 			return 1;
 		}
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		cerr << e.what() << '\n';
 		return 1;
 	}
 
@@ -251,7 +253,7 @@ int main(int argc, char* argv[])
 	{
 		// Initialize the log.
 		tee log(log_path);
-		std::cout << "Logging to " << log_path << '\n';
+		cout << "Logging to " << log_path << '\n';
 
 		// Initialize a Mersenne Twister random number generator.
 		log << "Using random seed " << seed << '\n';
@@ -376,7 +378,7 @@ int main(int argc, char* argv[])
 				if (num_atom_types_to_populate)
 				{
 					// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-					std::cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
+					cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
 
 					// Populate the grid map task container.
 					BOOST_ASSERT(gm_tasks.empty());
@@ -400,12 +402,12 @@ int main(int argc, char* argv[])
 					atom_types_to_populate.clear();
 
 					// Clear the current line and reset the cursor to the beginning.
-					std::cout << '\r' << std::setw(36) << '\r';
+					cout << '\r' << std::setw(36) << '\r';
 				}
 
 				// Dump the ligand filename.
 				log << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | ";
-				std::cout << std::flush;
+				cout << std::flush;
 
 				// Populate the Monte Carlo task container.
 				BOOST_ASSERT(mc_tasks.empty());
@@ -437,7 +439,7 @@ int main(int argc, char* argv[])
 				tp.sync();
 				mc_tasks.clear();
 
-				// Output full progress bar to log file to make it consistent with std::cout.
+				// Output full progress bar to log file to make it consistent with cout.
 				log.file << "##########";
 
 				// Proceed to number of conformations.
@@ -473,11 +475,10 @@ int main(int argc, char* argv[])
 					for (size_t k = 0; k < num_conformations; ++k)
 					{
 						result& r = results[k];
-						r.num_hbonds = 0;
 						for (size_t i = 0; i < num_lig_hbda; ++i)
 						{
-							const size_t lig_xs = lig.heavy_atoms[lig.hbda[i]].xs;
-							BOOST_ASSERT(xs_is_donor_acceptor(lig_xs));
+							const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
+							BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
 
 							// Find the possibly interacting receptor atoms via partitions.
 							const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
@@ -487,11 +488,11 @@ int main(int argc, char* argv[])
 							const size_t num_rec_hbda = rec_hbda.size();
 							for (size_t l = 0; l < num_rec_hbda; ++l)
 							{
-								const atom& a = rec.atoms[rec_hbda[l]];
-								BOOST_ASSERT(xs_is_donor_acceptor(a.xs));
-								if (!xs_hbond(lig_xs, a.xs)) continue;
-								const fl r2 = distance_sqr(lig_coords, a.coordinate);
-								if (r2 <= hbond_dist_sqr) ++r.num_hbonds;
+								const atom& rec_atom = rec.atoms[rec_hbda[l]];
+								BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
+								if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
+								const fl r2 = distance_sqr(lig_coords, rec_atom.coordinate);
+								if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
 							}
 						}
 					}
@@ -513,7 +514,7 @@ int main(int argc, char* argv[])
 			}
 			catch (const std::exception& e)
 			{
-				std::cout << input_ligand_path.filename().string() << ' ' << e.what() << '\n';
+				cout << input_ligand_path.filename().string() << ' ' << e.what() << '\n';
 				continue; // Skip the current ligand and proceed with the next one.
 			}
 		}
@@ -522,7 +523,7 @@ int main(int argc, char* argv[])
 		ptr_vector<summary> summaries(num_ligands);
 		vector<fl> energies;
 		energies.reserve(max_conformations);
-		vector<size_t> hbonds;
+		vector<string> hbonds;
 		hbonds.reserve(max_conformations);
 		string line;
 		line.reserve(79);
@@ -543,9 +544,9 @@ int main(int argc, char* argv[])
 				{
 					energies.push_back(right_cast<fl>(line, 56, 63));
 				}
-				else if (starts_with(line, "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:"))
+				else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
 				{
-					hbonds.push_back(right_cast<size_t>(line, 56, 59));
+					hbonds.push_back(line.substr(56));
 				}
 			}
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
@@ -554,7 +555,7 @@ int main(int argc, char* argv[])
 				log << p.filename().string() << " no energy or hydrogen bonds\n";
 				continue;
 			}
-			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<size_t>&&>(hbonds)));
+			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<string>&&>(hbonds)));
 #ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
 			energies.clear();
 			hbonds.clear();
@@ -594,7 +595,7 @@ int main(int argc, char* argv[])
 	}
 	catch (const std::exception& e)
 	{
-		std::cerr << e.what() << '\n';
+		cerr << e.what() << '\n';
 		return 1;
 	}
 }

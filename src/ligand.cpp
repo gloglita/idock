@@ -16,6 +16,7 @@
 
 */
 
+#include <boost/algorithm/string.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -71,7 +72,9 @@ namespace idock
 				if (ad == AD_TYPE_SIZE) throw parsing_error(p, num_lines, "Atom type " + ad_type_string + " is not supported by idock.");
 
 				// Parse the Cartesian coordinate.
-				atom a(vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				string name = line.substr(12, 4);
+				boost::algorithm::trim(name);
+				atom a(static_cast<string&&>(name), vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				if (a.is_hydrogen()) // Current atom is a hydrogen.
 				{
@@ -582,12 +585,21 @@ namespace idock
 		for (size_t i = 0; i < num_conformations; ++i)
 		{
 			const result& r = results[i];
+			const size_t num_hbonds = r.hbonds.size();
 			fos << "MODEL     " << setw(4) << (i + 1) << '\n'
 				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
 				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
 				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n"
-				<< "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << r.num_hbonds << '\n';
+				<< "REMARK     NUMBER OF HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds << '\n'
+				<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK: ";
+			for (size_t i = 0; i < num_hbonds; ++i)
+			{
+				if (i) fos << " | ";
+				const hbond& hb = r.hbonds[i];
+				fos << hb.receptor << " - " << hb.ligand;
+			}
+			fos << '\n';
 			for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 			{
 				const string& line = lines[j];

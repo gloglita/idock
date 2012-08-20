@@ -16,6 +16,7 @@
 
 */
 
+#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include "parsing_error.hpp"
 #include "scoring_function.hpp"
@@ -52,7 +53,9 @@ namespace idock
 				if (ad == AD_TYPE_H) continue;
 
 				// Parse the Cartesian coordinate.
-				const atom a(vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				string name = line.substr(12, 4);
+				boost::algorithm::trim(name);
+				const atom a(line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 				if (ad == AD_TYPE_HD)
