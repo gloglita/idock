@@ -42,7 +42,7 @@ Supported operating systems and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0 and 1.50.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0, 1.50.0 and 1.51.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
 
 ### Compilation on Linux, Mac OS X, Solaris and FreeBSD
 
@@ -117,7 +117,7 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
-### 1.6 (under construction)
+### 1.6 (2012-08-21)
 
 * Added a new example 2VQZ.
 * Output hydrogen bonds for each conformation.
@@ -126,7 +126,7 @@ Change Log
 * Fixed a bug of aligning columns in log.csv.
 * Fixed a bug of writing repeated energies to log.csv when compiling idock with clang 3.1 on Mac OS X and FreeBSD.
 * Supported CentOS 6.3.
-* To upgraded boost from 1.50.0 to 1.51.0.
+* Upgraded boost from 1.50.0 to 1.51.0.
 
 ### 1.5 (2012-06-13)
 
