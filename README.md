@@ -26,7 +26,7 @@ Supported operating systems and compilers
 * Ubuntu 11.10 x86_64 and Intel C++ Compiler 12.1.2
 * Fedora 16 x86_64 and GCC 4.6.2
 * Fedora 16 x86_64 and Intel C++ Compiler 12.1.2
-* Arch Linux 3.4.8 x86_64 and GCC 4.7.1
+* Arch Linux 3.5.2 x86_64 and GCC 4.7.1
 * Arch Linux 3.4.2 x86_64 and CLANG 3.1
 * Arch Linux 3.4.2 x86_64 and Intel C++ Compiler 12.1.2
 * CentOS 6.3 x86_64 and GCC 4.4.6
