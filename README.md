@@ -11,8 +11,13 @@ Features
 * idock estimates the capacity of every vector structure and intensively utilizes right-value reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
+* idock supports as many as 29 chemical elements including rare ones like Zn, Fe, Mg, Ca, Mn, Cu, Na, K, Hg, Ni, Co, Cd, As and Sr.
 * idock supports reading and writing compressed ligand files with gzip and bzip2.
 * idock enables automatic recovery and restarts docking from the previous stopping point.
+* idock reports progress every 10\% Monte Carlo tasks per ligand in a neat manner.
+* idock outputs putative inter-molecular hydrogen bonds for each predicted conformation.
+* idock outputs per-atom free energy for protein-ligand interaction hotspot detection.
+* idock outputs summary for each predicted conformation into a CSV file for subsequent analysis.
 * idock provides precompiled executables for 32-bit and 64-bit Linux, Windows, Mac OS X, FreeBSD and Solaris.
 * idock can be used as a backend docking engine for [igrow], a multithreaded ligand growing tool for structure-based molecule design.
 * idock is now available as a service at [istar].
@@ -42,7 +47,7 @@ Supported operating systems and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0, 1.50.0 and 1.51.0 are tested. The Boost libraries required by idock are `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0, 1.50.0 and 1.51.0 are tested. The Boost libraries required by idock are `Chrono`, `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
 
 ### Compilation on Linux, Mac OS X, Solaris and FreeBSD
 
@@ -64,11 +69,11 @@ The generated objects will be placed in the `obj` folder, and the generated exec
 
 ### Compilation on Windows
 
-Visual Studio 2010 solution and project files are provided in the `msvc` folder. The project file uses Windows 7.1 SDK as platform toolset by default. One may revert it to vc100. To compile, simply run
+Visual Studio 2012 solution and project files are provided in the `msvc` folder. To compile, simply run
 
     msbuild /t:Build /p:Configuration=Release
 
-Or one may open `idock.sln` in Visual Studio 2010 and do a full rebuild.
+Or one may open `idock.sln` in Visual Studio 2012 and do a full rebuild.
 
 The generated objects will be placed in the `obj` folder, and the generated executable will be placed in the `bin` folder.
 
@@ -120,7 +125,7 @@ Change Log
 ### 1.6 (2012-08-21)
 
 * Added a new example 2VQZ.
-* Output hydrogen bonds for each conformation.
+* Output putative hydrogen bonds for each predicted conformation.
 * Precompiled idock for Windows using Visual Studio 2012.
 * Upgraded Visual Studio project from 2010 to 2012.
 * Fixed a bug of aligning columns in log.csv.
