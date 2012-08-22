@@ -11,7 +11,7 @@ Features
 * idock estimates the capacity of every vector structure and intensively utilizes right-value reference, a new feature in the [C++11] standard, to avoid frequent memory reallocation.
 * idock flattens Vina's tree-like recursive data structure of ligand into simple linear array structure to ensure a high data cache hit rate and easy coding.
 * idock accelerates the assignment of atom types by making use of residue information for receptor and branch information for ligand.
-* idock supports as many as 29 chemical elements including rare ones like Mn, Cu, Na, K, Hg, Ni, Co, Cd, As and Sr.
+* idock supports as many as 29 chemical elements including rare ones like Zn, Fe, Mg, Ca, Mn, Cu, Na, K, Hg, Ni, Co, Cd, As and Sr.
 * idock supports reading and writing compressed ligand files with gzip and bzip2.
 * idock enables automatic recovery and restarts docking from the previous stopping point.
 * idock reports progress every 10% Monte Carlo tasks per ligand in a neat manner.
