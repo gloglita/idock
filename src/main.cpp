@@ -521,8 +521,9 @@ int main(int argc, char* argv[])
 
 		// Initialize necessary variables for storing ligand summaries.
 		ptr_vector<summary> summaries(num_ligands);
-		vector<fl> energies;
+		vector<fl> energies, efficiencies;
 		energies.reserve(max_conformations);
+		efficiencies.reserve(max_conformations);
 		vector<string> hbonds;
 		hbonds.reserve(max_conformations);
 		string line;
@@ -544,20 +545,27 @@ int main(int argc, char* argv[])
 				{
 					energies.push_back(right_cast<fl>(line, 56, 63));
 				}
+				else if (starts_with(line, "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:"))
+				{
+					efficiencies.push_back(right_cast<fl>(line, 56, 63));
+				}
 				else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
 				{
-					hbonds.push_back(line.substr(56));
+					size_t start;
+					for (start = 56; line[start] == ' '; ++start);
+					hbonds.push_back(line.substr(start));
 				}
 			}
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
-			if (energies.empty() || hbonds.empty())
+			if (energies.empty() || efficiencies.empty() || hbonds.empty())
 			{
-				log << p.filename().string() << " no energy or hydrogen bonds\n";
+				log << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
 				continue;
 			}
-			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<string>&&>(hbonds)));
+			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<fl>&&>(efficiencies), static_cast<vector<string>&&>(hbonds)));
 #ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
 			energies.clear();
+			efficiencies.clear();
 			hbonds.clear();
 #endif
 		}
@@ -572,7 +580,7 @@ int main(int argc, char* argv[])
 		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)
 		{
-			csv << ",FE" << i << ",HB" << i;
+			csv << ",FE" << i << ",LE" << i << ",HB" << i;
 		}
 		csv.setf(std::ios::fixed, std::ios::floatfield);
 		csv << '\n' << std::setprecision(3);
@@ -583,11 +591,11 @@ int main(int argc, char* argv[])
 			csv << s.stem << ',' << num_conformations;
 			for (size_t j = 0; j < num_conformations; ++j)
 			{
-				csv << ',' << s.energies[j] << ',' << s.hbonds[j];
+				csv << ',' << s.energies[j] << ',' << s.efficiencies[j] << ',' << s.hbonds[j];
 			}
 			for (size_t j = num_conformations; j < max_conformations; ++j)
 			{
-				csv << ",,";
+				csv << ",,,";
 			}
 			csv << '\n';
 		}
