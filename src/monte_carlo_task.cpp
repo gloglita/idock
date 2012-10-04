@@ -46,6 +46,10 @@ namespace idock
 		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box2_gen(eng, uniform_real_distribution<fl>(b.corner1[2], b.corner2[2]));
 		variate_generator<mt19937eng, uniform_int_distribution<size_t>> uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
 		variate_generator<mt19937eng, normal_distribution<fl>> normal_01_gen(eng, normal_distribution<fl>(0, 1));
+		// uniform_11 = uniform_01 * 2 - 1
+		// uniform_pi = (uniform_01 * 2 - 1) * pi
+		// uniform_box = uniform_01 * (b - a) + a
+		// uniform_entity = curand() % num_entities
 
 		// Generate an initial random conformation c0, and evaluate it.
 		conformation c0(lig.num_active_torsions);
@@ -207,7 +211,7 @@ namespace idock
 				g1 = g2;
 			}
 
-			// Accept c1 according to Metropolis critera.
+			// Accept c1 according to Metropolis criteria.
 			const fl delta = e0 - e1;
 			if ((delta > 0) || (uniform_01_gen() < exp(delta)))
 			{
