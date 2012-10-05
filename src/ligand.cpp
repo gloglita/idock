@@ -590,8 +590,8 @@ namespace idock
 				<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
 				<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 				<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
-				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e - r.f << " KCAL/MOL\n"
-				<< "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:" << setw(8) << r.f / num_heavy_atoms << " KCAL/MOL\n"
+				<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << (r.e - r.f) << " KCAL/MOL\n"
+				<< "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:" << setw(8) << (r.f / num_heavy_atoms) << " KCAL/MOL\n"
 				<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds;
 			for (size_t i = 0; i < num_hbonds; ++i)
 			{
