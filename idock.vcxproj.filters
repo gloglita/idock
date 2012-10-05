@@ -11,93 +11,93 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\box.cpp">
+    <ClCompile Include="src\box.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\grid_map_task.cpp">
+    <ClCompile Include="src\grid_map_task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\ligand.cpp">
+    <ClCompile Include="src\ligand.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\main.cpp">
+    <ClCompile Include="src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\monte_carlo_task.cpp">
+    <ClCompile Include="src\monte_carlo_task.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\scoring_function.cpp">
+    <ClCompile Include="src\scoring_function.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\quaternion.cpp">
+    <ClCompile Include="src\quaternion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\receptor.cpp">
+    <ClCompile Include="src\receptor.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\thread_pool.cpp">
+    <ClCompile Include="src\thread_pool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\src\array3d.hpp">
+    <ClInclude Include="src\array3d.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\atom.hpp">
+    <ClInclude Include="src\atom.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\box.hpp">
+    <ClInclude Include="src\box.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\common.hpp">
+    <ClInclude Include="src\common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\conformation.hpp">
+    <ClInclude Include="src\conformation.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\grid_map_task.hpp">
+    <ClInclude Include="src\grid_map_task.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\ligand.hpp">
+    <ClInclude Include="src\ligand.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\mat3.hpp">
+    <ClInclude Include="src\mat3.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\matrix.hpp">
+    <ClInclude Include="src\matrix.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\monte_carlo_task.hpp">
+    <ClInclude Include="src\monte_carlo_task.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\result.hpp">
+    <ClInclude Include="src\result.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\scoring_function.hpp">
+    <ClInclude Include="src\scoring_function.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\quaternion.hpp">
+    <ClInclude Include="src\quaternion.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\receptor.hpp">
+    <ClInclude Include="src\receptor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\seed.hpp">
+    <ClInclude Include="src\seed.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\thread_pool.hpp">
+    <ClInclude Include="src\thread_pool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\tee.hpp">
+    <ClInclude Include="src\tee.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\vec3.hpp">
+    <ClInclude Include="src\vec3.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\summary.hpp">
+    <ClInclude Include="src\summary.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\src\parsing_error.hpp">
+    <ClInclude Include="src\parsing_error.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
