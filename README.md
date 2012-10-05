@@ -69,7 +69,7 @@ The generated objects will be placed in the `obj` folder, and the generated exec
 
 ### Compilation on Windows
 
-Visual Studio 2012 solution and project files are provided in the `msvc` folder. To compile, simply run
+Visual Studio 2012 solution and project files are provided. To compile, simply run
 
     msbuild /t:Build /p:Configuration=Release
 
