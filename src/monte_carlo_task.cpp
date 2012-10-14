@@ -38,14 +38,14 @@ namespace idock
 		using boost::random::uniform_int_distribution;
 		using boost::random::normal_distribution;
 		mt19937eng eng(seed);
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_01_gen(eng, uniform_real_distribution<fl>(  0,  1));
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_11_gen(eng, uniform_real_distribution<fl>( -1,  1));
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_pi_gen(eng, uniform_real_distribution<fl>(-pi, pi));
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box0_gen(eng, uniform_real_distribution<fl>(b.corner1[0], b.corner2[0]));
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box1_gen(eng, uniform_real_distribution<fl>(b.corner1[1], b.corner2[1]));
-		variate_generator<mt19937eng, uniform_real_distribution<fl>> uniform_box2_gen(eng, uniform_real_distribution<fl>(b.corner1[2], b.corner2[2]));
-		variate_generator<mt19937eng, uniform_int_distribution<size_t>> uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
-		variate_generator<mt19937eng, normal_distribution<fl>> normal_01_gen(eng, normal_distribution<fl>(0, 1));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_01_gen(eng, uniform_real_distribution<fl>(  0,  1));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_11_gen(eng, uniform_real_distribution<fl>( -1,  1));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_pi_gen(eng, uniform_real_distribution<fl>(-pi, pi));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_box0_gen(eng, uniform_real_distribution<fl>(b.corner1[0], b.corner2[0]));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_box1_gen(eng, uniform_real_distribution<fl>(b.corner1[1], b.corner2[1]));
+		variate_generator<mt19937eng&, uniform_real_distribution<fl>> uniform_box2_gen(eng, uniform_real_distribution<fl>(b.corner1[2], b.corner2[2]));
+		variate_generator<mt19937eng&, uniform_int_distribution<size_t>> uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
+		variate_generator<mt19937eng&, normal_distribution<fl>> normal_01_gen(eng, normal_distribution<fl>(0, 1));
 		// uniform_11 = uniform_01 * 2 - 1
 		// uniform_pi = (uniform_01 * 2 - 1) * pi
 		// uniform_box = uniform_01 * (b - a) + a
