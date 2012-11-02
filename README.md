@@ -122,6 +122,13 @@ The generated PDF will be `refman.pdf`.
 Change Log
 ----------
 
+### 2.0 (2012-11-02)
+
+* Output ligand efficiency.
+* Updated Visual Studio 2012 project settings.
+* Fixed a bug of repeatly executing the same Monte Carlo tasks.
+* Updated the logo.
+
 ### 1.6 (2012-08-21)
 
 * Added a new example 2VQZ.
