@@ -1,5 +1,5 @@
 BOOST_ROOT = $(HOME)/boost_1_51_0
-CC = g++ -static -O3 -DNDEBUG -std=gnu++0x
+CC = g++ -static -O3 -DNDEBUG -std=c++0x
 
 all: ../bin/Linux/x86_64/idock ../bin/Linux/x86/idock
 
