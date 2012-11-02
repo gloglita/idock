@@ -86,6 +86,10 @@ namespace idock
 					atoms.push_back(a);
 				}
 			}
+			else if (starts_with(line, "TER"))
+			{
+				residue = "XXXX";
+			}
 		}
 		in.close(); // Parsing finishes. Close the p stream as soon as possible.
 
