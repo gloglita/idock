@@ -47,8 +47,8 @@
  * \section citation Citation
  * Hongjian Li, Kwong-Sak Leung, and Man-Hon Wong. idock: A Multithreaded Virtual Screening Tool for Flexible Ligand Docking. 2012 IEEE Symposium on Computational Intelligence in Bioinformatics and Computational Biology (CIBCB), pp.77-84, San Diego, United States, 9-12 May 2012. DOI: 10.1109/CIBCB.2012.6217214
  *
- * \author Hongjian Li, The Chinese University of Hong Kong.
- * \date 13 June 2012
+ * \author Hongjian Li
+ * \date 2 November 2012
  *
  * Copyright (C) 2011-2012 The Chinese University of Hong Kong.
  */
@@ -72,7 +72,7 @@ int main(int argc, char* argv[])
 {
 	using std::cout;
 	using std::cerr;
-	cout << "idock 1.6\n";
+	cout << "idock 2.0\n";
 
 	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
