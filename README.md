@@ -47,7 +47,7 @@ Supported operating systems and compilers
 Compilation
 -----------
 
-idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0, 1.50.0 and 1.51.0 are tested. The Boost libraries required by idock are `Chrono`, `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
+idock depends on [Boost C++ Libraries]. Boost 1.46.0, 1.46.1, 1.47.0, 1.48.0, 1.49.0, 1.50.0, 1.51.0 and 1.52.0 are tested. The Boost libraries required by idock are `Chrono`, `System`, `Thread`, `Filesystem`, `Program Options` and `Iostreams`.
 
 ### Compilation on Linux, Mac OS X, Solaris and FreeBSD
 
