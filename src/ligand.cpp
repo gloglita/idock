@@ -37,8 +37,6 @@ namespace idock
 		hydrogens.reserve(50); // A ligand typically consists of <= 50 hydrogens.
 
 		// Initialize helper variables for parsing.
-		vector<size_t> numbers; ///< Atom serial numbers.
-		numbers.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
 		vector<vector<size_t>> bonds; ///< Covalent bonds.
 		bonds.reserve(100); // A ligand typically consists of <= 100 heavy atoms.
 		size_t current = 0; // Index of current frame, initialized to ROOT frame.
@@ -74,7 +72,7 @@ namespace idock
 				// Parse the Cartesian coordinate.
 				string name = line.substr(12, 4);
 				boost::algorithm::trim(name);
-				atom a(static_cast<string&&>(name), vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				atom a(right_cast<size_t>(line, 7, 11), name, name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				if (a.is_hydrogen()) // Current atom is a hydrogen.
 				{
@@ -124,8 +122,7 @@ namespace idock
 					}
 
 					// Set rotorYidx if the serial number of current atom is rotorYsrn.
-					numbers.push_back(right_cast<size_t>(line, 7, 11));
-					if (current && (numbers.back() == f->rotorYsrn)) // current > 0, i.e. BRANCH frame.
+					if (current && (a.serial == f->rotorYsrn)) // current > 0, i.e. BRANCH frame.
 					{
 						f->rotorYidx = heavy_atoms.size();
 					}
@@ -146,7 +143,7 @@ namespace idock
 				// Find the corresponding heavy atom with x as its atom serial number in the current frame.
 				for (size_t i = f->habegin; true; ++i)
 				{
-					if (numbers[i] == rotorXsrn)
+					if (heavy_atoms[i].serial == rotorXsrn)
 					{
 						// Insert a new frame whose parent is the current frame.
 						frames.push_back(frame(current, rotorXsrn, rotorYsrn, i, heavy_atoms.size(), hydrogens.size()));

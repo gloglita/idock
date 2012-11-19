@@ -55,7 +55,7 @@ namespace idock
 				// Parse the Cartesian coordinate.
 				string name = line.substr(12, 4);
 				boost::algorithm::trim(name);
-				const atom a(line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				const atom a(right_cast<size_t>(line, 7, 11), name, line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 				if (ad == AD_TYPE_HD)

@@ -99,6 +99,27 @@ namespace idock
 		return AD_TYPE_SIZE;
 	}
 
+	/// Returns true if the AutoDock4 atom type is a hydrogen bond donor.
+	inline bool ad_is_donor(const size_t ad)
+	{
+		BOOST_ASSERT(ad < AD_TYPE_SIZE);
+		return (ad == AD_TYPE_HD) || (ad >= AD_TYPE_Zn);
+	}
+
+	/// Returns true if the AutoDock4 atom type is a hydrogen bond acceptor.
+	inline bool ad_is_acceptor(const size_t ad)
+	{
+		BOOST_ASSERT(ad < AD_TYPE_SIZE);
+		return (ad == AD_TYPE_NA) || (ad == AD_TYPE_OA);
+	}
+
+	/// Returns true if the AutoDock4 atom type is either a hydrogen bond donor or a hydrogen bond acceptor.
+	inline bool ad_is_donor_acceptor(const size_t ad)
+	{
+		BOOST_ASSERT(ad < AD_TYPE_SIZE);
+		return ad_is_donor(ad) || ad_is_acceptor(ad);
+	}
+
 	// http://en.wikipedia.org/wiki/Atomic_radii_of_the_elements_(data_page)
 	// http://en.wikipedia.org/wiki/Covalent_radius
 	// The above two references have inconsistent values for covalent radius.
@@ -272,13 +293,15 @@ namespace idock
 	class atom
 	{
 	public:
+		size_t serial; ///< Serial number.
 		string name; ///< Atom name;
+		string id; ///< Unique identifier, e.g. A:SER35:N for receptor and O1 for ligand.
 		vec3 coordinate; ///< 3D coordinate.
 		size_t ad; ///< AutoDock4 atom type.
 		size_t xs; ///< XScore atom type.
 
 		/// Constructs an atom with 3D coordinate and AutoDock4 atom type.
-		explicit atom(string&& name_, const vec3& coordinate, const size_t ad) : name(static_cast<string&&>(name_)), coordinate(coordinate), ad(ad), xs(ad_to_xs[ad]) {}
+		explicit atom(const size_t serial, const string& name, const string& id, const vec3& coordinate, const size_t ad) : serial(serial), name(name), id(id), coordinate(coordinate), ad(ad), xs(ad_to_xs[ad]) {}
 
 		/// Returns the covalent radius of current AutoDock4 atom type.
 		fl covalent_radius() const
