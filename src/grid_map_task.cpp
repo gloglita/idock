@@ -42,7 +42,7 @@ namespace idock
 			for (size_t l = 0; l < num_receptor_atoms; ++l)
 			{
 				const atom& a = rec.atoms[receptor_atoms[l]];
-				BOOST_ASSERT(!a.is_hydrogen());
+				if (a.is_hydrogen()) continue;
 				const fl r2 = distance_sqr(probe_coords, a.coordinate);
 				if (r2 <= scoring_function::Cutoff_Sqr)
 				{

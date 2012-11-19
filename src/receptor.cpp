@@ -31,8 +31,7 @@ namespace idock
 
 		// Initialize helper variables for parsing.
 		string residue = "XXXX"; // Current residue sequence, used to track residue change, initialized to a dummy value.
-		vector<size_t> residues;
-		residues.reserve(1000); // A receptor typically consists of <= 1,000 residues, including metal ions and water molecules if any.
+		size_t residue_start; // The starting atom of the current residue.
 		size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 		string line;
 		line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
@@ -44,6 +43,16 @@ namespace idock
 			++num_lines;
 			if (starts_with(line, "ATOM") || starts_with(line, "HETATM"))
 			{
+				// Parse the residue sequence located at 1-based [23, 26].
+				if ((line[25] != residue[3]) || (line[24] != residue[2]) || (line[23] != residue[1]) || (line[22] != residue[0])) // This line is the start of a new residue.
+				{
+					residue[3] = line[25];
+					residue[2] = line[24];
+					residue[1] = line[23];
+					residue[0] = line[22];
+					residue_start = atoms.size();
+				}
+
 				// Parse and validate AutoDock4 atom type.
 				const string ad_type_string = line.substr(77, isspace(line[78]) ? 1 : 2);
 				const size_t ad = parse_ad_type_string(ad_type_string);
@@ -55,36 +64,45 @@ namespace idock
 				// Parse the Cartesian coordinate.
 				string name = line.substr(12, 4);
 				boost::algorithm::trim(name);
-				const atom a(right_cast<size_t>(line, 7, 11), name, line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+				atom a(right_cast<size_t>(line, 7, 11), name, line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
 
 				// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 				if (ad == AD_TYPE_HD)
 				{
-					const size_t residue_start = residues.back();
 					for (size_t i = atoms.size(); i > residue_start;)
 					{
 						atom& b = atoms[--i];
-						if (!b.is_hetero()) continue; // Only a hetero atom can be a hydrogen bond donor.
-						if (a.is_neighbor(b))
+						if (b.is_hetero() && b.is_neighbor(a))
 						{
 							b.donorize();
 							break;
 						}
 					}
 				}
-				else // It is a heavy atom.
+				else if (a.is_hetero()) // It is a hetero atom.
 				{
-					// Parse the residue sequence located at 1-based [23, 26].
-					if ((line[25] != residue[3]) || (line[24] != residue[2]) || (line[23] != residue[1]) || (line[22] != residue[0])) // This line is the start of a new residue.
+					for (size_t i = atoms.size(); i > residue_start;)
 					{
-						residue[3] = line[25];
-						residue[2] = line[24];
-						residue[1] = line[23];
-						residue[0] = line[22];
-						residues.push_back(atoms.size());
+						atom& b = atoms[--i];
+						if (!b.is_hetero() && b.is_neighbor(a))
+						{
+							b.dehydrophobicize();
+						}
 					}
-					atoms.push_back(a);
 				}
+				else // It is a carbon atom.
+				{
+					for (size_t i = atoms.size(); i > residue_start;)
+					{
+						const atom& b = atoms[--i];
+						if (b.is_hetero() && b.is_neighbor(a))
+						{
+							a.dehydrophobicize();
+							break;
+						}
+					}
+				}
+				atoms.push_back(a);
 			}
 			else if (starts_with(line, "TER"))
 			{
@@ -92,32 +110,6 @@ namespace idock
 			}
 		}
 		in.close(); // Parsing finishes. Close the p stream as soon as possible.
-
-		// Dehydrophobicize carbons if necessary.
-		const size_t num_residues = residues.size();
-		residues.push_back(atoms.size());
-		for (size_t r = 0; r < num_residues; ++r)
-		{
-			const size_t begin = residues[r];
-			const size_t end = residues[r + 1];
-			for (size_t i = begin; i < end; ++i)
-			{
-				const atom& a = atoms[i];
-				if (!a.is_hetero()) continue; // a is a hetero atom.
-
-				for (size_t j = begin; j < end; ++j)
-				{
-					atom& b = atoms[j];
-					if (b.is_hetero()) continue; // b is a carbon atom.
-
-					// If carbon atom b is bonded to hetero atom a, b is no longer a hydrophobic atom.
-					if (a.is_neighbor(b))
-					{
-						b.dehydrophobicize();
-					}
-				}
-			}
-		}
 
 		// Find all the heavy receptor atoms that are within 8A of the box.
 		vector<size_t> receptor_atoms_within_cutoff;
