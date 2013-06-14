@@ -18,7 +18,7 @@ int main(int argc, char* argv[])
 	using std::cerr;
 	cout << "idock 2.0\n";
 
-	path receptor_path, ligand_folder_path, output_folder_path, csv_path;
+	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	fl energy_range, grid_granularity;
@@ -31,8 +31,7 @@ int main(int argc, char* argv[])
 
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
-		const path default_log_path = "log.txt";
-		const path default_csv_path = "log.csv";
+		const path default_log_path = "log.csv";
 		const unsigned int concurrency = boost::thread::hardware_concurrency();
 		const size_t default_num_threads = concurrency ? concurrency : 1;
 		const size_t default_seed = random_seed();
@@ -57,7 +56,7 @@ int main(int argc, char* argv[])
 		options_description output_options("output (optional)");
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
-			("csv", value<path>(&csv_path)->default_value(default_csv_path), "csv file")
+			("log", value<path>(&log_path)->default_value(default_log_path), "log file")
 			;
 
 		options_description miscellaneous_options("options (optional)");
@@ -147,10 +146,10 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		// Validate csv_path.
-		if (is_directory(csv_path))
+		// Validate log_path.
+		if (is_directory(log_path))
 		{
-			cerr << "csv path " << csv_path << " is a directory\n";
+			cerr << "log path " << log_path << " is a directory\n";
 			return 1;
 		}
 
@@ -493,30 +492,30 @@ int main(int argc, char* argv[])
 	// Sort the summaries.
 	summaries.sort();
 
-	// Dump ligand summaries to the csv file.
+	// Dump ligand summaries to the log file.
 	const size_t num_summaries = summaries.size();
-	cout << "Writing summary of " << num_summaries << " ligands to " << csv_path << '\n';
-	ofstream csv(csv_path);
-	csv << "Ligand,Conf";
+	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
+	ofstream log(log_path);
+	log << "Ligand,Conf";
 	for (size_t i = 1; i <= max_conformations; ++i)
 	{
-		csv << ",FE" << i << ",LE" << i << ",HB" << i;
+		log << ",FE" << i << ",LE" << i << ",HB" << i;
 	}
-	csv.setf(std::ios::fixed, std::ios::floatfield);
-	csv << '\n' << std::setprecision(3);
+	log.setf(std::ios::fixed, std::ios::floatfield);
+	log << '\n' << std::setprecision(3);
 	for (size_t i = 0; i < num_summaries; ++i)
 	{
 		const summary& s = summaries[i];
 		const size_t num_conformations = s.energies.size();
-		csv << s.stem << ',' << num_conformations;
+		log << s.stem << ',' << num_conformations;
 		for (size_t j = 0; j < num_conformations; ++j)
 		{
-			csv << ',' << s.energies[j] << ',' << s.efficiencies[j] << ',' << s.hbonds[j];
+			log << ',' << s.energies[j] << ',' << s.efficiencies[j] << ',' << s.hbonds[j];
 		}
 		for (size_t j = num_conformations; j < max_conformations; ++j)
 		{
-			csv << ",,,";
+			log << ",,,";
 		}
-		csv << '\n';
+		log << '\n';
 	}
 }
