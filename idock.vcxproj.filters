@@ -82,9 +82,6 @@
     <ClInclude Include="src\receptor.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\seed.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\thread_pool.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>

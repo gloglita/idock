@@ -1,10 +1,10 @@
+#include <chrono>
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
-#include "seed.hpp"
 #include "receptor.hpp"
 #include "ligand.hpp"
 #include "thread_pool.hpp"
@@ -31,9 +31,8 @@ int main(int argc, char* argv[])
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
 		const path default_log_path = "log.csv";
-		const unsigned int concurrency = boost::thread::hardware_concurrency();
-		const size_t default_num_threads = concurrency ? concurrency : 1;
-		const size_t default_seed = random_seed();
+		const size_t default_num_threads = boost::thread::hardware_concurrency();
+		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 32;
 		const size_t default_max_conformations = 9;
 		const fl default_energy_range = 3.0;
