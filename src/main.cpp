@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
-	fl energy_range, grid_granularity;
+	fl grid_granularity;
 	bool force;
 
 	// Process program options.
@@ -35,7 +35,6 @@ int main(int argc, char* argv[])
 		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 32;
 		const size_t default_max_conformations = 9;
-		const fl default_energy_range = 3.0;
 		const fl default_grid_granularity = 0.15625;
 		const bool default_force = false;
 
@@ -63,7 +62,6 @@ int main(int argc, char* argv[])
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
 			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
-			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference in kcal/mol between the best binding conformation and the worst one")
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
 			("help", "help information")
@@ -179,11 +177,6 @@ int main(int argc, char* argv[])
 			cerr << "Option max_conformations must be 1 or greater\n";
 			return 1;
 		}
-		if (energy_range < 0)
-		{
-			cerr << "Option energy_range must be 0 or greater\n";
-			return 1;
-		}
 		if (grid_granularity <= 0)
 		{
 			cerr << "Option granularity must be positive\n";
@@ -270,7 +263,6 @@ int main(int argc, char* argv[])
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
 	path input_ligand_path;
 	size_t num_ligands = 0; // Ligand counter.
-	size_t num_conformations; // Number of conformation to output.
 	using namespace boost::filesystem;
 	const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
@@ -390,18 +382,14 @@ int main(int argc, char* argv[])
 				results[i].e_nd = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
 			}
 
-			// Determine the number of conformations to output according to user-supplied max_conformations and energy_range.
-			const fl energy_upper_bound = best_result.e_nd + energy_range;
-			for (num_conformations = 1; (num_conformations < num_results) && (results[num_conformations].e_nd <= energy_upper_bound); ++num_conformations);
-
 			// Flush the number of conformations to output.
-			cout << std::setw(4) << num_conformations << " |";
+			cout << std::setw(4) << num_results << " |";
 
-			if (num_conformations)
+			if (num_results)
 			{
 				// Find the number of hydrogen bonds.
 				const size_t num_lig_hbda = lig.hbda.size();
-				for (size_t k = 0; k < num_conformations; ++k)
+				for (size_t k = 0; k < num_results; ++k)
 				{
 					result& r = results[k];
 					for (size_t i = 0; i < num_lig_hbda; ++i)
@@ -427,10 +415,10 @@ int main(int argc, char* argv[])
 				}
 
 				// Write models to file.
-				lig.write_models(output_ligand_path, results, num_conformations, b, grid_maps);
+				lig.write_models(output_ligand_path, results, num_results, b, grid_maps);
 
 				// Display the free energies of the top 4 conformations.
-				const size_t num_energies = std::min<size_t>(num_conformations, 4);
+				const size_t num_energies = std::min<size_t>(num_results, 4);
 				for (size_t i = 0; i < num_energies; ++i)
 				{
 					cout << std::setw(8) << results[i].e_nd;
