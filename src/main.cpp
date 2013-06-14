@@ -5,7 +5,6 @@
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include "seed.hpp"
-#include "tee.hpp"
 #include "receptor.hpp"
 #include "ligand.hpp"
 #include "thread_pool.hpp"
@@ -19,7 +18,7 @@ int main(int argc, char* argv[])
 	using std::cerr;
 	cout << "idock 2.0\n";
 
-	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
+	path receptor_path, ligand_folder_path, output_folder_path, csv_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	fl energy_range, grid_granularity;
@@ -58,7 +57,6 @@ int main(int argc, char* argv[])
 		options_description output_options("output (optional)");
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
-			("log", value<path>(&log_path)->default_value(default_log_path), "log file")
 			("csv", value<path>(&csv_path)->default_value(default_csv_path), "csv file")
 			;
 
@@ -149,13 +147,6 @@ int main(int argc, char* argv[])
 			}
 		}
 
-		// Validate log_path.
-		if (is_directory(log_path))
-		{
-			cerr << "Log path " << log_path << " is a directory\n";
-			return 1;
-		}
-
 		// Validate csv_path.
 		if (is_directory(csv_path))
 		{
@@ -198,19 +189,15 @@ int main(int argc, char* argv[])
 
 	try
 	{
-		// Initialize the log.
-		tee log(log_path);
-		cout << "Logging to " << log_path << '\n';
-
 		// Initialize a Mersenne Twister random number generator.
-		log << "Using random seed " << seed << '\n';
+		cout << "Using random seed " << seed << '\n';
 		mt19937eng eng(seed);
 
 		// Initialize the search space of cuboid shape.
 		const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 
 		// Parse the receptor.
-		log << "Parsing receptor " << receptor_path << '\n';
+		cout << "Parsing receptor " << receptor_path << '\n';
 		const receptor rec(receptor_path, b);
 
 		// Reserve storage for task containers.
@@ -244,11 +231,11 @@ int main(int argc, char* argv[])
 		atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
 		// Initialize a thread pool and create worker threads for later use.
-		log << "Creating a thread pool of " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << '\n';
+		cout << "Creating a thread pool of " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << '\n';
 		thread_pool tp(num_threads);
 
 		// Precalculate the scoring function in parallel.
-		log << "Precalculating scoring function in parallel ";
+		cout << "Precalculating scoring function in parallel ";
 		scoring_function sf;
 		{
 			// Precalculate reciprocal square root values.
@@ -276,12 +263,13 @@ int main(int argc, char* argv[])
 			// Wait until all the scoring function tasks are completed.
 			tp.sync();
 		}
-		log << '\n';
+		cout << '\n';
 
-		log << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
+		cout << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
 
 		// Perform docking for each file in the ligand folder.
-		log << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
+		cout.setf(std::ios::fixed, std::ios::floatfield);
+		cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
 		path input_ligand_path;
 		size_t num_ligands = 0; // Ligand counter.
 		size_t num_conformations; // Number of conformation to output.
@@ -353,8 +341,7 @@ int main(int argc, char* argv[])
 				}
 
 				// Dump the ligand filename.
-				log << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | ";
-				cout << std::flush;
+				cout << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | " << std::flush;
 
 				// Populate the Monte Carlo task container.
 				BOOST_ASSERT(mc_tasks.empty());
@@ -386,17 +373,14 @@ int main(int argc, char* argv[])
 				tp.sync();
 				mc_tasks.clear();
 
-				// Output full progress bar to log file to make it consistent with cout.
-				log.file << "##########";
-
 				// Proceed to number of conformations.
-				log << " | ";
+				cout << " | ";
 
 				// If no conformation can be found, skip the current ligand and proceed with the next one.
 				const size_t num_results = std::min<size_t>(results.size(), max_conformations);
 				if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >= 1 is enforced when parsing command line arguments.
 				{
-					log << std::setw(4) << 0 << " |\n";
+					cout << std::setw(4) << 0 << " |\n";
 					continue;
 				}
 
@@ -413,7 +397,7 @@ int main(int argc, char* argv[])
 				for (num_conformations = 1; (num_conformations < num_results) && (results[num_conformations].e_nd <= energy_upper_bound); ++num_conformations);
 
 				// Flush the number of conformations to output.
-				log << std::setw(4) << num_conformations << " |";
+				cout << std::setw(4) << num_conformations << " |";
 
 				if (num_conformations)
 				{
@@ -451,10 +435,10 @@ int main(int argc, char* argv[])
 					const size_t num_energies = std::min<size_t>(num_conformations, 4);
 					for (size_t i = 0; i < num_energies; ++i)
 					{
-						log << std::setw(8) << results[i].e_nd;
+						cout << std::setw(8) << results[i].e_nd;
 					}
 				}
-				log << '\n';
+				cout << '\n';
 
 				// Clear the results of the current ligand.
 				results.clear();
@@ -506,7 +490,7 @@ int main(int argc, char* argv[])
 			in.close(); // Parsing finishes. Close the file stream as soon as possible.
 			if (energies.empty() || efficiencies.empty() || hbonds.empty())
 			{
-				log << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
+				cout << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
 				continue;
 			}
 			summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<fl>&&>(efficiencies), static_cast<vector<string>&&>(hbonds)));
@@ -522,7 +506,7 @@ int main(int argc, char* argv[])
 
 		// Dump ligand summaries to the csv file.
 		const size_t num_summaries = summaries.size();
-		log << "Writing summary of " << num_summaries << " ligands to " << csv_path << '\n';
+		cout << "Writing summary of " << num_summaries << " ligands to " << csv_path << '\n';
 		ofstream csv(csv_path);
 		csv << "Ligand,Conf";
 		for (size_t i = 1; i <= max_conformations; ++i)

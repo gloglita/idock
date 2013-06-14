@@ -39,7 +39,6 @@
     <ClInclude Include="src\seed.hpp" />
     <ClInclude Include="src\summary.hpp" />
     <ClInclude Include="src\thread_pool.hpp" />
-    <ClInclude Include="src\tee.hpp" />
     <ClInclude Include="src\vec3.hpp" />
   </ItemGroup>
   <ItemGroup>
