@@ -16,7 +16,6 @@ int main(int argc, char* argv[])
 {
 	using std::cout;
 	using std::cerr;
-	cout << "idock 2.0\n";
 
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
@@ -68,29 +67,41 @@ int main(int argc, char* argv[])
 			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference in kcal/mol between the best binding conformation and the worst one")
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
+			("help", "help information")
+			("version", "version information")
 			("config", value<path>(), "options can be loaded from a configuration file")
 			;
 
 		options_description all_options;
 		all_options.add(input_options).add(output_options).add(miscellaneous_options);
 
+		// Parse command line arguments.
+		variables_map vm;
+		store(parse_command_line(argc, argv, all_options), vm);
+
 		// If no command line argument is supplied, simply print the usage and exit.
-		if (argc == 1)
+		if (argc == 1 || vm.count("help"))
 		{
 			cout << all_options;
 			return 0;
 		}
 
-		// Parse command line arguments.
-		variables_map vm;
-		store(parse_command_line(argc, argv, all_options), vm);
-		variable_value config_value = vm["config"];
-		if (!config_value.empty()) // If a configuration file is presented, parse it.
+		// If version is requested, simply print the version and exit.
+		if (vm.count("version"))
 		{
-			ifstream config_file(config_value.as<path>());
+			cout << "3.0" << std::endl;
+			return 0;
+		}
+
+		// If a configuration file is presented, parse it.
+		if (vm.count("config"))
+		{
+			boost::filesystem::ifstream config_file(vm["config"].as<path>());
 			store(parse_config_file(config_file, all_options), vm);
 		}
-		vm.notify(); // Notify the user if there are any parsing errors.
+
+		// Notify the user if there are any parsing errors.
+		vm.notify();
 
 		// Validate receptor.
 		if (!exists(receptor_path))
