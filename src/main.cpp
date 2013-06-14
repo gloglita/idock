@@ -19,7 +19,6 @@ int main(int argc, char* argv[])
 	using std::cerr;
 	cout << "idock 2.0\n";
 
-	using namespace idock;
 	path receptor_path, ligand_folder_path, output_folder_path, log_path, csv_path;
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;

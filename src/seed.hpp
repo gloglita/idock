@@ -9,27 +9,24 @@
 #include <unistd.h>
 #endif
 
-namespace idock
-{
 #ifdef _WIN32
-	/// Returns current process ID.
-	inline unsigned int pid()
-	{
-		return GetCurrentProcessId();
-	}
+/// Returns current process ID.
+inline unsigned int pid()
+{
+	return GetCurrentProcessId();
+}
 #else
-	/// Returns current process ID.
-	inline unsigned int pid()
-	{
-		return getpid();
-	}
+/// Returns current process ID.
+inline unsigned int pid()
+{
+	return getpid();
+}
 #endif
 
-	/// Generates a random seed from current process ID and current time.
-	inline size_t random_seed()
-	{
-		return static_cast<size_t>(pid() * (time(0))); // The return type of time(0) is size_t.
-	}
+/// Generates a random seed from current process ID and current time.
+inline size_t random_seed()
+{
+	return static_cast<size_t>(pid() * (time(0))); // The return type of time(0) is size_t.
 }
 
 #endif
