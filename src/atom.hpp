@@ -104,41 +104,41 @@ inline bool ad_is_donor_acceptor(const size_t ad)
 // http://en.wikipedia.org/wiki/Covalent_radius
 // The above two references have inconsistent values for covalent radius.
 // The following definitions use the first reference, while OpenBabel uses the second.
-const fl ad_covalent_radii[] = ///< AutoDock4 covalent radii, factorized by 1.1 for extra allowance.
+const float ad_covalent_radii[] = ///< AutoDock4 covalent radii, factorized by 1.1 for extra allowance.
 {
-	0.407, //  0 = AD_TYPE_H , 0.407 = 1.1 * 0.37
-	0.407, //  1 = AD_TYPE_HD, 0.407 = 1.1 * 0.37
-	0.847, //  2 = AD_TYPE_C , 0.847 = 1.1 * 0.77
-	0.847, //  3 = AD_TYPE_A , 0.847 = 1.1 * 0.77
-	0.825, //  4 = AD_TYPE_N , 0.825 = 1.1 * 0.75
-	0.825, //  5 = AD_TYPE_NA, 0.825 = 1.1 * 0.75
-	0.803, //  6 = AD_TYPE_OA, 0.803 = 1.1 * 0.73
-	1.122, //  7 = AD_TYPE_S , 1.122 = 1.1 * 1.02
-	1.122, //  8 = AD_TYPE_SA, 1.122 = 1.1 * 1.02
-	1.276, //  9 = AD_TYPE_Se, 1.276 = 1.1 * 1.16
-	1.166, // 10 = AD_TYPE_P , 1.166 = 1.1 * 1.06
-	0.781, // 11 = AD_TYPE_F , 0.781 = 1.1 * 0.71
-	1.089, // 12 = AD_TYPE_Cl, 1.089 = 1.1 * 0.99
-	1.254, // 13 = AD_TYPE_Br, 1.254 = 1.1 * 1.14
-	1.463, // 14 = AD_TYPE_I , 1.463 = 1.1 * 1.33
-	1.441, // 15 = AD_TYPE_Zn, 1.441 = 1.1 * 1.31
-	1.375, // 16 = AD_TYPE_Fe, 1.375 = 1.1 * 1.25
-	1.430, // 17 = AD_TYPE_Mg, 1.430 = 1.1 * 1.30
-	1.914, // 18 = AD_TYPE_Ca, 1.914 = 1.1 * 1.74
-	1.529, // 19 = AD_TYPE_Mn, 1.529 = 1.1 * 1.39
-	1.518, // 20 = AD_TYPE_Cu, 1.518 = 1.1 * 1.38
-	1.694, // 21 = AD_TYPE_Na, 1.694 = 1.1 * 1.54
-	2.156, // 22 = AD_TYPE_K , 2.156 = 1.1 * 1.96
-	1.639, // 23 = AD_TYPE_Hg, 1.639 = 1.1 * 1.49
-	1.331, // 24 = AD_TYPE_Ni, 1.331 = 1.1 * 1.21
-	1.386, // 25 = AD_TYPE_Co, 1.386 = 1.1 * 1.26
-	1.628, // 26 = AD_TYPE_Cd, 1.628 = 1.1 * 1.48
-	1.309, // 27 = AD_TYPE_As, 1.309 = 1.1 * 1.19
-	2.112, // 28 = AD_TYPE_Sr, 2.112 = 1.1 * 1.92
+	0.407f, //  0 = AD_TYPE_H , 0.407 = 1.1 * 0.37
+	0.407f, //  1 = AD_TYPE_HD, 0.407 = 1.1 * 0.37
+	0.847f, //  2 = AD_TYPE_C , 0.847 = 1.1 * 0.77
+	0.847f, //  3 = AD_TYPE_A , 0.847 = 1.1 * 0.77
+	0.825f, //  4 = AD_TYPE_N , 0.825 = 1.1 * 0.75
+	0.825f, //  5 = AD_TYPE_NA, 0.825 = 1.1 * 0.75
+	0.803f, //  6 = AD_TYPE_OA, 0.803 = 1.1 * 0.73
+	1.122f, //  7 = AD_TYPE_S , 1.122 = 1.1 * 1.02
+	1.122f, //  8 = AD_TYPE_SA, 1.122 = 1.1 * 1.02
+	1.276f, //  9 = AD_TYPE_Se, 1.276 = 1.1 * 1.16
+	1.166f, // 10 = AD_TYPE_P , 1.166 = 1.1 * 1.06
+	0.781f, // 11 = AD_TYPE_F , 0.781 = 1.1 * 0.71
+	1.089f, // 12 = AD_TYPE_Cl, 1.089 = 1.1 * 0.99
+	1.254f, // 13 = AD_TYPE_Br, 1.254 = 1.1 * 1.14
+	1.463f, // 14 = AD_TYPE_I , 1.463 = 1.1 * 1.33
+	1.441f, // 15 = AD_TYPE_Zn, 1.441 = 1.1 * 1.31
+	1.375f, // 16 = AD_TYPE_Fe, 1.375 = 1.1 * 1.25
+	1.430f, // 17 = AD_TYPE_Mg, 1.430 = 1.1 * 1.30
+	1.914f, // 18 = AD_TYPE_Ca, 1.914 = 1.1 * 1.74
+	1.529f, // 19 = AD_TYPE_Mn, 1.529 = 1.1 * 1.39
+	1.518f, // 20 = AD_TYPE_Cu, 1.518 = 1.1 * 1.38
+	1.694f, // 21 = AD_TYPE_Na, 1.694 = 1.1 * 1.54
+	2.156f, // 22 = AD_TYPE_K , 2.156 = 1.1 * 1.96
+	1.639f, // 23 = AD_TYPE_Hg, 1.639 = 1.1 * 1.49
+	1.331f, // 24 = AD_TYPE_Ni, 1.331 = 1.1 * 1.21
+	1.386f, // 25 = AD_TYPE_Co, 1.386 = 1.1 * 1.26
+	1.628f, // 26 = AD_TYPE_Cd, 1.628 = 1.1 * 1.48
+	1.309f, // 27 = AD_TYPE_As, 1.309 = 1.1 * 1.19
+	2.112f, // 28 = AD_TYPE_Sr, 2.112 = 1.1 * 1.92
 };
 
 /// Returns covalent radius from an AutoDock4 atom type.
-inline fl ad_covalent_radius(const size_t ad)
+inline float ad_covalent_radius(const size_t ad)
 {
 	return ad_covalent_radii[ad];
 }
@@ -161,27 +161,27 @@ const size_t XS_TYPE_I_H   = 13; ///< Iodine, hydrophobic.
 const size_t XS_TYPE_Met_D = 14; ///< Metal, hydrogen bond donor.
 const size_t XS_TYPE_SIZE  = 15; ///< Number of supported XScore atom types.
 
-const fl xs_vdw_radii[] = ///< Van der Waals radii for XScore atom types.
+const float xs_vdw_radii[] = ///< Van der Waals radii for XScore atom types.
 {
-	1.9, //  0 = XS_TYPE_C_H
-	1.9, //  1 = XS_TYPE_C_P
-	1.8, //  2 = XS_TYPE_N_P
-	1.8, //  3 = XS_TYPE_N_D
-	1.8, //  4 = XS_TYPE_N_A
-	1.8, //  5 = XS_TYPE_N_DA
-	1.7, //  6 = XS_TYPE_O_A
-	1.7, //  7 = XS_TYPE_O_DA
-	2.0, //  8 = XS_TYPE_S_P
-	2.1, //  9 = XS_TYPE_P_P
-	1.5, // 10 = XS_TYPE_F_H
-	1.8, // 11 = XS_TYPE_Cl_H
-	2.0, // 12 = XS_TYPE_Br_H
-	2.2, // 13 = XS_TYPE_I_H
-	1.2  // 14 = XS_TYPE_Met_D
+	1.9f, //  0 = XS_TYPE_C_H
+	1.9f, //  1 = XS_TYPE_C_P
+	1.8f, //  2 = XS_TYPE_N_P
+	1.8f, //  3 = XS_TYPE_N_D
+	1.8f, //  4 = XS_TYPE_N_A
+	1.8f, //  5 = XS_TYPE_N_DA
+	1.7f, //  6 = XS_TYPE_O_A
+	1.7f, //  7 = XS_TYPE_O_DA
+	2.0f, //  8 = XS_TYPE_S_P
+	2.1f, //  9 = XS_TYPE_P_P
+	1.5f, // 10 = XS_TYPE_F_H
+	1.8f, // 11 = XS_TYPE_Cl_H
+	2.0f, // 12 = XS_TYPE_Br_H
+	2.2f, // 13 = XS_TYPE_I_H
+	1.2f  // 14 = XS_TYPE_Met_D
 };
 
 /// Returns Van der Waals radius from an XScore atom type.
-inline fl xs_vdw_radius(const size_t xs)
+inline float xs_vdw_radius(const size_t xs)
 {
 	BOOST_ASSERT(xs < XS_TYPE_SIZE);
 	return xs_vdw_radii[xs];
@@ -267,7 +267,7 @@ const size_t ad_to_xs[] =
 };
 
 /// Distance requirement of forming hydrogen bonds.
-const fl hbond_dist_sqr = sqr(3.5);
+const float hbond_dist_sqr = sqr(3.5f);
 
 /// Represents an atom by very simple fields.
 class atom
@@ -284,7 +284,7 @@ public:
 	explicit atom(const size_t serial, const string& name, const string& id, const vec3& coordinate, const size_t ad) : serial(serial), name(name), id(id), coordinate(coordinate), ad(ad), xs(ad_to_xs[ad]) {}
 
 	/// Returns the covalent radius of current AutoDock4 atom type.
-	fl covalent_radius() const
+	float covalent_radius() const
 	{
 		return ad_covalent_radius(ad);
 	}

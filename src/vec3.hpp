@@ -8,14 +8,14 @@
 using boost::array;
 
 /// Represents a vector of 3 floating point elements.
-class vec3 : private array<fl, 3>
+class vec3 : private array<float, 3>
 {
 public:
 	/// Constructs a vector with uninitialized values.
 	vec3() {}
 
 	/// Constructs a vector with specified values.
-	vec3(const fl d0, const fl d1, const fl d2)
+	vec3(const float d0, const float d1, const float d2)
 	{
 		elems[0] = d0;
 		elems[1] = d1;
@@ -23,7 +23,7 @@ public:
 	}
 
 	/// Assigns a value to all the 3 elements.
-	void assign(const fl s)
+	void assign(const float s)
 	{
 		elems[0] = s;
 		elems[1] = s;
@@ -31,14 +31,14 @@ public:
 	}
 
 	/// Returns a constant reference to the element at index i.
-	const fl& operator[](const size_t i) const
+	const float& operator[](const size_t i) const
 	{
 		BOOST_ASSERT(i < 3);
 		return elems[i];
 	}
 
 	/// Returns a mutable reference to the element at index i.
-	fl& operator[](const size_t i)
+	float& operator[](const size_t i)
 	{
 		BOOST_ASSERT(i < 3);
 		return elems[i];
@@ -51,13 +51,13 @@ public:
 	}
 
 	/// Returns the square norm.
-	fl norm_sqr() const
+	float norm_sqr() const
 	{
 		return sqr(elems[0]) + sqr(elems[1]) + sqr(elems[2]);
 	}
 
 	/// Returns the norm.
-	fl norm() const
+	float norm() const
 	{
 		return sqrt(norm_sqr());
 	}
@@ -71,12 +71,12 @@ public:
 	/// Normalize the vector.
 	vec3 normalize() const
 	{
-		const fl factor = 1 / norm();
+		const float factor = 1.0f / norm();
 		return vec3(factor * elems[0], factor * elems[1], factor * elems[2]);
 	}
 
 	/// Returns the dot product of the current vector and the given vector.
-	fl operator*(const vec3& v) const
+	float operator*(const vec3& v) const
 	{
 		return elems[0] * v[0] + elems[1] * v[1] + elems[2] * v[2];
 	}
@@ -121,7 +121,7 @@ public:
 const vec3 zero3(0, 0, 0); ///< Constant vector with all the 3 elements of zero.
 
 /// Pairwise multiply a constant to the current vector.
-inline vec3 operator*(const fl s, const vec3& v)
+inline vec3 operator*(const float s, const vec3& v)
 {
 	return vec3(s * v[0], s * v[1], s * v[2]);
 }
@@ -129,7 +129,7 @@ inline vec3 operator*(const fl s, const vec3& v)
 /// Returns the normalized vector of a vector.
 inline vec3 normalize(const vec3& v)
 {
-	return (1 / v.norm()) * v;
+	return (1.0f / v.norm()) * v;
 }
 
 /// Returns the cross product of two vectors.
@@ -139,18 +139,18 @@ inline vec3 cross_product(const vec3& a, const vec3& b)
 }
 
 /// Returns the square distance between two vectors.
-inline fl distance_sqr(const vec3& a, const vec3& b)
+inline float distance_sqr(const vec3& a, const vec3& b)
 {
 	return sqr(a[0] - b[0]) + sqr(a[1] - b[1]) + sqr(a[2] - b[2]);
 }
 
 /// Returns the accumulated square distance between two vectors of vectors.
-inline fl distance_sqr(const vector<vec3>& a, const vector<vec3>& b)
+inline float distance_sqr(const vector<vec3>& a, const vector<vec3>& b)
 {
 	const size_t n = a.size();
 	BOOST_ASSERT(n > 0);
 	BOOST_ASSERT(n == b.size());
-	fl sum = 0;
+	float sum = 0.0f;
 	for (size_t i = 0; i < n; ++i)
 		sum += distance_sqr(a[i], b[i]);
 	return sum;

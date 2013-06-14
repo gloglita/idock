@@ -1,9 +1,9 @@
 #include "box.hpp"
 
-const fl box::Default_Partition_Granularity = static_cast<fl>(3);
-const fl box::Default_Partition_Granularity_Inverse = 1 / Default_Partition_Granularity;
+const float box::Default_Partition_Granularity = 3.0f;
+const float box::Default_Partition_Granularity_Inverse = 1 / Default_Partition_Granularity;
 
-box::box(const vec3& center, const vec3& span_, const fl grid_granularity) : center(center), grid_granularity(grid_granularity), grid_granularity_inverse(1 / grid_granularity), grid_size(vec3(grid_granularity, grid_granularity, grid_granularity)), grid_size_inverse(vec3(grid_granularity_inverse, grid_granularity_inverse, grid_granularity_inverse))
+box::box(const vec3& center, const vec3& span_, const float grid_granularity) : center(center), grid_granularity(grid_granularity), grid_granularity_inverse(1 / grid_granularity), grid_size(vec3(grid_granularity, grid_granularity, grid_granularity)), grid_size_inverse(vec3(grid_granularity_inverse, grid_granularity_inverse, grid_granularity_inverse))
 {
 	// The loop may be unrolled by enabling compiler optimization.
 	for (size_t i = 0; i < 3; ++i)
@@ -15,7 +15,7 @@ box::box(const vec3& center, const vec3& span_, const fl grid_granularity) : cen
 		num_probes[i] = num_grids[i] + 1;
 
 		// Determine the two extreme corners.
-		corner1[i] = center[i]  - span[i] * static_cast<fl>(0.5);
+		corner1[i] = center[i]  - span[i] * 0.5f;
 		corner2[i] = corner1[i] + span[i];
 		BOOST_ASSERT(corner1[i] < corner2[i]);
 
@@ -38,7 +38,7 @@ bool box::within(const vec3& coordinate) const
 	return true;
 }
 
-fl box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
+float box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
 {
 	// Calculate the projection point of the given coordinate onto the surface of the given box.
 	vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.
@@ -52,7 +52,7 @@ fl box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec
 	return distance_sqr(projection, coordinate);
 }
 
-fl box::project_distance_sqr(const vec3& coordinate) const
+float box::project_distance_sqr(const vec3& coordinate) const
 {
 	return project_distance_sqr(corner1, corner2, coordinate);
 }

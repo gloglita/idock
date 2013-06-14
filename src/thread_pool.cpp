@@ -3,11 +3,11 @@
 #include <boost/flyweight/no_tracking.hpp>
 #include "thread_pool.hpp"
 
-const fl progress_bar::num_bars_inverse = static_cast<fl>(1) / num_bars;
+const float progress_bar::num_bars_inverse = 1.0f / num_bars;
 
 progress_bar::progress_bar(const size_t num_tasks) : num_tasks(num_tasks)
 {
-	const fl delta = num_tasks * num_bars_inverse;
+	const float delta = num_tasks * num_bars_inverse;
 	(*this)[0] = delta - epsilon;
 	for (size_t i = 1; i < num_bars; ++i)
 	{

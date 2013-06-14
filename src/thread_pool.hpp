@@ -21,10 +21,10 @@ using boost::unique_future;
 
 const size_t num_bars = 10; ///< Number of bars of a progress.
 
-class progress_bar : public array<fl, num_bars>
+class progress_bar : public array<float, num_bars>
 {
 public:
-	static const fl num_bars_inverse; ///< 1 / num_bars.
+	static const float num_bars_inverse; ///< 1 / num_bars.
 
 	const size_t num_tasks; ///< Number of tasks.
 

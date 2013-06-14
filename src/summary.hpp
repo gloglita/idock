@@ -10,10 +10,10 @@ class summary
 {
 public:
 	const string stem;
-	const vector<fl> energies;
-	const vector<fl> efficiencies;
+	const vector<float> energies;
+	const vector<float> efficiencies;
 	const vector<string> hbonds;
-	explicit summary(const string& stem, vector<fl>&& energies_, vector<fl>&& efficiencies_, vector<string>&& hbonds_) : stem(stem), energies(static_cast<vector<fl>&&>(energies_)), efficiencies(static_cast<vector<fl>&&>(efficiencies_)), hbonds(static_cast<vector<string>&&>(hbonds_)) {}
+	explicit summary(const string& stem, vector<float>&& energies_, vector<float>&& efficiencies_, vector<string>&& hbonds_) : stem(stem), energies(static_cast<vector<float>&&>(energies_)), efficiencies(static_cast<vector<float>&&>(efficiencies_)), hbonds(static_cast<vector<string>&&>(hbonds_)) {}
 };
 
 /// For sorting ptr_vector<summary>.

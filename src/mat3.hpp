@@ -8,7 +8,7 @@
 // (1 4 7)
 // (2 5 8)
 /// Represents a row-major 3x3 matrix for vector transformation.
-class mat3 : private array<fl, 9>
+class mat3 : private array<float, 9>
 {
 public:
 	/// Constructs an empty 3x3 matrix.
@@ -24,9 +24,12 @@ public:
 	/// @param d20 The top right value.
 	/// @param d21 The middle right value.
 	/// @param d22 The bottom right value.
-	mat3(const fl d00, const fl d01, const fl d02,
-			const fl d10, const fl d11, const fl d12,
-			const fl d20, const fl d21, const fl d22)
+	mat3
+	(
+		const float d00, const float d01, const float d02,
+		const float d10, const float d11, const float d12,
+		const float d20, const float d21, const float d22
+	)
 	{
 		elems[0] = d00; elems[1] = d01; elems[2] = d02;
 		elems[3] = d10; elems[4] = d11; elems[5] = d12;
@@ -34,7 +37,7 @@ public:
 	}
 
 	/// Returns the value at index (i, j) where j is the lowest dimension.
-	fl operator()(const size_t i, const size_t j) const
+	float operator()(const size_t i, const size_t j) const
 	{
 		BOOST_ASSERT(i < 3);
 		BOOST_ASSERT(j < 3);

@@ -1,9 +1,9 @@
 #include "grid_map_task.hpp"
 
-void grid_map_task(vector<array3d<fl>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
+void grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
 {
 	const size_t num_atom_types_to_populate = atom_types_to_populate.size();
-	vector<fl> e(num_atom_types_to_populate);
+	vector<float> e(num_atom_types_to_populate);
 
 	// For each probe atom of the given X dimension value.
 	const size_t num_y_probes = b.num_probes[1];
@@ -17,13 +17,13 @@ void grid_map_task(vector<array3d<fl>>& grid_maps, const vector<size_t>& atom_ty
 		const vector<size_t>& receptor_atoms = rec.partitions(b.partition_index(probe_coords));
 
 		// Accumulate individual free energies for each atom types to populate.
-		fill(e.begin(), e.end(), 0);
+		fill(e.begin(), e.end(), 0.0f);
 		const size_t num_receptor_atoms = receptor_atoms.size();
 		for (size_t l = 0; l < num_receptor_atoms; ++l)
 		{
 			const atom& a = rec.atoms[receptor_atoms[l]];
 			if (a.is_hydrogen()) continue;
-			const fl r2 = distance_sqr(probe_coords, a.coordinate);
+			const float r2 = distance_sqr(probe_coords, a.coordinate);
 			if (r2 <= scoring_function::Cutoff_Sqr)
 			{
 				const size_t t1 = a.xs;

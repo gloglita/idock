@@ -8,25 +8,25 @@
 class qtn4
 {
 public:
-	fl a, b, c, d;
+	float a, b, c, d;
 
 	/// Constructs an uninitialized quaternion.
 	explicit qtn4() {}
 
 	/// Constructs a quaternion by its four components.
-	explicit qtn4(const fl a, const fl b, const fl c, const fl d);
+	explicit qtn4(const float a, const float b, const float c, const float d);
 
 	/// Constructs a quaternion by a normalized axis and a rotation angle.
-	explicit qtn4(const vec3& axis, const fl angle);
+	explicit qtn4(const vec3& axis, const float angle);
 
 	/// Constructs a quaternion by a rotation vector.
 	explicit qtn4(const vec3& rotation);
 
 	/// Returns the square norm of current quaternion.
-	fl norm_sqr() const;
+	float norm_sqr() const;
 
 	/// Returns the norm of current quaternion.
-	fl norm() const;
+	float norm() const;
 
 	/// Returns true if the current quaternion is normalized.
 	bool is_normalized() const;

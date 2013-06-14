@@ -18,10 +18,6 @@ using boost::filesystem::path;
 using boost::filesystem::ifstream;
 using boost::filesystem::ofstream;
 
-/// igrow uses double precision floating point computation by default.
-/// This could possible be demoted to single precision for better performance.
-typedef double fl;
-
 // Choose the appropriate Mersenne Twister engine for random number generation on 32-bit or 64-bit platform.
 #if defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__) || defined(_M_X64) || defined(_M_AMD64)
 typedef boost::random::mt19937_64 mt19937eng;
@@ -29,10 +25,10 @@ typedef boost::random::mt19937_64 mt19937eng;
 typedef boost::random::mt19937 mt19937eng;
 #endif
 
-const fl epsilon = static_cast<fl>(0.00001); ///< Tolerance for equality comparison of two floating point values.
+const float epsilon = 0.00001f; ///< Tolerance for equality comparison of two floating point values.
 
 /// Returns true if the absolute difference between two floating point values is within the constant tolerance.
-inline bool eq(const fl a, const fl b)
+inline bool eq(const float a, const float b)
 {
 	return fabs(a - b) < epsilon;
 }

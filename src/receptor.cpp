@@ -43,7 +43,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 			// Parse the Cartesian coordinate.
 			string name = line.substr(12, 4);
 			boost::algorithm::trim(name);
-			atom a(right_cast<size_t>(line, 7, 11), name, line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<fl>(line, 31, 38), right_cast<fl>(line, 39, 46), right_cast<fl>(line, 47, 54)), ad);
+			atom a(right_cast<size_t>(line, 7, 11), name, line.substr(21, 1) + ':' + line.substr(17, 3) + right_cast<string>(line, 23, 26) + ':' + name, vec3(right_cast<float>(line, 31, 38), right_cast<float>(line, 39, 46), right_cast<float>(line, 47, 54)), ad);
 
 			// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 			if (ad == AD_TYPE_HD)
@@ -121,7 +121,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 		{
 			const size_t i = receptor_atoms_within_cutoff[l];
 			const atom& a = atoms[i];
-			const fl proj_dist_sqr = b.project_distance_sqr(corner1, corner2, a.coordinate);
+			const float proj_dist_sqr = b.project_distance_sqr(corner1, corner2, a.coordinate);
 			if (proj_dist_sqr < scoring_function::Cutoff_Sqr)
 			{
 				par.push_back(i);

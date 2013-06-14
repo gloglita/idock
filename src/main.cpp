@@ -18,9 +18,9 @@ int main(int argc, char* argv[])
 	using std::cerr;
 
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
-	fl center_x, center_y, center_z, size_x, size_y, size_z;
+	float center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
-	fl grid_granularity;
+	float grid_granularity;
 	bool force;
 
 	// Process program options.
@@ -35,19 +35,19 @@ int main(int argc, char* argv[])
 		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 32;
 		const size_t default_max_conformations = 9;
-		const fl default_grid_granularity = 0.15625;
+		const float default_grid_granularity = 0.15625f;
 		const bool default_force = false;
 
 		options_description input_options("input (required)");
 		input_options.add_options()
 			("receptor", value<path>(&receptor_path)->required(), "receptor in PDBQT format")
 			("ligand_folder", value<path>(&ligand_folder_path)->required(), "folder of ligands in PDBQT format")
-			("center_x", value<fl>(&center_x)->required(), "x coordinate of the search space center")
-			("center_y", value<fl>(&center_y)->required(), "y coordinate of the search space center")
-			("center_z", value<fl>(&center_z)->required(), "z coordinate of the search space center")
-			("size_x", value<fl>(&size_x)->required(), "size in the x dimension in Angstrom")
-			("size_y", value<fl>(&size_y)->required(), "size in the y dimension in Angstrom")
-			("size_z", value<fl>(&size_z)->required(), "size in the z dimension in Angstrom")
+			("center_x", value<float>(&center_x)->required(), "x coordinate of the search space center")
+			("center_y", value<float>(&center_y)->required(), "y coordinate of the search space center")
+			("center_z", value<float>(&center_z)->required(), "z coordinate of the search space center")
+			("size_x", value<float>(&size_x)->required(), "size in the x dimension in Angstrom")
+			("size_y", value<float>(&size_y)->required(), "size in the y dimension in Angstrom")
+			("size_z", value<float>(&size_z)->required(), "size in the z dimension in Angstrom")
 			;
 
 		options_description output_options("output (optional)");
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
 			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
-			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
+			("granularity", value<float>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
 			("help", "help information")
 			("version", "version information")
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
 	results.reserve(max_results * num_mc_tasks);
 
 	// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
-	vector<array3d<fl>> grid_maps(XS_TYPE_SIZE);
+	vector<array3d<float>> grid_maps(XS_TYPE_SIZE);
 	vector<size_t> atom_types_to_populate;
 	atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
@@ -230,7 +230,7 @@ int main(int argc, char* argv[])
 	scoring_function sf;
 	{
 		// Precalculate reciprocal square root values.
-		vector<fl> rs(scoring_function::Num_Samples, 0);
+		vector<float> rs(scoring_function::Num_Samples, 0);
 		for (size_t i = 0; i < scoring_function::Num_Samples; ++i)
 		{
 			rs[i] = sqrt(i * scoring_function::Factor_Inverse);
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
 			{
 				const size_t t = ligand_atom_types[i];
 				BOOST_ASSERT(t < XS_TYPE_SIZE);
-				array3d<fl>& grid_map = grid_maps[t];
+				array3d<float>& grid_map = grid_maps[t];
 				if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
 				grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
 				atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
@@ -346,7 +346,7 @@ int main(int argc, char* argv[])
 
 			// Merge results from all the tasks into one single result container.
 			BOOST_ASSERT(results.empty());
-			const fl required_square_error = static_cast<fl>(4 * lig.num_heavy_atoms); // Ligands with RMSD < 2.0 will be clustered into the same cluster.
+			const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms); // Ligands with RMSD < 2.0 will be clustered into the same cluster.
 			for (size_t i = 0; i < num_mc_tasks; ++i)
 			{
 				mc_tasks[i].get_future().get();
@@ -376,7 +376,7 @@ int main(int argc, char* argv[])
 
 			// Adjust free energy relative to the best conformation and flexibility.
 			const result& best_result = results.front();
-			const fl best_result_intra_e = best_result.e - best_result.f;
+			const float best_result_intra_e = best_result.e - best_result.f;
 			for (size_t i = 0; i < num_results; ++i)
 			{
 				results[i].e_nd = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
@@ -408,7 +408,7 @@ int main(int argc, char* argv[])
 							const atom& rec_atom = rec.atoms[rec_hbda[l]];
 							BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
 							if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
-							const fl r2 = distance_sqr(lig_coords, rec_atom.coordinate);
+							const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
 							if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
 						}
 					}
@@ -438,7 +438,7 @@ int main(int argc, char* argv[])
 
 	// Initialize necessary variables for storing ligand summaries.
 	ptr_vector<summary> summaries(num_ligands);
-	vector<fl> energies, efficiencies;
+	vector<float> energies, efficiencies;
 	energies.reserve(max_conformations);
 	efficiencies.reserve(max_conformations);
 	vector<string> hbonds;
@@ -460,11 +460,11 @@ int main(int argc, char* argv[])
 		{
 			if (starts_with(line, "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:"))
 			{
-				energies.push_back(right_cast<fl>(line, 56, 63));
+				energies.push_back(right_cast<float>(line, 56, 63));
 			}
 			else if (starts_with(line, "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:"))
 			{
-				efficiencies.push_back(right_cast<fl>(line, 56, 63));
+				efficiencies.push_back(right_cast<float>(line, 56, 63));
 			}
 			else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
 			{
@@ -479,7 +479,7 @@ int main(int argc, char* argv[])
 			cout << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
 			continue;
 		}
-		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<fl>&&>(energies), static_cast<vector<fl>&&>(efficiencies), static_cast<vector<string>&&>(hbonds)));
+		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies), static_cast<vector<float>&&>(efficiencies), static_cast<vector<string>&&>(hbonds)));
 #ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
 		energies.clear();
 		efficiencies.clear();
