@@ -302,9 +302,6 @@ vector<size_t> ligand::get_atom_types() const
 
 bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<fl>>& grid_maps, const fl e_upper_bound, fl& e, fl& f, change& g) const
 {
-	if (!b.within(conf.position))
-		return false;
-
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
 	vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
@@ -333,8 +330,6 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
 		coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
-		if (!b.within(coordinates[i]))
-			return false;
 	}
 
 	// Apply torsions to BRANCH frames.
@@ -344,8 +339,6 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 
 		// Update origin.
 		origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
-		if (!b.within(origins[k]))
-			return false;
 
 		// If the current BRANCH frame does not have an active torsion, skip it.
 		if (!f.active)
@@ -368,8 +361,6 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
 			coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coordinate;
-			if (!b.within(coordinates[i]))
-				return false;
 		}
 	}
 
@@ -394,6 +385,15 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	e = 0;
 	for (size_t i = 0; i < num_heavy_atoms; ++i)
 	{
+		if (!b.within(coordinates[i]))
+		{
+			e += 10;
+			derivatives[i][0] = 0;
+			derivatives[i][1] = 0;
+			derivatives[i][2] = 0;
+			continue;
+		}
+
 		// Retrieve the grid map in need.
 		const array3d<fl>& grid_map = grid_maps[heavy_atoms[i].xs];
 		BOOST_ASSERT(grid_map.initialized());
