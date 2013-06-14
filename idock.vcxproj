@@ -33,7 +33,6 @@
     <ClInclude Include="src\matrix.hpp" />
     <ClInclude Include="src\monte_carlo_task.hpp" />
     <ClInclude Include="src\result.hpp" />
-    <ClInclude Include="src\parsing_error.hpp" />
     <ClInclude Include="src\scoring_function.hpp" />
     <ClInclude Include="src\quaternion.hpp" />
     <ClInclude Include="src\receptor.hpp" />

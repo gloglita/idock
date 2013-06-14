@@ -97,8 +97,5 @@
     <ClInclude Include="src\summary.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\parsing_error.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

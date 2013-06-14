@@ -1,6 +1,5 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
-#include "parsing_error.hpp"
 #include "scoring_function.hpp"
 #include "receptor.hpp"
 
@@ -36,7 +35,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 			// Parse and validate AutoDock4 atom type.
 			const string ad_type_string = line.substr(77, isspace(line[78]) ? 1 : 2);
 			const size_t ad = parse_ad_type_string(ad_type_string);
-			if (ad == AD_TYPE_SIZE) throw parsing_error(p, num_lines, "Atom type " + ad_type_string + " is not supported by idock.");
+			if (ad == AD_TYPE_SIZE) continue;
 
 			// Skip non-polar hydrogens.
 			if (ad == AD_TYPE_H) continue;

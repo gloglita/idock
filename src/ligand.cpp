@@ -2,7 +2,6 @@
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
-#include "parsing_error.hpp"
 #include "ligand.hpp"
 
 ligand::ligand(const path& p) : num_active_torsions(0)
@@ -45,7 +44,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			// Parse and validate AutoDock4 atom type.
 			const string ad_type_string = line.substr(77, isspace(line[78]) ? 1 : 2);
 			const size_t ad = parse_ad_type_string(ad_type_string);
-			if (ad == AD_TYPE_SIZE) throw parsing_error(p, num_lines, "Atom type " + ad_type_string + " is not supported by idock.");
+			if (ad == AD_TYPE_SIZE) continue;
 
 			// Parse the Cartesian coordinate.
 			string name = line.substr(12, 4);
@@ -146,7 +145,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 
 			// A frame may be empty, e.g. "BRANCH   4   9" is immediately followed by "ENDBRANCH   4   9".
 			// This emptiness is likely to be caused by invalid input structure, especially when all the atoms are located in the same plane.
-			if (f->habegin == heavy_atoms.size()) throw parsing_error(p, num_lines, "An empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
+			if (f->habegin == heavy_atoms.size()) throw std::domain_error("Error parsing " + p.filename().string() + ": an empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
 
 			// If the current frame consists of rotor Y and a few hydrogens only, e.g. -OH and -NH2,
 			// the torsion of this frame will have no effect on scoring and is thus redundant.
