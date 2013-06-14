@@ -374,14 +374,6 @@ int main(int argc, char* argv[])
 				continue;
 			}
 
-			// Adjust free energy relative to the best conformation and flexibility.
-			const result& best_result = results.front();
-			const float best_result_intra_e = best_result.e - best_result.f;
-			for (size_t i = 0; i < num_results; ++i)
-			{
-				results[i].e_nd = (results[i].e - best_result_intra_e) * lig.flexibility_penalty_factor;
-			}
-
 			// Flush the number of conformations to output.
 			cout << std::setw(4) << num_results << " |";
 
@@ -421,7 +413,7 @@ int main(int argc, char* argv[])
 				const size_t num_energies = std::min<size_t>(num_results, 4);
 				for (size_t i = 0; i < num_energies; ++i)
 				{
-					cout << std::setw(8) << results[i].e_nd;
+					cout << std::setw(8) << results[i].e;
 				}
 			}
 			cout << '\n';
@@ -440,7 +432,6 @@ int main(int argc, char* argv[])
 	ptr_vector<summary> summaries(num_ligands);
 	vector<float> energies, efficiencies;
 	energies.reserve(max_conformations);
-	efficiencies.reserve(max_conformations);
 	vector<string> hbonds;
 	hbonds.reserve(max_conformations);
 	string line;
@@ -458,13 +449,9 @@ int main(int argc, char* argv[])
 		fis.push(in);
 		while (getline(fis, line))
 		{
-			if (starts_with(line, "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:"))
+			if (starts_with(line, "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:"))
 			{
 				energies.push_back(right_cast<float>(line, 56, 63));
-			}
-			else if (starts_with(line, "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:"))
-			{
-				efficiencies.push_back(right_cast<float>(line, 56, 63));
 			}
 			else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
 			{
@@ -474,12 +461,12 @@ int main(int argc, char* argv[])
 			}
 		}
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
-		if (energies.empty() || efficiencies.empty() || hbonds.empty())
+		if (energies.empty() || hbonds.empty())
 		{
 			cout << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
 			continue;
 		}
-		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies), static_cast<vector<float>&&>(efficiencies), static_cast<vector<string>&&>(hbonds)));
+		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies), static_cast<vector<string>&&>(hbonds)));
 #ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
 		energies.clear();
 		efficiencies.clear();
@@ -497,7 +484,7 @@ int main(int argc, char* argv[])
 	log << "Ligand,Conf";
 	for (size_t i = 1; i <= max_conformations; ++i)
 	{
-		log << ",FE" << i << ",LE" << i << ",HB" << i;
+		log << ",FE" << i << ",HB" << i;
 	}
 	log.setf(std::ios::fixed, std::ios::floatfield);
 	log << '\n' << std::setprecision(3);
@@ -508,11 +495,11 @@ int main(int argc, char* argv[])
 		log << s.stem << ',' << num_conformations;
 		for (size_t j = 0; j < num_conformations; ++j)
 		{
-			log << ',' << s.energies[j] << ',' << s.efficiencies[j] << ',' << s.hbonds[j];
+			log << ',' << s.energies[j] << ',' << s.hbonds[j];
 		}
 		for (size_t j = num_conformations; j < max_conformations; ++j)
 		{
-			log << ",,,";
+			log << ",,";
 		}
 		log << '\n';
 	}

@@ -24,7 +24,6 @@ class result
 public:
 	float e; ///< Free energy.
 	float f; ///< Inter-molecular free energy.
-	float e_nd; ///< Normalized free energy, only for output purpose.
 	vector<hbond> hbonds; ///< Hydrogen bonds.
 	vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 	vector<vec3> hydrogens; ///< Hydrogen atom coordinates.

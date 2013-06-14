@@ -204,8 +204,6 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	BOOST_ASSERT(num_torsions + 1 == num_frames);
 	BOOST_ASSERT(num_torsions >= num_active_torsions);
 	BOOST_ASSERT(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 == lines.size()); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines == lines.size()
-	flexibility_penalty_factor = 1.0f / (1.0f + 0.05846f * (num_active_torsions + 0.5f * (num_torsions - num_active_torsions)));
-	BOOST_ASSERT(flexibility_penalty_factor < 1);
 
 	// Find hydrogen bond donors and acceptors.
 	hbda.reserve(num_heavy_atoms);
@@ -561,11 +559,7 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 		const result& r = results[i];
 		const size_t num_hbonds = r.hbonds.size();
 		fos << "MODEL     " << setw(4) << (i + 1) << '\n'
-			<< "REMARK       NORMALIZED FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e_nd    << " KCAL/MOL\n"
 			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
-			<< "REMARK     INTER-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.f       << " KCAL/MOL\n"
-			<< "REMARK     INTRA-LIGAND FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << (r.e - r.f) << " KCAL/MOL\n"
-			<< "REMARK            LIGAND EFFICIENCY PREDICTED BY IDOCK:" << setw(8) << (r.f * num_heavy_atoms_inverse) << " KCAL/MOL\n"
 			<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds;
 		for (size_t i = 0; i < num_hbonds; ++i)
 		{
