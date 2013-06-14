@@ -214,15 +214,6 @@ int main(int argc, char* argv[])
 	ptr_vector<result> results;
 	results.reserve(max_results * num_mc_tasks);
 
-	// Precalculate alpha values for determining step size in BFGS.
-	using boost::array;
-	array<fl, num_alphas> alphas;
-	alphas[0] = 1;
-	for (size_t i = 1; i < num_alphas; ++i)
-	{
-		alphas[i] = alphas[i - 1] * 0.1;
-	}
-
 	// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
 	vector<array3d<fl>> grid_maps(XS_TYPE_SIZE);
 	vector<size_t> atom_types_to_populate;
@@ -346,7 +337,7 @@ int main(int argc, char* argv[])
 			for (size_t i = 0; i < num_mc_tasks; ++i)
 			{
 				BOOST_ASSERT(result_containers[i].empty());
-				mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), boost::cref(alphas), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+				mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 			}
 
 			// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
