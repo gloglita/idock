@@ -23,6 +23,7 @@ int main(int argc, char* argv[])
 	fl center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	fl energy_range, grid_granularity;
+	bool force;
 
 	// Process program options.
 	try
@@ -40,6 +41,7 @@ int main(int argc, char* argv[])
 		const size_t default_max_conformations = 9;
 		const fl default_energy_range = 3.0;
 		const fl default_grid_granularity = 0.15625;
+		const bool default_force = false;
 
 		options_description input_options("input (required)");
 		input_options.add_options()
@@ -68,6 +70,7 @@ int main(int argc, char* argv[])
 			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
 			("energy_range", value<fl>(&energy_range)->default_value(default_energy_range), "maximum energy difference in kcal/mol between the best binding conformation and the worst one")
 			("granularity", value<fl>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
+			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
 			("config", value<path>(), "options can be loaded from a configuration file")
 			;
 
@@ -300,7 +303,7 @@ int main(int argc, char* argv[])
 
 				// Skip the current ligand if it has been docked.
 				const path output_ligand_path = output_folder_path / input_ligand_path.filename();
-				if (exists(output_ligand_path)) continue;
+				if (!force && exists(output_ligand_path)) continue;
 
 				// Parse the ligand.
 				ligand lig(input_ligand_path);
