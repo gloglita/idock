@@ -3,7 +3,8 @@
 void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
 {
 	// Define constants.
-	const size_t num_mc_iterations = 100 * lig.num_heavy_atoms; ///< The number of iterations correlates to the complexity of ligand.
+	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
+	const size_t num_mc_iterations = 100 * lig.num_heavy_atoms; // The number of iterations correlates to the complexity of ligand.
 	const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
 	const float e_upper_bound = 4.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.

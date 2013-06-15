@@ -12,8 +12,6 @@ typedef boost::random::mt19937_64 mt19937eng;
 typedef boost::random::mt19937 mt19937eng;
 #endif
 
-const size_t num_alphas = 5; ///< Number of alpha values for determining step size in BFGS
-
 /// Task for running Monte Carlo Simulated Annealing algorithm to find local minimums of the scoring function.
 /// A Monte Carlo task uses a seed to initialize its own random number generator.
 /// It starts from a random initial conformation,
