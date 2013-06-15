@@ -74,7 +74,6 @@ void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size
 
 	for (size_t mc_i = 0; mc_i < num_mc_iterations; ++mc_i)
 	{
-		size_t num_mutations = 0;
 		size_t mutation_entity;
 
 		// Mutate c0 into c1, and evaluate c1.
@@ -99,7 +98,6 @@ void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size
 				c1.orientation = qtn4(0.01f * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation;
 				BOOST_ASSERT(c1.orientation.is_normalized());
 			}
-			++num_mutations;
 		} while (!lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1));
 
 		// Initialize the Hessian matrix to identity.
