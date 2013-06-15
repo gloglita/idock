@@ -1,4 +1,4 @@
-CC = g++ -g -O1 -DDEBUG -Wall -fno-inline -std=gnu++0x
+CC = g++ -g -O1 -DDEBUG -Wall -fno-inline -std=c++11
 
 bin/debug/idock: obj/debug/scoring_function.o obj/debug/box.o obj/debug/quaternion.o obj/debug/thread_pool.o obj/debug/receptor.o obj/debug/ligand.o obj/debug/grid_map_task.o obj/debug/monte_carlo_task.o obj/debug/main.o
 	$(CC) -o $@ $^ -pthread -lboost_system -lboost_thread -lboost_filesystem -lboost_program_options -lboost_iostreams -lz -lbz2

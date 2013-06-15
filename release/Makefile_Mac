@@ -1,5 +1,5 @@
-BOOST_ROOT = $(HOME)/boost_1_51_0
-CC = clang++ -O3 -DNDEBUG -std=gnu++11
+BOOST_ROOT = $(HOME)/boost_1_53_0
+CC = clang++ -O3 -DNDEBUG -std=c++11
 
 all: ../bin/Mac/x86_64/idock ../bin/Mac/x86/idock
 
