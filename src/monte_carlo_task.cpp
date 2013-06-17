@@ -4,10 +4,10 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
-	const size_t num_mc_iterations = 2000; // The number of iterations.
+	const size_t num_mc_iterations = 100; // The number of iterations.
 	const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
-	const float e_upper_bound = 4.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
+	const float e_upper_bound = 40.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
 	const float pi = 3.1415926535897932f; ///< Pi.
 
 	// On Linux, the std namespace contains std::mt19937 and std::normal_distribution.
@@ -30,19 +30,15 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 	conformation c0(lig.num_active_torsions);
 	float e0, f0;
 	change g0(lig.num_active_torsions);
-	bool valid_conformation = false;
-	for (size_t i = 0; (i < 1000) && (!valid_conformation); ++i)
+	// Randomize conformation c0.
+	c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
+	c0.orientation = qtn4(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen()).normalize();
+	for (size_t i = 0; i < lig.num_active_torsions; ++i)
 	{
-		// Randomize conformation c0.
-		c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
-		c0.orientation = qtn4(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen()).normalize();
-		for (size_t i = 0; i < lig.num_active_torsions; ++i)
-		{
-			c0.torsions[i] = uniform_pi_gen();
-		}
-		valid_conformation = lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
+		c0.torsions[i] = uniform_pi_gen();
 	}
-	if (!valid_conformation) return;
+	lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
+	r = lig.compose_result(e0, f0, c0);
 
 	// Initialize necessary variables for BFGS.
 	conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
