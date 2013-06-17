@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
 		const path default_log_path = "log.csv";
 		const size_t default_num_threads = boost::thread::hardware_concurrency();
 		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
-		const size_t default_num_mc_tasks = 64;
+		const size_t default_num_mc_tasks = 4096;
 		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 		const bool default_force = false;
@@ -347,9 +347,7 @@ int main(int argc, char* argv[])
 			// Block until all the Monte Carlo tasks are completed.
 			tp.sync();
 			mc_tasks.clear();
-
-			// Flush the number of conformations to output.
-			cout << " | " << std::setw(4) << num_conformations << " |";
+			cout << " | " << std::flush;
 
 			// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
 			results.sort();
@@ -372,10 +370,11 @@ int main(int argc, char* argv[])
 					representatives.push_back(i);
 				}
 			}
+			cout << std::setw(4) << representatives.size() << " |";
 
 			// Find the number of hydrogen bonds.
 			const size_t num_lig_hbda = lig.hbda.size();
-			for (size_t k = 0; k < num_conformations; ++k)
+			for (size_t k = 0; k < representatives.size(); ++k)
 			{
 				result& r = results[representatives[k]];
 				for (size_t i = 0; i < num_lig_hbda; ++i)
@@ -404,7 +403,7 @@ int main(int argc, char* argv[])
 			lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
 
 			// Display the free energies of the top 4 conformations.
-			for (size_t i = 0; i < 4; ++i)
+			for (size_t i = 0; i < std::min<size_t>(representatives.size(), 4); ++i)
 			{
 				cout << std::setw(8) << results[representatives[i]].e;
 			}
