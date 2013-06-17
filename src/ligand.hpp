@@ -71,7 +71,7 @@ public:
 	result compose_result(const float e, const float f, const conformation& conf) const;
 
 	/// Writes a given number of conformations from a result container into a output ligand file in PDBQT format.
-	void write_models(const path& output_ligand_path, const ptr_vector<result>& results, const size_t num_conformations, const box& b, const vector<array3d<float>>& grid_maps);
+	void write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const box& b, const vector<array3d<float>>& grid_maps);
 
 private:
 	float num_heavy_atoms_inverse; ///< 1 / num_heavy_atoms.

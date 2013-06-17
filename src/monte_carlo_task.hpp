@@ -13,12 +13,6 @@ typedef boost::random::mt19937 mt19937eng;
 #endif
 
 /// Task for running Monte Carlo Simulated Annealing algorithm to find local minimums of the scoring function.
-/// A Monte Carlo task uses a seed to initialize its own random number generator.
-/// It starts from a random initial conformation,
-/// repeats a specified number of iterations,
-/// uses precalculated alpha values for line search during BFGS local search,
-/// clusters free energies and heavy atom coordinate vectors of the best conformations into results,
-/// and sorts the results in the ascending order of free energies.
-void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps);
+void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps);
 
 #endif

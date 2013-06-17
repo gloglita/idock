@@ -1,14 +1,13 @@
 #include "monte_carlo_task.hpp"
 
-void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
+void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
-	const size_t num_mc_iterations = 100 * lig.num_heavy_atoms; // The number of iterations correlates to the complexity of ligand.
+	const size_t num_mc_iterations = 2000; // The number of iterations.
 	const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
 	const float e_upper_bound = 4.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
-	const float required_square_error = 1.0f * lig.num_heavy_atoms; // Ligands with RMSD < 1.0 will be clustered into the same cluster.
 	const float pi = 3.1415926535897932f; ///< Pi.
 
 	// On Linux, the std namespace contains std::mt19937 and std::normal_distribution.
@@ -48,7 +47,6 @@ void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size
 		valid_conformation = lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
 	}
 	if (!valid_conformation) return;
-	float best_e = e0; // The best free energy so far.
 
 	// Initialize necessary variables for BFGS.
 	conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
@@ -191,16 +189,9 @@ void monte_carlo_task(ptr_vector<result>& results, const ligand& lig, const size
 		}
 
 		// Accept c1 according to Metropolis criteria.
-		const float delta = e0 - e1;
-		if ((delta > 0) || (uniform_01_gen() < exp(delta)))
+		if (e1 < e0)
 		{
-			// best_e is the best energy of all the conformations in the container.
-			// e1 will be saved if and only if it is even better than the best one.
-			if (e1 < best_e || results.size() < results.capacity())
-			{
-				add_to_result_container(results, lig.compose_result(e1, f1, c1), required_square_error);
-				if (e1 < best_e) best_e = e0;
-			}
+			r = lig.compose_result(e1, f1, c1);
 
 			// Save c1 into c0.
 			c0 = c1;

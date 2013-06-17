@@ -538,10 +538,10 @@ result ligand::compose_result(const float e, const float f, const conformation& 
 	return result(e, f, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 }
 
-void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const size_t num_conformations, const box& b, const vector<array3d<float>>& grid_maps)
+void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const box& b, const vector<array3d<float>>& grid_maps)
 {
-	BOOST_ASSERT(num_conformations > 0);
-	BOOST_ASSERT(num_conformations <= results.size());
+	BOOST_ASSERT(representatives.size());
+	BOOST_ASSERT(representatives.size() <= results.size());
 
 	const size_t num_lines = lines.size();
 
@@ -554,16 +554,16 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 	fos.push(out);
 	fos.setf(ios::fixed, ios::floatfield);
 	fos << setprecision(3);
-	for (size_t i = 0; i < num_conformations; ++i)
+	for (size_t i = 0; i < representatives.size(); ++i)
 	{
-		const result& r = results[i];
+		const result& r = results[representatives[i]];
 		const size_t num_hbonds = r.hbonds.size();
 		fos << "MODEL     " << setw(4) << (i + 1) << '\n'
 			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
 			<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds;
-		for (size_t i = 0; i < num_hbonds; ++i)
+		for (size_t j = 0; j < num_hbonds; ++j)
 		{
-			const hbond& hb = r.hbonds[i];
+			const hbond& hb = r.hbonds[j];
 			fos << " | " << hb.receptor << " - " << hb.ligand;
 		}
 		fos << '\n';

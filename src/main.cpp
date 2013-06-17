@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	float center_x, center_y, center_z, size_x, size_y, size_z;
-	size_t num_threads, seed, num_mc_tasks, max_conformations;
+	size_t num_threads, seed, num_mc_tasks, num_conformations;
 	float grid_granularity;
 	bool force;
 
@@ -33,8 +33,8 @@ int main(int argc, char* argv[])
 		const path default_log_path = "log.csv";
 		const size_t default_num_threads = boost::thread::hardware_concurrency();
 		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
-		const size_t default_num_mc_tasks = 32;
-		const size_t default_max_conformations = 9;
+		const size_t default_num_mc_tasks = 64;
+		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 		const bool default_force = false;
 
@@ -61,7 +61,7 @@ int main(int argc, char* argv[])
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
-			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "maximum number of binding conformations to write")
+			("num_conformations", value<size_t>(&num_conformations)->default_value(default_num_conformations), "number of binding conformations to write")
 			("granularity", value<float>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
 			("help", "help information")
@@ -172,9 +172,14 @@ int main(int argc, char* argv[])
 			cerr << "Option tasks must be 1 or greater\n";
 			return 1;
 		}
-		if (!max_conformations)
+		if (!num_conformations)
 		{
-			cerr << "Option max_conformations must be 1 or greater\n";
+			cerr << "Option conformations must be 1 or greater\n";
+			return 1;
+		}
+		if (num_conformations > num_mc_tasks)
+		{
+			cerr << "Option conformations must be no greater than option tasks\n";
 			return 1;
 		}
 		if (grid_granularity <= 0)
@@ -206,15 +211,10 @@ int main(int argc, char* argv[])
 	ptr_vector<packaged_task<void>> mc_tasks(num_mc_tasks);
 
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
-	const size_t max_results = 20; // Maximum number of results obtained from a single Monte Carlo task.
-	ptr_vector<ptr_vector<result>> result_containers;
-	result_containers.resize(num_mc_tasks);
-	for (size_t i = 0; i < num_mc_tasks; ++i)
-	{
-		result_containers[i].reserve(max_results);
-	}
 	ptr_vector<result> results;
-	results.reserve(max_results * num_mc_tasks);
+	results.resize(num_mc_tasks);
+	vector<size_t> representatives;
+	representatives.reserve(num_conformations);
 
 	// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
 	vector<array3d<float>> grid_maps(XS_TYPE_SIZE);
@@ -335,86 +335,78 @@ int main(int argc, char* argv[])
 
 			// Populate the Monte Carlo task container.
 			BOOST_ASSERT(mc_tasks.empty());
+			BOOST_ASSERT(results.empty());
 			for (size_t i = 0; i < num_mc_tasks; ++i)
 			{
-				BOOST_ASSERT(result_containers[i].empty());
-				mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(result_containers[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+				mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(results[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 			}
 
 			// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
 			tp.run(mc_tasks);
 
-			// Merge results from all the tasks into one single result container.
-			BOOST_ASSERT(results.empty());
-			const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms); // Ligands with RMSD < 2.0 will be clustered into the same cluster.
-			for (size_t i = 0; i < num_mc_tasks; ++i)
-			{
-				mc_tasks[i].get_future().get();
-				ptr_vector<result>& task_results = result_containers[i];
-				const size_t num_task_results = task_results.size();
-				for (size_t j = 0; j < num_task_results; ++j)
-				{
-					add_to_result_container(results, static_cast<result&&>(task_results[j]), required_square_error);
-				}
-				task_results.clear();
-			}
-
 			// Block until all the Monte Carlo tasks are completed.
 			tp.sync();
 			mc_tasks.clear();
 
-			// Proceed to number of conformations.
-			cout << " | ";
-
-			// If no conformation can be found, skip the current ligand and proceed with the next one.
-			const size_t num_results = std::min<size_t>(results.size(), max_conformations);
-			if (!num_results) // Possible if and only if results.size() == 0 because max_conformations >= 1 is enforced when parsing command line arguments.
-			{
-				cout << std::setw(4) << 0 << " |\n";
-				continue;
-			}
-
 			// Flush the number of conformations to output.
-			cout << std::setw(4) << num_results << " |";
+			cout << " | " << std::setw(4) << num_conformations << " |";
 
-			if (num_results)
+			// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
+			results.sort();
+			const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);
+			for (size_t i = 0; i < num_mc_tasks && representatives.size() < representatives.capacity(); ++i)
 			{
-				// Find the number of hydrogen bonds.
-				const size_t num_lig_hbda = lig.hbda.size();
-				for (size_t k = 0; k < num_results; ++k)
+				const result& r = results[i];
+				bool representative = true;
+				for (size_t j = 0; j < i; ++j)
 				{
-					result& r = results[k];
-					for (size_t i = 0; i < num_lig_hbda; ++i)
+					const float this_square_error = distance_sqr(r.heavy_atoms, results[j].heavy_atoms);
+					if (this_square_error < required_square_error)
 					{
-						const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
-						BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
-
-						// Find the possibly interacting receptor atoms via partitions.
-						const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
-						const vector<size_t>& rec_hbda = rec.hbda_3d(b.partition_index(lig_coords));
-
-						// Accumulate individual free energies for each atom types to populate.
-						const size_t num_rec_hbda = rec_hbda.size();
-						for (size_t l = 0; l < num_rec_hbda; ++l)
-						{
-							const atom& rec_atom = rec.atoms[rec_hbda[l]];
-							BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
-							if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
-							const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
-							if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
-						}
+						representative = false;
+						break;
 					}
 				}
-
-				// Write models to file.
-				lig.write_models(output_ligand_path, results, num_results, b, grid_maps);
-
-				// Display the free energies of the top 4 conformations.
-				const size_t num_energies = std::min<size_t>(num_results, 4);
-				for (size_t i = 0; i < num_energies; ++i)
+				if (representative)
 				{
-					cout << std::setw(8) << results[i].e;
+					representatives.push_back(i);
 				}
+			}
+
+			// Find the number of hydrogen bonds.
+			const size_t num_lig_hbda = lig.hbda.size();
+			for (size_t k = 0; k < num_conformations; ++k)
+			{
+				result& r = results[representatives[k]];
+				for (size_t i = 0; i < num_lig_hbda; ++i)
+				{
+					const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
+					BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
+
+					// Find the possibly interacting receptor atoms via partitions.
+					const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
+					const vector<size_t>& rec_hbda = rec.hbda_3d(b.partition_index(lig_coords));
+
+					// Accumulate individual free energies for each atom types to populate.
+					const size_t num_rec_hbda = rec_hbda.size();
+					for (size_t l = 0; l < num_rec_hbda; ++l)
+					{
+						const atom& rec_atom = rec.atoms[rec_hbda[l]];
+						BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
+						if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
+						const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
+						if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
+					}
+				}
+			}
+
+			// Write models to file.
+			lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
+
+			// Display the free energies of the top 4 conformations.
+			for (size_t i = 0; i < 4; ++i)
+			{
+				cout << std::setw(8) << results[representatives[i]].e;
 			}
 			cout << '\n';
 
@@ -431,9 +423,9 @@ int main(int argc, char* argv[])
 	// Initialize necessary variables for storing ligand summaries.
 	ptr_vector<summary> summaries(num_ligands);
 	vector<float> energies, efficiencies;
-	energies.reserve(max_conformations);
+	energies.reserve(num_conformations);
 	vector<string> hbonds;
-	hbonds.reserve(max_conformations);
+	hbonds.reserve(num_conformations);
 	string line;
 	line.reserve(79);
 
@@ -482,7 +474,7 @@ int main(int argc, char* argv[])
 	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
 	ofstream log(log_path);
 	log << "Ligand,Conf";
-	for (size_t i = 1; i <= max_conformations; ++i)
+	for (size_t i = 1; i <= num_conformations; ++i)
 	{
 		log << ",FE" << i << ",HB" << i;
 	}
@@ -497,7 +489,7 @@ int main(int argc, char* argv[])
 		{
 			log << ',' << s.energies[j] << ',' << s.hbonds[j];
 		}
-		for (size_t j = num_conformations; j < max_conformations; ++j)
+		for (size_t j = num_conformations; j < num_conformations; ++j)
 		{
 			log << ",,";
 		}
