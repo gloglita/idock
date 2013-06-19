@@ -4,7 +4,7 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
-	const size_t num_mc_iterations = 100; // The number of iterations.
+	const size_t num_mc_iterations = 50; // The number of iterations.
 	const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
 	const float e_upper_bound = 40.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
@@ -64,31 +64,11 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 
 	for (size_t mc_i = 0; mc_i < num_mc_iterations; ++mc_i)
 	{
-		size_t mutation_entity;
-
-		// Mutate c0 into c1, and evaluate c1.
-		do
-		{
-			// Make a copy, so the previous conformation is retained.
-			c1 = c0;
-
-			// Determine an entity to mutate.
-			mutation_entity = uniform_entity_gen();
-			BOOST_ASSERT(mutation_entity < num_entities);
-			if (mutation_entity < lig.num_active_torsions) // Mutate an active torsion.
-			{
-				c1.torsions[mutation_entity] = uniform_pi_gen();
-			}
-			else if (mutation_entity == lig.num_active_torsions) // Mutate position.
-			{
-				c1.position += vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen());
-			}
-			else // Mutate orientation.
-			{
-				c1.orientation = qtn4(0.01f * vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen())) * c1.orientation;
-				BOOST_ASSERT(c1.orientation.is_normalized());
-			}
-		} while (!lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1));
+		// Make a copy, so the previous conformation is retained.
+		c1 = c0;
+//		c1.position += vec3(1, 1, 1);
+		c1.position += vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen());
+		lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1);
 
 		// Initialize the Hessian matrix to identity.
 		h = identity_hessian;
@@ -120,9 +100,6 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 			alpha = 1.0;
 			for (num_alpha_trials = 0; num_alpha_trials < num_alphas; ++num_alpha_trials)
 			{
-				// Obtain alpha from the precalculated alpha values.
-				alpha *= 0.1f;
-
 				// Calculate c2 = c1 + ap.
 				c2.position = c1.position + alpha * vec3(p[0], p[1], p[2]);
 				BOOST_ASSERT(c1.orientation.is_normalized());
@@ -144,6 +121,8 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 					if (pg2 >= 0.9f * pg1)
 						break; // An appropriate alpha is found.
 				}
+
+				alpha *= 0.1f;
 			}
 
 			// If an appropriate alpha cannot be found, exit the BFGS loop.
