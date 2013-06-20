@@ -40,16 +40,4 @@ inline T sqr(const T x)
 	return x * x;
 }
 
-/// Returns true if a string starts with another string.
-inline bool starts_with(const string& str, const string& start)
-{
-	const size_t start_size = start.size();
-	if (str.size() < start_size) return false;
-	for (size_t i = 0; i < start_size; ++i)
-	{
-		if (str[i] != start[i]) return false;
-	}
-	return true;
-}
-
 #endif

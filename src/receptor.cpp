@@ -20,7 +20,8 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 	while (getline(in, line))
 	{
 		++num_lines;
-		if (starts_with(line, "ATOM") || starts_with(line, "HETATM"))
+		const string record = line.substr(0, 6);
+		if (record == "ATOM  " || record == "HETATM")
 		{
 			// Parse the residue sequence located at 1-based [23, 26].
 			if ((line[25] != residue[3]) || (line[24] != residue[2]) || (line[23] != residue[1]) || (line[22] != residue[0])) // This line is the start of a new residue.
@@ -83,7 +84,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 			}
 			atoms.push_back(a);
 		}
-		else if (starts_with(line, "TER"))
+		else if (record == "TER   ")
 		{
 			residue = "XXXX";
 		}

@@ -440,12 +440,11 @@ int main(int argc, char* argv[])
 		fis.push(in);
 		while (getline(fis, line))
 		{
-			if (starts_with(line, "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:"))
+			const string record = line.substr(0, 6);
+			if (record == "REMARK")
 			{
 				energies.push_back(stof(line.substr(55, 8)));
-			}
-			else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
-			{
+				getline(fis, line);
 				size_t start;
 				for (start = 56; line[start] == ' '; ++start);
 				hbonds.push_back(line.substr(start));

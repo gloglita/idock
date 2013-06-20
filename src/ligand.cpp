@@ -32,7 +32,8 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	while (getline(fis, line))
 	{
 		++num_lines;
-		if (starts_with(line, "ATOM") || starts_with(line, "HETATM"))
+		const string record = line.substr(0, 6);
+		if (record == "ATOM  " || record == "HETATM")
 		{
 			// Whenever an ATOM/HETATM line shows up, the current frame must be the last one.
 			BOOST_ASSERT(current == frames.size() - 1);
@@ -108,7 +109,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 				heavy_atoms.push_back(a);
 			}
 		}
-		else if (starts_with(line, "BRANCH"))
+		else if (record == "BRANCH")
 		{
 			// This line will be dumped to the output ligand file.
 			lines.push_back(line);
@@ -138,7 +139,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			frames[current - 1].haend = f->habegin;
 			frames[current - 1].hyend = f->hybegin;
 		}
-		else if (starts_with(line, "ENDBRANCH"))
+		else if (record == "ENDBRA")
 		{
 			// This line will be dumped to the output ligand file.
 			lines.push_back(line);
@@ -179,7 +180,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			// Update the pointer to the current frame.
 			f = &frames[current];
 		}
-		else if (starts_with(line, "ROOT") || starts_with(line, "ENDROOT") || starts_with(line, "TORSDOF"))
+		else if (record == "ROOT" || record == "ENDROO" || record == "TORSDO")
 		{
 			// This line will be dumped to the output ligand file.
 			lines.push_back(line);
