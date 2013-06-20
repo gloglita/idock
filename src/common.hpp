@@ -52,13 +52,4 @@ inline bool starts_with(const string& str, const string& start)
 	return true;
 }
 
-/// Parses right-justified 1-based [i, j] of str into generic type T lexically.
-/// This conversion does not apply to left-justified values.
-template<typename T>
-inline T right_cast(const string& str, const size_t i, const size_t j)
-{
-	const size_t start = str.find_first_not_of(' ', i - 1);
-	return lexical_cast<T>(str.substr(start, j - start));
-}
-
 #endif

@@ -442,7 +442,7 @@ int main(int argc, char* argv[])
 		{
 			if (starts_with(line, "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:"))
 			{
-				energies.push_back(right_cast<float>(line, 56, 63));
+				energies.push_back(stof(line.substr(55, 8)));
 			}
 			else if (starts_with(line, "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:"))
 			{

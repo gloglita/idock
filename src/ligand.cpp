@@ -49,7 +49,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			// Parse the Cartesian coordinate.
 			string name = line.substr(12, 4);
 			boost::algorithm::trim(name);
-			atom a(right_cast<size_t>(line, 7, 11), name, name, vec3(right_cast<float>(line, 31, 38), right_cast<float>(line, 39, 46), right_cast<float>(line, 47, 54)), ad);
+			atom a(stoul(line.substr(6, 5)), name, name, vec3(stof(line.substr(30, 8)), stof(line.substr(38, 8)), stof(line.substr(46, 8))), ad);
 
 			if (a.is_hydrogen()) // Current atom is a hydrogen.
 			{
@@ -114,8 +114,8 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			lines.push_back(line);
 
 			// Parse "BRANCH   X   Y". X and Y are right-justified and 4 characters wide.
-			const size_t rotorXsrn = right_cast<size_t>(line,  7, 10);
-			const size_t rotorYsrn = right_cast<size_t>(line, 11, 14);
+			const size_t rotorXsrn = stoul(line.substr( 6, 4));
+			const size_t rotorYsrn = stoul(line.substr(10, 4));
 
 			// Find the corresponding heavy atom with x as its atom serial number in the current frame.
 			for (size_t i = f->habegin; true; ++i)
