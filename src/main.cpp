@@ -273,150 +273,142 @@ int main(int argc, char* argv[])
 		// Increment the ligand counter.
 		++num_ligands;
 
-		try // The try-catch block ensures the remaining ligands will be docked should the current ligand fail.
+		// Obtain a ligand.
+		input_ligand_path = dir_iter->path();
+		const string stem = input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string();
+
+		// Skip the current ligand if it has been docked.
+		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
+		if (!force && exists(output_ligand_path)) continue;
+
+		// Parse the ligand.
+		ligand lig(input_ligand_path);
+
+		// Create grid maps on the fly if necessary.
+		BOOST_ASSERT(atom_types_to_populate.empty());
+		const vector<size_t> ligand_atom_types = lig.get_atom_types();
+		const size_t num_ligand_atom_types = ligand_atom_types.size();
+		for (size_t i = 0; i < num_ligand_atom_types; ++i)
 		{
-			// Obtain a ligand.
-			input_ligand_path = dir_iter->path();
-			const string stem = input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string();
+			const size_t t = ligand_atom_types[i];
+			BOOST_ASSERT(t < XS_TYPE_SIZE);
+			array3d<float>& grid_map = grid_maps[t];
+			if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
+			grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
+			atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
+		}
+		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
+		if (num_atom_types_to_populate)
+		{
+			// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
+			cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
 
-			// Skip the current ligand if it has been docked.
-			const path output_ligand_path = output_folder_path / input_ligand_path.filename();
-			if (!force && exists(output_ligand_path)) continue;
-
-			// Parse the ligand.
-			ligand lig(input_ligand_path);
-
-			// Create grid maps on the fly if necessary.
-			BOOST_ASSERT(atom_types_to_populate.empty());
-			const vector<size_t> ligand_atom_types = lig.get_atom_types();
-			const size_t num_ligand_atom_types = ligand_atom_types.size();
-			for (size_t i = 0; i < num_ligand_atom_types; ++i)
+			// Populate the grid map task container.
+			BOOST_ASSERT(gm_tasks.empty());
+			for (size_t x = 0; x < num_gm_tasks; ++x)
 			{
-				const size_t t = ligand_atom_types[i];
-				BOOST_ASSERT(t < XS_TYPE_SIZE);
-				array3d<float>& grid_map = grid_maps[t];
-				if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
-				grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
-				atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
-			}
-			const size_t num_atom_types_to_populate = atom_types_to_populate.size();
-			if (num_atom_types_to_populate)
-			{
-				// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-				cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
-
-				// Populate the grid map task container.
-				BOOST_ASSERT(gm_tasks.empty());
-				for (size_t x = 0; x < num_gm_tasks; ++x)
-				{
-					gm_tasks.push_back(new packaged_task<void>(boost::bind<void>(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec))));
-				}
-
-				// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
-				tp.run(gm_tasks);
-
-				// Propagate possible exceptions thrown by grid_map_task().
-				for (size_t i = 0; i < num_gm_tasks; ++i)
-				{
-					gm_tasks[i].get_future().get();
-				}
-
-				// Block until all the grid map tasks are completed.
-				tp.sync();
-				gm_tasks.clear();
-				atom_types_to_populate.clear();
-
-				// Clear the current line and reset the cursor to the beginning.
-				cout << '\r' << std::setw(36) << '\r';
+				gm_tasks.push_back(new packaged_task<void>(boost::bind<void>(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec))));
 			}
 
-			// Dump the ligand filename.
-			cout << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | " << std::flush;
+			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
+			tp.run(gm_tasks);
 
-			// Populate the Monte Carlo task container.
-			BOOST_ASSERT(mc_tasks.empty());
-			BOOST_ASSERT(results.empty());
-			for (size_t i = 0; i < num_mc_tasks; ++i)
+			// Propagate possible exceptions thrown by grid_map_task().
+			for (size_t i = 0; i < num_gm_tasks; ++i)
 			{
-				mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(results[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+				gm_tasks[i].get_future().get();
 			}
 
-			// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
-			tp.run(mc_tasks);
-
-			// Block until all the Monte Carlo tasks are completed.
+			// Block until all the grid map tasks are completed.
 			tp.sync();
-			mc_tasks.clear();
-			cout << " | " << std::flush;
+			gm_tasks.clear();
+			atom_types_to_populate.clear();
 
-			// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
-			results.sort();
-			const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);
-			for (size_t i = 0; i < num_mc_tasks && representatives.size() < representatives.capacity(); ++i)
-			{
-				const result& r = results[i];
-				bool representative = true;
-				for (size_t j = 0; j < i; ++j)
-				{
-					const float this_square_error = distance_sqr(r.heavy_atoms, results[j].heavy_atoms);
-					if (this_square_error < required_square_error)
-					{
-						representative = false;
-						break;
-					}
-				}
-				if (representative)
-				{
-					representatives.push_back(i);
-				}
-			}
-			cout << std::setw(4) << representatives.size() << " |";
-
-			// Find the number of hydrogen bonds.
-			const size_t num_lig_hbda = lig.hbda.size();
-			for (size_t k = 0; k < representatives.size(); ++k)
-			{
-				result& r = results[representatives[k]];
-				for (size_t i = 0; i < num_lig_hbda; ++i)
-				{
-					const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
-					BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
-
-					// Find the possibly interacting receptor atoms via partitions.
-					const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
-					const vector<size_t>& rec_hbda = rec.hbda_3d(b.partition_index(lig_coords));
-
-					// Accumulate individual free energies for each atom types to populate.
-					const size_t num_rec_hbda = rec_hbda.size();
-					for (size_t l = 0; l < num_rec_hbda; ++l)
-					{
-						const atom& rec_atom = rec.atoms[rec_hbda[l]];
-						BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
-						if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
-						const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
-						if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
-					}
-				}
-			}
-
-			// Write models to file.
-			lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
-
-			// Display the free energies of the top 4 conformations.
-			for (size_t i = 0; i < std::min<size_t>(representatives.size(), 4); ++i)
-			{
-				cout << std::setw(8) << results[representatives[i]].e;
-			}
-			cout << '\n';
-
-			// Clear the results of the current ligand.
-			results.clear();
+			// Clear the current line and reset the cursor to the beginning.
+			cout << '\r' << std::setw(36) << '\r';
 		}
-		catch (const std::exception& e)
+
+		// Dump the ligand filename.
+		cout << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | " << std::flush;
+
+		// Populate the Monte Carlo task container.
+		BOOST_ASSERT(mc_tasks.empty());
+		BOOST_ASSERT(results.empty());
+		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			cout << input_ligand_path.filename().string() << ' ' << e.what() << '\n';
-			continue; // Skip the current ligand and proceed with the next one.
+			mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(results[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
 		}
+
+		// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
+		tp.run(mc_tasks);
+
+		// Block until all the Monte Carlo tasks are completed.
+		tp.sync();
+		mc_tasks.clear();
+		cout << " | " << std::flush;
+
+		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
+		results.sort();
+		const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);
+		for (size_t i = 0; i < num_mc_tasks && representatives.size() < representatives.capacity(); ++i)
+		{
+			const result& r = results[i];
+			bool representative = true;
+			for (size_t j = 0; j < i; ++j)
+			{
+				const float this_square_error = distance_sqr(r.heavy_atoms, results[j].heavy_atoms);
+				if (this_square_error < required_square_error)
+				{
+					representative = false;
+					break;
+				}
+			}
+			if (representative)
+			{
+				representatives.push_back(i);
+			}
+		}
+		cout << std::setw(4) << representatives.size() << " |";
+
+		// Find the number of hydrogen bonds.
+		const size_t num_lig_hbda = lig.hbda.size();
+		for (size_t k = 0; k < representatives.size(); ++k)
+		{
+			result& r = results[representatives[k]];
+			for (size_t i = 0; i < num_lig_hbda; ++i)
+			{
+				const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
+				BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
+
+				// Find the possibly interacting receptor atoms via partitions.
+				const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
+				const vector<size_t>& rec_hbda = rec.hbda_3d(b.partition_index(lig_coords));
+
+				// Accumulate individual free energies for each atom types to populate.
+				const size_t num_rec_hbda = rec_hbda.size();
+				for (size_t l = 0; l < num_rec_hbda; ++l)
+				{
+					const atom& rec_atom = rec.atoms[rec_hbda[l]];
+					BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
+					if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
+					const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
+					if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
+				}
+			}
+		}
+
+		// Write models to file.
+		lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
+
+		// Display the free energies of the top 4 conformations.
+		for (size_t i = 0; i < std::min<size_t>(representatives.size(), 4); ++i)
+		{
+			cout << std::setw(8) << results[representatives[i]].e;
+		}
+		cout << '\n';
+
+		// Clear the results of the current ligand.
+		results.clear();
 	}
 
 	// Initialize necessary variables for storing ligand summaries.
