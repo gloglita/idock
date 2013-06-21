@@ -26,11 +26,4 @@ inline bool eq(const float a, const float b)
 	return fabs(a - b) < epsilon;
 }
 
-/// Returns the square of a generic value.
-template<typename T>
-inline T sqr(const T x)
-{
-	return x * x;
-}
-
 #endif

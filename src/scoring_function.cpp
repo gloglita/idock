@@ -15,8 +15,8 @@ float scoring_function::score(const size_t t1, const size_t t2, const float r)
 
 	// The scoring function is a weighted sum of 5 terms.
 	// The first 3 terms depend on d only, while the latter 2 terms depend on t1, t2 and d.
-	return (-0.035579f) * exp(-sqr(d * 2.0f))
-		+  (-0.005156f) * exp(-sqr((d - 3.0f) * 0.5f))
+	return (-0.035579f) * exp(-4.0f * d * d)
+		+  (-0.005156f) * exp(-0.25f * (d - 3.0f) * (d - 3.0f))
 		+  ( 0.840245f) * (d > 0.0f ? 0.0f : d * d)
 		+  (-0.035069f) * ((xs_is_hydrophobic(t1) && xs_is_hydrophobic(t2)) ? ((d >= 1.5f) ? 0.0f : ((d <= 0.5f) ? 1.0f : 1.5f - d)) : 0.0f)
 		+  (-0.587439f) * ((xs_hbond(t1, t2)) ? ((d >= 0.0f) ? 0.0f : ((d <= -0.7f) ? 1.0f : d * (-1.428571f))): 0.0f);

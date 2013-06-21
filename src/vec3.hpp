@@ -53,7 +53,7 @@ public:
 	/// Returns the square norm.
 	float norm_sqr() const
 	{
-		return sqr(elems[0]) + sqr(elems[1]) + sqr(elems[2]);
+		return elems[0] * elems[0] + elems[1] * elems[1] + elems[2] * elems[2];
 	}
 
 	/// Returns the norm.
@@ -141,7 +141,10 @@ inline vec3 cross_product(const vec3& a, const vec3& b)
 /// Returns the square distance between two vectors.
 inline float distance_sqr(const vec3& a, const vec3& b)
 {
-	return sqr(a[0] - b[0]) + sqr(a[1] - b[1]) + sqr(a[2] - b[2]);
+	const float d0 = a[0] - b[0];
+	const float d1 = a[1] - b[1];
+	const float d2 = a[2] - b[2];
+	return d0 * d0 + d1 * d1 + d2 * d2;
 }
 
 /// Returns the accumulated square distance between two vectors of vectors.

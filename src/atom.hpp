@@ -266,9 +266,6 @@ const size_t ad_to_xs[] =
 	XS_TYPE_Met_D, // 28 = AD_TYPE_Sr
 };
 
-/// Distance requirement of forming hydrogen bonds.
-const float hbond_dist_sqr = sqr(3.5f);
-
 /// Represents an atom by very simple fields.
 class atom
 {
@@ -305,7 +302,8 @@ public:
 	bool is_neighbor(const atom& a) const
 	{
 		BOOST_ASSERT(this != &a);
-		return (distance_sqr(coordinate, a.coordinate) < sqr(covalent_radius() + a.covalent_radius()));
+		const float s = covalent_radius() + a.covalent_radius();
+		return distance_sqr(coordinate, a.coordinate) < s * s;
 	}
 
 	/// For nitrogen and oxygen, revises the XScore atom type to make it a hydrogen bond donor.
