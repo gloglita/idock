@@ -8,7 +8,7 @@ const float progress_bar::num_bars_inverse = 1.0f / num_bars;
 progress_bar::progress_bar(const size_t num_tasks) : num_tasks(num_tasks)
 {
 	const float delta = num_tasks * num_bars_inverse;
-	(*this)[0] = delta - epsilon;
+	(*this)[0] = delta * 0.5;
 	for (size_t i = 1; i < num_bars; ++i)
 	{
 		(*this)[i] = (*this)[i - 1] + delta;

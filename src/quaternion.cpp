@@ -38,7 +38,7 @@ float qtn4::norm() const
 
 bool qtn4::is_normalized() const
 {
-	return eq(norm_sqr(), 1.0f);
+	return norm_sqr() - 1.0f < 1e-5f;
 }
 
 qtn4 qtn4::normalize() const

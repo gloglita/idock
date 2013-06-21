@@ -47,7 +47,7 @@ public:
 	/// Returns true is the vector is (0, 0, 0).
 	bool zero() const
 	{
-		return (eq(elems[0], 0) && eq(elems[1], 0) && eq(elems[2], 0));
+		return elems[0] < 1e-5f && elems[1] < 1e-5f && elems[2] < 1e-5f;
 	}
 
 	/// Returns the square norm.
@@ -65,7 +65,7 @@ public:
 	/// Returns true if the norm equals 1.
 	bool normalized() const
 	{
-		return eq(norm_sqr(), 1);
+		return norm_sqr() - 1.0f < 1e-5f;
 	}
 
 	/// Normalize the vector.

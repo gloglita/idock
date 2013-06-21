@@ -18,12 +18,4 @@ using boost::filesystem::path;
 using boost::filesystem::ifstream;
 using boost::filesystem::ofstream;
 
-const float epsilon = 0.00001f; ///< Tolerance for equality comparison of two floating point values.
-
-/// Returns true if the absolute difference between two floating point values is within the constant tolerance.
-inline bool eq(const float a, const float b)
-{
-	return fabs(a - b) < epsilon;
-}
-
 #endif
