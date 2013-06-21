@@ -210,16 +210,9 @@ int main(int argc, char* argv[])
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(3);
 	size_t num_ligands = 0; // Ligand counter.
 	ptr_vector<summary> summaries;
-	using namespace boost::filesystem;
-	const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
-	for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
+	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
+	for (directory_iterator dir_iter(ligand_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
-		// Skip non-regular files such as folders.
-		if (!is_regular_file(dir_iter->status())) continue;
-
-		// Increment the ligand counter.
-		++num_ligands;
-
 		// Parse the ligand.
 		const path input_ligand_path = dir_iter->path();
 		ligand lig(input_ligand_path);
@@ -270,7 +263,7 @@ int main(int argc, char* argv[])
 
 		// Dump the ligand filename.
 		const string stem = input_ligand_path.stem().string();
-		cout << setw(7) << num_ligands << " | " << setw(12) << stem << " | " << flush;
+		cout << setw(7) << ++num_ligands << " | " << setw(12) << stem << " | " << flush;
 
 		// Populate the Monte Carlo task container.
 		BOOST_ASSERT(mc_tasks.empty());
