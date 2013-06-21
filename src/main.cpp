@@ -248,7 +248,6 @@ int main(int argc, char* argv[])
 
 		// Populate the Monte Carlo task container.
 		BOOST_ASSERT(tp.empty());
-		BOOST_ASSERT(results.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
 			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), boost::cref(b), cref(grid_maps))));
@@ -302,12 +301,11 @@ int main(int argc, char* argv[])
 	summaries.sort();
 
 	// Dump ligand summaries to the log file.
-	const size_t num_summaries = summaries.size();
-	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
+	cout << "Writing summary of " << num_ligands << " ligand" << (num_ligands == 1 ? "" : "s") << " to " << log_path << '\n';
 	boost::filesystem::ofstream log(log_path);
 	log.setf(ios::fixed, ios::floatfield);
-	log << "Ligand,Free energy (kcal/mol)" << '\n' << setprecision(3);
-	for (size_t i = 0; i < num_summaries; ++i)
+	log << "Ligand,Free energy (kcal/mol)" << '\n' << setprecision(2);
+	for (size_t i = 0; i < num_ligands; ++i)
 	{
 		const summary& s = summaries[i];
 		log << s.stem << ',' << s.energy << '\n';
