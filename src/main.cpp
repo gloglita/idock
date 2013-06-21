@@ -44,13 +44,11 @@ int main(int argc, char* argv[])
 			("size_y", value<float>(&size_y)->required(), "size in the y dimension in Angstrom")
 			("size_z", value<float>(&size_z)->required(), "size in the z dimension in Angstrom")
 			;
-
 		options_description output_options("output (optional)");
 		output_options.add_options()
 			("output_folder", value<path>(&output_folder_path)->default_value(default_output_folder_path), "folder of output models in PDBQT format")
 			("log", value<path>(&log_path)->default_value(default_log_path), "log file")
 			;
-
 		options_description miscellaneous_options("options (optional)");
 		miscellaneous_options.add_options()
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
@@ -62,7 +60,6 @@ int main(int argc, char* argv[])
 			("version", "version information")
 			("config", value<path>(), "options can be loaded from a configuration file")
 			;
-
 		options_description all_options;
 		all_options.add(input_options).add(output_options).add(miscellaneous_options);
 
@@ -70,7 +67,7 @@ int main(int argc, char* argv[])
 		variables_map vm;
 		store(parse_command_line(argc, argv, all_options), vm);
 
-		// If no command line argument is supplied, simply print the usage and exit.
+		// If no command line argument is supplied or help is requested, simply print the usage and exit.
 		if (argc == 1 || vm.count("help"))
 		{
 			cout << all_options;
@@ -80,7 +77,7 @@ int main(int argc, char* argv[])
 		// If version is requested, simply print the version and exit.
 		if (vm.count("version"))
 		{
-			cout << "3.0" << endl;
+			cout << "3.0.0" << endl;
 			return 0;
 		}
 
