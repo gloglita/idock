@@ -5,17 +5,6 @@
 #include <boost/ptr_container/ptr_vector.hpp>
 #include "conformation.hpp"
 
-class hbond
-{
-public:
-	string receptor, ligand;
-	explicit hbond(const string& receptor, const string& ligand) : receptor(receptor), ligand(ligand) {}
-//		hbond(const hbond&) = default;
-//		hbond(hbond&&) = default;
-//		hbond& operator=(const hbond&) = default;
-//		hbond& operator=(hbond&&) = default;
-};
-
 using boost::ptr_vector;
 
 /// Represents a result found by BFGS local optimization for later clustering.
@@ -24,7 +13,6 @@ class result
 public:
 	float e; ///< Free energy.
 	float f; ///< Inter-molecular free energy.
-	vector<hbond> hbonds; ///< Hydrogen bonds.
 	vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 	vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 
