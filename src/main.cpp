@@ -30,7 +30,7 @@ int main(int argc, char* argv[])
 		const path default_log_path = "log.csv";
 		const size_t default_num_threads = boost::thread::hardware_concurrency();
 		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
-		const size_t default_num_mc_tasks = 8192;
+		const size_t default_num_mc_tasks = 2048;
 		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 		const bool default_force = false;
