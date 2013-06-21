@@ -16,12 +16,4 @@ public:
 	explicit conformation(const size_t num_active_torsions) : position(zero3), orientation(qtn4id), torsions(num_active_torsions, 0) {}
 };
 
-/// Represents a transition from one conformation to another.
-class change : public vector<float>
-{
-public:
-	/// Constructs a zero change.
-	explicit change(const size_t num_active_torsions) : vector<float>(6 + num_active_torsions, 0) {}
-};
-
 #endif

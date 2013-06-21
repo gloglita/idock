@@ -289,7 +289,7 @@ vector<size_t> ligand::get_atom_types() const
 	return atom_types;
 }
 
-bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, change& g) const
+bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.

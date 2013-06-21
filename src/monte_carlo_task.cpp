@@ -31,7 +31,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	// Generate an initial random conformation c0, and evaluate it.
 	conformation c0(lig.num_active_torsions);
 	float e0, f0;
-	change g0(lig.num_active_torsions);
+	vector<float> g0(6 + lig.num_active_torsions);
 	// Randomize conformation c0.
 	c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
 	c0.orientation = qtn4(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen()).normalize();
@@ -45,8 +45,8 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	// Initialize necessary variables for BFGS.
 	conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
 	float e1, f1, e2, f2;
-	change g1(lig.num_active_torsions), g2(lig.num_active_torsions);
-	change p(lig.num_active_torsions); // Descent direction.
+	vector<float> g1(6 + lig.num_active_torsions), g2(6 + lig.num_active_torsions);
+	vector<float> p(6 + lig.num_active_torsions); // Descent direction.
 	float alpha, pg1, pg2; // pg1 = p * g1. pg2 = p * g2.
 	size_t num_alpha_trials;
 
@@ -60,8 +60,8 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 
 	// Initialize necessary variables for updating the Hessian matrix h.
 	triangular_matrix<float> h(identity_hessian);
-	change y(lig.num_active_torsions); // y = g2 - g1.
-	change mhy(lig.num_active_torsions); // mhy = -h * y.
+	vector<float> y(6 + lig.num_active_torsions); // y = g2 - g1.
+	vector<float> mhy(6 + lig.num_active_torsions); // mhy = -h * y.
 	float yhy, yp, ryp, pco;
 
 	for (size_t mc_i = 0; mc_i < num_mc_iterations; ++mc_i)

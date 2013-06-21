@@ -62,7 +62,7 @@ public:
 	vector<size_t> get_atom_types() const;
 
 	/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
-	bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, change& g) const;
+	bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, vector<float>& g) const;
 
 	/// Composes a result from free energy, and conformation conf.
 	result compose_result(const float e, const conformation& conf) const;
