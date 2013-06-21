@@ -222,7 +222,7 @@ int main(int argc, char* argv[])
 	atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
 	// Initialize a thread pool and create worker threads for later use.
-	cout << "Creating a thread pool of " << num_threads << " worker thread" << ((num_threads == 1) ? "" : "s") << '\n';
+	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << '\n';
 	thread_pool tp(num_threads);
 
 	// Precalculate the scoring function in parallel.
@@ -256,7 +256,7 @@ int main(int argc, char* argv[])
 	}
 	cout << '\n';
 
-	cout << "Running " << num_mc_tasks << " Monte Carlo task" << ((num_mc_tasks == 1) ? "" : "s") << " per ligand\n";
+	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
 
 	// Perform docking for each file in the ligand folder.
 	cout.setf(std::ios::fixed, std::ios::floatfield);
