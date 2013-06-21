@@ -18,7 +18,6 @@ int main(int argc, char* argv[])
 	float center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, num_conformations;
 	float grid_granularity;
-	bool force;
 
 	// Process program options.
 	try
@@ -33,7 +32,6 @@ int main(int argc, char* argv[])
 		const size_t default_num_mc_tasks = 2048;
 		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
-		const bool default_force = false;
 
 		options_description input_options("input (required)");
 		input_options.add_options()
@@ -60,7 +58,6 @@ int main(int argc, char* argv[])
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
 			("num_conformations", value<size_t>(&num_conformations)->default_value(default_num_conformations), "number of binding conformations to write")
 			("granularity", value<float>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
-			("force", bool_switch(&force)->default_value(default_force), "force to dock every ligand")
 			("help", "help information")
 			("version", "version information")
 			("config", value<path>(), "options can be loaded from a configuration file")
@@ -258,7 +255,6 @@ int main(int argc, char* argv[])
 	// Perform docking for each file in the ligand folder.
 	cout.setf(std::ios::fixed, std::ios::floatfield);
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
-	path input_ligand_path;
 	size_t num_ligands = 0; // Ligand counter.
 	ptr_vector<summary> summaries;
 	using namespace boost::filesystem;
@@ -271,15 +267,8 @@ int main(int argc, char* argv[])
 		// Increment the ligand counter.
 		++num_ligands;
 
-		// Obtain a ligand.
-		input_ligand_path = dir_iter->path();
-		const string stem = input_ligand_path.stem().string();
-
-		// Skip the current ligand if it has been docked.
-		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
-		if (!force && exists(output_ligand_path)) continue;
-
 		// Parse the ligand.
+		const path input_ligand_path = dir_iter->path();
 		ligand lig(input_ligand_path);
 
 		// Create grid maps on the fly if necessary.
@@ -327,6 +316,7 @@ int main(int argc, char* argv[])
 		}
 
 		// Dump the ligand filename.
+		const string stem = input_ligand_path.stem().string();
 		cout << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | " << std::flush;
 
 		// Populate the Monte Carlo task container.
@@ -371,6 +361,7 @@ int main(int argc, char* argv[])
 		cout << std::setw(4) << representatives.size() << " |";
 
 		// Write models to file.
+		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
 		lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
 
 		// Display the free energies of the top 4 conformations.
