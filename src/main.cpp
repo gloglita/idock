@@ -10,13 +10,11 @@
 #include "grid_map_task.hpp"
 #include "monte_carlo_task.hpp"
 #include "summary.hpp"
+using namespace std;
 using namespace boost::filesystem;
 
 int main(int argc, char* argv[])
 {
-	using std::cout;
-	using std::cerr;
-
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	float center_x, center_y, center_z, size_x, size_y, size_z;
 	size_t num_threads, seed, num_mc_tasks, num_conformations;
@@ -29,7 +27,7 @@ int main(int argc, char* argv[])
 		const path default_output_folder_path = "output";
 		const path default_log_path = "log.csv";
 		const size_t default_num_threads = boost::thread::hardware_concurrency();
-		const size_t default_seed = std::chrono::system_clock::now().time_since_epoch().count();
+		const size_t default_seed = chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 2048;
 		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
@@ -82,7 +80,7 @@ int main(int argc, char* argv[])
 		// If version is requested, simply print the version and exit.
 		if (vm.count("version"))
 		{
-			cout << "3.0" << std::endl;
+			cout << "3.0" << endl;
 			return 0;
 		}
 
@@ -140,7 +138,7 @@ int main(int argc, char* argv[])
 			}
 		}
 	}
-	catch (const std::exception& e)
+	catch (const exception& e)
 	{
 		cerr << e.what() << '\n';
 		return 1;
@@ -211,8 +209,8 @@ int main(int argc, char* argv[])
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
 
 	// Perform docking for each file in the ligand folder.
-	cout.setf(std::ios::fixed, std::ios::floatfield);
-	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
+	cout.setf(ios::fixed, ios::floatfield);
+	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(3);
 	size_t num_ligands = 0; // Ligand counter.
 	ptr_vector<summary> summaries;
 	using namespace boost::filesystem;
@@ -246,7 +244,7 @@ int main(int argc, char* argv[])
 		if (num_atom_types_to_populate)
 		{
 			// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-			cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << std::flush;
+			cout << "Creating " << setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << flush;
 
 			// Populate the grid map task container.
 			BOOST_ASSERT(gm_tasks.empty());
@@ -270,12 +268,12 @@ int main(int argc, char* argv[])
 			atom_types_to_populate.clear();
 
 			// Clear the current line and reset the cursor to the beginning.
-			cout << '\r' << std::setw(36) << '\r';
+			cout << '\r' << setw(36) << '\r';
 		}
 
 		// Dump the ligand filename.
 		const string stem = input_ligand_path.stem().string();
-		cout << std::setw(7) << num_ligands << " | " << std::setw(12) << stem << " | " << std::flush;
+		cout << setw(7) << num_ligands << " | " << setw(12) << stem << " | " << flush;
 
 		// Populate the Monte Carlo task container.
 		BOOST_ASSERT(mc_tasks.empty());
@@ -291,7 +289,7 @@ int main(int argc, char* argv[])
 		// Block until all the Monte Carlo tasks are completed.
 		tp.sync();
 		mc_tasks.clear();
-		cout << " | " << std::flush;
+		cout << " | " << flush;
 
 		results.sort();
 		summaries.push_back(new summary(stem, results.front().e));
@@ -316,16 +314,16 @@ int main(int argc, char* argv[])
 				representatives.push_back(i);
 			}
 		}
-		cout << std::setw(4) << representatives.size() << " |";
+		cout << setw(4) << representatives.size() << " |";
 
 		// Write models to file.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
 		lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
 
 		// Display the free energies of the top 4 conformations.
-		for (size_t i = 0; i < std::min<size_t>(representatives.size(), 4); ++i)
+		for (size_t i = 0; i < min<size_t>(representatives.size(), 4); ++i)
 		{
-			cout << std::setw(8) << results[representatives[i]].e;
+			cout << setw(8) << results[representatives[i]].e;
 		}
 		cout << '\n';
 
@@ -340,8 +338,8 @@ int main(int argc, char* argv[])
 	const size_t num_summaries = summaries.size();
 	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
 	boost::filesystem::ofstream log(log_path);
-	log.setf(std::ios::fixed, std::ios::floatfield);
-	log << "Ligand,Free energy (kcal/mol)" << '\n' << std::setprecision(3);
+	log.setf(ios::fixed, ios::floatfield);
+	log << "Ligand,Free energy (kcal/mol)" << '\n' << setprecision(3);
 	for (size_t i = 0; i < num_summaries; ++i)
 	{
 		const summary& s = summaries[i];
