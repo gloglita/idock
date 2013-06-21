@@ -1,7 +1,7 @@
 #include <boost/random.hpp>
 #include "monte_carlo_task.hpp"
 
-void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
+int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
@@ -171,4 +171,5 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 			e0 = e1;
 		}
 	}
+	return 0;
 }

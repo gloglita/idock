@@ -1,6 +1,6 @@
 #include "grid_map_task.hpp"
 
-void grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
+int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
 {
 	const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 	vector<float> e(num_atom_types_to_populate);
@@ -43,4 +43,5 @@ void grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom
 			grid_maps[t](grid_index) = e[i];
 		}
 	}
+	return 0;
 }

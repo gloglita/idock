@@ -1,6 +1,5 @@
 #include <chrono>
 #include <boost/random.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -26,7 +25,7 @@ int main(int argc, char* argv[])
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
 		const path default_log_path = "log.csv";
-		const size_t default_num_threads = boost::thread::hardware_concurrency();
+		const size_t default_num_threads = thread::hardware_concurrency();
 		const size_t default_seed = chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 2048;
 		const size_t default_max_conformations = 9;
@@ -154,8 +153,6 @@ int main(int argc, char* argv[])
 
 	// Reserve storage for task containers.
 	const size_t num_gm_tasks = b.num_probes[0];
-	ptr_vector<packaged_task<void>> gm_tasks(num_gm_tasks);
-	ptr_vector<packaged_task<void>> mc_tasks(num_mc_tasks);
 
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 	ptr_vector<result> results;
@@ -173,7 +170,7 @@ int main(int argc, char* argv[])
 	thread_pool tp(num_threads);
 
 	// Precalculate the scoring function in parallel.
-	cout << "Precalculating scoring function in parallel ";
+	cout << "Precalculating scoring function in parallel\n";
 	scoring_function sf;
 	{
 		// Precalculate reciprocal square root values.
@@ -186,22 +183,16 @@ int main(int argc, char* argv[])
 		BOOST_ASSERT(rs.back() == scoring_function::Cutoff);
 
 		// Populate the scoring function task container.
-		const size_t num_sf_tasks = ((XS_TYPE_SIZE + 1) * XS_TYPE_SIZE) >> 1;
-		ptr_vector<packaged_task<void>> sf_tasks(num_sf_tasks);
+		BOOST_ASSERT(tp.empty());
 		for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
 		for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
 		{
-			sf_tasks.push_back(new packaged_task<void>(boost::bind<void>(&scoring_function::precalculate, boost::ref(sf), t1, t2, boost::cref(rs))));
+			tp.push_back(packaged_task<int()>(bind(&scoring_function::precalculate, ref(sf), t1, t2, cref(rs))));
 		}
-		BOOST_ASSERT(sf_tasks.size() == num_sf_tasks);
 
-		// Run the scoring function tasks in parallel asynchronously and display the progress bar with hashes.
-		tp.run(sf_tasks);
-
-		// Wait until all the scoring function tasks are completed.
+		// Run the scoring function tasks in parallel.
 		tp.sync();
 	}
-	cout << '\n';
 
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
 
@@ -237,24 +228,14 @@ int main(int argc, char* argv[])
 			cout << "Creating " << setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << flush;
 
 			// Populate the grid map task container.
-			BOOST_ASSERT(gm_tasks.empty());
+			BOOST_ASSERT(tp.empty());
 			for (size_t x = 0; x < num_gm_tasks; ++x)
 			{
-				gm_tasks.push_back(new packaged_task<void>(boost::bind<void>(grid_map_task, boost::ref(grid_maps), boost::cref(atom_types_to_populate), x, boost::cref(sf), boost::cref(b), boost::cref(rec))));
+				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), x, cref(sf), cref(b), cref(rec))));
 			}
 
 			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
-			tp.run(gm_tasks);
-
-			// Propagate possible exceptions thrown by grid_map_task().
-			for (size_t i = 0; i < num_gm_tasks; ++i)
-			{
-				gm_tasks[i].get_future().get();
-			}
-
-			// Block until all the grid map tasks are completed.
-			tp.sync();
-			gm_tasks.clear();
+			tp.sync(10);
 			atom_types_to_populate.clear();
 
 			// Clear the current line and reset the cursor to the beginning.
@@ -266,19 +247,15 @@ int main(int argc, char* argv[])
 		cout << setw(7) << ++num_ligands << " | " << setw(12) << stem << " | " << flush;
 
 		// Populate the Monte Carlo task container.
-		BOOST_ASSERT(mc_tasks.empty());
+		BOOST_ASSERT(tp.empty());
 		BOOST_ASSERT(results.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			mc_tasks.push_back(new packaged_task<void>(boost::bind<void>(monte_carlo_task, boost::ref(results[i]), boost::cref(lig), eng(), boost::cref(sf), boost::cref(b), boost::cref(grid_maps))));
+			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), boost::cref(b), cref(grid_maps))));
 		}
 
 		// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
-		tp.run(mc_tasks);
-
-		// Block until all the Monte Carlo tasks are completed.
-		tp.sync();
-		mc_tasks.clear();
+		tp.sync(10);
 		cout << " | " << flush;
 
 		results.sort();
