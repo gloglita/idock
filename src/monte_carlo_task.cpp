@@ -19,14 +19,11 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	using boost::random::uniform_int_distribution;
 	using boost::random::normal_distribution;
 	mt19937_64 eng(seed);
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_01_gen(eng, uniform_real_distribution<float>(  0.0f,  1.0f));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_11_gen(eng, uniform_real_distribution<float>( -1.0f,  1.0f));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_pi_gen(eng, uniform_real_distribution<float>(-pi, pi));
+	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
+
 	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box0_gen(eng, uniform_real_distribution<float>(b.corner1[0], b.corner2[0]));
 	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box1_gen(eng, uniform_real_distribution<float>(b.corner1[1], b.corner2[1]));
 	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box2_gen(eng, uniform_real_distribution<float>(b.corner1[2], b.corner2[2]));
-	variate_generator<mt19937_64&, uniform_int_distribution<size_t>> uniform_entity_gen(eng, uniform_int_distribution<size_t>(0, num_entities - 1));
-	variate_generator<mt19937_64&, normal_distribution<float>> normal_01_gen(eng, normal_distribution<float>(0.0f, 1.0f));
 
 	// Generate an initial random conformation c0, and evaluate it.
 	conformation c0(lig.num_active_torsions);
@@ -34,10 +31,10 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	vector<float> g0(6 + lig.num_active_torsions);
 	// Randomize conformation c0.
 	c0.position = vec3(uniform_box0_gen(), uniform_box1_gen(), uniform_box2_gen());
-	c0.orientation = qtn4(normal_01_gen(), normal_01_gen(), normal_01_gen(), normal_01_gen()).normalize();
+	c0.orientation = qtn4(uniform_11(eng), uniform_11(eng), uniform_11(eng), uniform_11(eng)).normalize();
 	for (size_t i = 0; i < lig.num_active_torsions; ++i)
 	{
-		c0.torsions[i] = uniform_pi_gen();
+		c0.torsions[i] = uniform_11(eng);
 	}
 	lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
 	r = lig.compose_result(e0, c0);
@@ -69,7 +66,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 		// Make a copy, so the previous conformation is retained.
 		c1 = c0;
 //		c1.position += vec3(1, 1, 1);
-		c1.position += vec3(uniform_11_gen(), uniform_11_gen(), uniform_11_gen());
+		c1.position += vec3(uniform_11(eng), uniform_11(eng), uniform_11(eng));
 		lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1);
 
 		// Initialize the Hessian matrix to identity.
