@@ -2,9 +2,6 @@
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
 #include "receptor.hpp"
 #include "ligand.hpp"
 #include "thread_pool.hpp"
@@ -276,7 +273,7 @@ int main(int argc, char* argv[])
 
 		// Obtain a ligand.
 		input_ligand_path = dir_iter->path();
-		const string stem = input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string();
+		const string stem = input_ligand_path.stem().string();
 
 		// Skip the current ligand if it has been docked.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
@@ -349,7 +346,7 @@ int main(int argc, char* argv[])
 		cout << " | " << std::flush;
 
 		results.sort();
-		summaries.push_back(new summary(input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string(), results.front().e));
+		summaries.push_back(new summary(stem, results.front().e));
 
 		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
 		const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);

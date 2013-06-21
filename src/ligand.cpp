@@ -1,7 +1,4 @@
 #include <boost/algorithm/string.hpp>
-#include <boost/iostreams/filtering_stream.hpp>
-#include <boost/iostreams/filter/gzip.hpp>
-#include <boost/iostreams/filter/bzip2.hpp>
 #include "ligand.hpp"
 
 ligand::ligand(const path& p) : num_active_torsions(0)
@@ -24,12 +21,8 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 	// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
-	ifstream in(p); // Parsing starts. Open the file stream as late as possible.
-	boost::iostreams::filtering_istream fis;
-	const string ext = p.extension().string();
-	if (ext == ".gz") fis.push(boost::iostreams::gzip_decompressor()); else if (ext == ".bz2") fis.push(boost::iostreams::bzip2_decompressor());
-	fis.push(in);
-	while (getline(fis, line))
+	ifstream ifs(p); // Parsing starts. Open the file stream as late as possible.
+	while (getline(ifs, line))
 	{
 		++num_lines;
 		const string record = line.substr(0, 6);
@@ -186,7 +179,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			lines.push_back(line);
 		}
 	}
-	in.close(); // Parsing finishes. Close the file stream as soon as possible.
+	ifs.close(); // Parsing finishes. Close the file stream as soon as possible.
 	BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 	BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 	BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
@@ -548,18 +541,14 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 
 	// Dump binding conformations to the output ligand file.
 	using namespace std;
-	boost::filesystem::ofstream out(output_ligand_path); // Dumping starts. Open the file stream as late as possible.
-	boost::iostreams::filtering_ostream fos;
-	const string ext = output_ligand_path.extension().string();
-	if (ext == ".gz") fos.push(boost::iostreams::gzip_compressor()); else if (ext == ".bz2") fos.push(boost::iostreams::bzip2_compressor());
-	fos.push(out);
-	fos.setf(ios::fixed, ios::floatfield);
-	fos << setprecision(3);
+	boost::filesystem::ofstream ofs(output_ligand_path); // Dumping starts. Open the file stream as late as possible.
+	ofs.setf(ios::fixed, ios::floatfield);
+	ofs << setprecision(3);
 	for (size_t i = 0; i < representatives.size(); ++i)
 	{
 		const result& r = results[representatives[i]];
 		const size_t num_hbonds = r.hbonds.size();
-		fos << "MODEL     " << setw(4) << (i + 1) << '\n'
+		ofs << "MODEL     " << setw(4) << (i + 1) << '\n'
 			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n";
 		for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 		{
@@ -568,7 +557,7 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 			{
 				const float free_energy = line[77] == 'H' ? 0 : grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom]));
 				const vec3& coordinate = line[77] == 'H' ? r.hydrogens[hydrogen++] : r.heavy_atoms[heavy_atom++];
-				fos << line.substr(0, 30)
+				ofs << line.substr(0, 30)
 					<< setw(8) << coordinate[0]
 					<< setw(8) << coordinate[1]
 					<< setw(8) << coordinate[2]
@@ -578,10 +567,10 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 			}
 			else // This line starts with "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", TORSDOF", which will not change during docking.
 			{
-				fos << line;
+				ofs << line;
 			}
-			fos << '\n';
+			ofs << '\n';
 		}
-		fos << "ENDMDL\n";
+		ofs << "ENDMDL\n";
 	}
 }
