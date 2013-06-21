@@ -104,9 +104,9 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 			{
 				// Calculate c2 = c1 + ap.
 				c2.position = c1.position + alpha * vec3(p[0], p[1], p[2]);
-				BOOST_ASSERT(c1.orientation.is_normalized());
+				assert(c1.orientation.is_normalized());
 				c2.orientation = qtn4(alpha * vec3(p[3], p[4], p[5])) * c1.orientation;
-				BOOST_ASSERT(c2.orientation.is_normalized());
+				assert(c2.orientation.is_normalized());
 				for (size_t i = 0; i < lig.num_active_torsions; ++i)
 				{
 					c2.torsions[i] = c1.torsions[i] + alpha * p[6 + i];

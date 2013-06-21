@@ -33,14 +33,14 @@ public:
 	/// Returns a constant reference to the element at index i.
 	const float& operator[](const size_t i) const
 	{
-		BOOST_ASSERT(i < 3);
+		assert(i < 3);
 		return elems[i];
 	}
 
 	/// Returns a mutable reference to the element at index i.
 	float& operator[](const size_t i)
 	{
-		BOOST_ASSERT(i < 3);
+		assert(i < 3);
 		return elems[i];
 	}
 
@@ -151,8 +151,8 @@ inline float distance_sqr(const vec3& a, const vec3& b)
 inline float distance_sqr(const vector<vec3>& a, const vector<vec3>& b)
 {
 	const size_t n = a.size();
-	BOOST_ASSERT(n > 0);
-	BOOST_ASSERT(n == b.size());
+	assert(n > 0);
+	assert(n == b.size());
 	float sum = 0.0f;
 	for (size_t i = 0; i < n; ++i)
 		sum += distance_sqr(a[i], b[i]);

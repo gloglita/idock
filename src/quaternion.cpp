@@ -4,7 +4,7 @@ qtn4::qtn4(const float a, const float b, const float c, const float d) : a(a), b
 
 qtn4::qtn4(const vec3& axis, const float angle)
 {
-	BOOST_ASSERT(axis.normalized());
+	assert(axis.normalized());
 	a = cos(angle * 0.5f);
 	const float s = sin(angle * 0.5f);
 	b = s * axis[0];
@@ -49,7 +49,7 @@ qtn4 qtn4::normalize() const
 
 mat3 qtn4::to_mat3() const
 {
-	BOOST_ASSERT(this->is_normalized());
+	assert(this->is_normalized());
 	const float aa = a*a;
 	const float ab = a*b;
 	const float ac = a*c;

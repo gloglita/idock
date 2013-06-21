@@ -39,8 +39,8 @@ public:
 	/// Returns the value at index (i, j) where j is the lowest dimension.
 	float operator()(const size_t i, const size_t j) const
 	{
-		BOOST_ASSERT(i < 3);
-		BOOST_ASSERT(j < 3);
+		assert(i < 3);
+		assert(j < 3);
 		return elems[3 * i + j];
 	}
 

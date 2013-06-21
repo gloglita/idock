@@ -179,11 +179,11 @@ int main(int argc, char* argv[])
 		{
 			rs[i] = sqrt(i * scoring_function::Factor_Inverse);
 		}
-		BOOST_ASSERT(rs.front() == 0);
-		BOOST_ASSERT(rs.back() == scoring_function::Cutoff);
+		assert(rs.front() == 0);
+		assert(rs.back() == scoring_function::Cutoff);
 
 		// Populate the scoring function task container.
-		BOOST_ASSERT(tp.empty());
+		assert(tp.empty());
 		for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
 		for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
 		{
@@ -209,13 +209,13 @@ int main(int argc, char* argv[])
 		ligand lig(input_ligand_path);
 
 		// Create grid maps on the fly if necessary.
-		BOOST_ASSERT(atom_types_to_populate.empty());
+		assert(atom_types_to_populate.empty());
 		const vector<size_t> ligand_atom_types = lig.get_atom_types();
 		const size_t num_ligand_atom_types = ligand_atom_types.size();
 		for (size_t i = 0; i < num_ligand_atom_types; ++i)
 		{
 			const size_t t = ligand_atom_types[i];
-			BOOST_ASSERT(t < XS_TYPE_SIZE);
+			assert(t < XS_TYPE_SIZE);
 			array3d<float>& grid_map = grid_maps[t];
 			if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
 			grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
@@ -228,7 +228,7 @@ int main(int argc, char* argv[])
 			cout << "Creating " << setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << flush;
 
 			// Populate the grid map task container.
-			BOOST_ASSERT(tp.empty());
+			assert(tp.empty());
 			for (size_t x = 0; x < num_gm_tasks; ++x)
 			{
 				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), x, cref(sf), cref(b), cref(rec))));
@@ -247,7 +247,7 @@ int main(int argc, char* argv[])
 		cout << setw(7) << ++num_ligands << " | " << setw(12) << stem << " | " << flush;
 
 		// Populate the Monte Carlo task container.
-		BOOST_ASSERT(tp.empty());
+		assert(tp.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
 			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), boost::cref(b), cref(grid_maps))));
