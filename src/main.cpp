@@ -1,4 +1,5 @@
 #include <chrono>
+#include <boost/random.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -175,7 +176,7 @@ int main(int argc, char* argv[])
 
 	// Initialize a Mersenne Twister random number generator.
 	cout << "Using random seed " << seed << '\n';
-	mt19937eng eng(seed);
+	boost::random::mt19937_64 eng(seed);
 
 	// Initialize the search space of cuboid shape.
 	const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);

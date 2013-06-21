@@ -3,13 +3,13 @@
 #define IDOCK_THREAD_POOL_HPP
 
 #include <iostream>
+#include <vector>
 #include <boost/array.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #include <boost/thread/condition.hpp>
 #include <boost/thread/future.hpp>
-#include "common.hpp"
 
 using boost::array;
 using boost::ptr_vector;

@@ -2,7 +2,6 @@
 #ifndef IDOCK_SUMMARY_HPP
 #define IDOCK_SUMMARY_HPP
 
-#include "common.hpp"
 #include <boost/filesystem/path.hpp>
 
 /// Represents a summary of docking results of a ligand.

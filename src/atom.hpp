@@ -2,7 +2,9 @@
 #ifndef IDOCK_ATOM_HPP
 #define IDOCK_ATOM_HPP
 
+#include <string>
 #include "vec3.hpp"
+using std::string;
 
 // AutoDock4 atom types.
 const size_t AD_TYPE_H    =  0;	///< Non-polar hydrogen, i.e. bonded to carbon.

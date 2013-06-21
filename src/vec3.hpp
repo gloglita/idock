@@ -2,9 +2,9 @@
 #ifndef IDOCK_VEC3_HPP
 #define IDOCK_VEC3_HPP
 
+#include <vector>
 #include <boost/array.hpp>
-#include "common.hpp"
-
+using std::vector;
 using boost::array;
 
 /// Represents a vector of 3 floating point elements.
