@@ -91,30 +91,20 @@ int main(int argc, char* argv[])
 			store(parse_config_file(config_file, all_options), vm);
 		}
 
-		// Notify the user if there are any parsing errors.
+		// Notify the user of parsing errors, if any.
 		vm.notify();
 
 		// Validate receptor.
-		if (!exists(receptor_path))
-		{
-			cerr << "Receptor " << receptor_path << " does not exist\n";
-			return 1;
-		}
 		if (!is_regular_file(receptor_path))
 		{
-			cerr << "Receptor " << receptor_path << " is not a regular file\n";
+			cerr << "Receptor " << receptor_path << " does not exist or is not a regular file\n";
 			return 1;
 		}
 
 		// Validate ligand_folder.
-		if (!exists(ligand_folder_path))
-		{
-			cerr << "Ligand folder " << ligand_folder_path << " does not exist\n";
-			return 1;
-		}
 		if (!is_directory(ligand_folder_path))
 		{
-			cerr << "Ligand folder " << ligand_folder_path << " is not a directory\n";
+			cerr << "Ligand folder " << ligand_folder_path << " does not exist or is not a directory\n";
 			return 1;
 		}
 
@@ -146,13 +136,6 @@ int main(int argc, char* argv[])
 				cerr << "Failed to create output folder " << output_folder_path << '\n';
 				return 1;
 			}
-		}
-
-		// Validate log_path.
-		if (is_directory(log_path))
-		{
-			cerr << "log path " << log_path << " is a directory\n";
-			return 1;
 		}
 
 		// Validate miscellaneous options.
