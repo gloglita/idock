@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 {
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
 	float center_x, center_y, center_z, size_x, size_y, size_z;
-	size_t num_threads, seed, num_mc_tasks, num_conformations;
+	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	float grid_granularity;
 
 	// Process program options.
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
 		const size_t default_num_threads = boost::thread::hardware_concurrency();
 		const size_t default_seed = chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 2048;
-		const size_t default_num_conformations = 9;
+		const size_t default_max_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 
 		using namespace boost::program_options;
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
-			("num_conformations", value<size_t>(&num_conformations)->default_value(default_num_conformations), "number of binding conformations to write")
+			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "number of binding conformations to write")
 			("granularity", value<float>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("help", "help information")
 			("version", "version information")
@@ -164,7 +164,7 @@ int main(int argc, char* argv[])
 	ptr_vector<result> results;
 	results.resize(num_mc_tasks);
 	vector<size_t> representatives;
-	representatives.reserve(num_conformations);
+	representatives.reserve(max_conformations);
 
 	// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
 	vector<array3d<float>> grid_maps(XS_TYPE_SIZE);
