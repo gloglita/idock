@@ -25,8 +25,6 @@ int main(int argc, char* argv[])
 	// Process program options.
 	try
 	{
-		using namespace boost::program_options;
-
 		// Initialize the default values of optional arguments.
 		const path default_output_folder_path = "output";
 		const path default_log_path = "log.csv";
@@ -36,6 +34,7 @@ int main(int argc, char* argv[])
 		const size_t default_num_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 
+		using namespace boost::program_options;
 		options_description input_options("input (required)");
 		input_options.add_options()
 			("receptor", value<path>(&receptor_path)->required(), "receptor in PDBQT format")
@@ -139,33 +138,6 @@ int main(int argc, char* argv[])
 				cerr << "Failed to create output folder " << output_folder_path << '\n';
 				return 1;
 			}
-		}
-
-		// Validate miscellaneous options.
-		if (!num_threads)
-		{
-			cerr << "Option threads must be 1 or greater\n";
-			return 1;
-		}
-		if (!num_mc_tasks)
-		{
-			cerr << "Option tasks must be 1 or greater\n";
-			return 1;
-		}
-		if (!num_conformations)
-		{
-			cerr << "Option conformations must be 1 or greater\n";
-			return 1;
-		}
-		if (num_conformations > num_mc_tasks)
-		{
-			cerr << "Option conformations must be no greater than option tasks\n";
-			return 1;
-		}
-		if (grid_granularity <= 0)
-		{
-			cerr << "Option granularity must be positive\n";
-			return 1;
 		}
 	}
 	catch (const std::exception& e)
@@ -367,7 +339,7 @@ int main(int argc, char* argv[])
 	// Dump ligand summaries to the log file.
 	const size_t num_summaries = summaries.size();
 	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
-	ofstream log(log_path);
+	boost::filesystem::ofstream log(log_path);
 	log.setf(std::ios::fixed, std::ios::floatfield);
 	log << "Ligand,Free energy (kcal/mol)" << '\n' << std::setprecision(3);
 	for (size_t i = 0; i < num_summaries; ++i)
