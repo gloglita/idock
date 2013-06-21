@@ -288,7 +288,7 @@ int main(int argc, char* argv[])
 		if (num_atom_types_to_populate)
 		{
 			// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-			cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << ((num_atom_types_to_populate == 1) ? ' ' : 's') << "    " << std::flush;
+			cout << "Creating " << std::setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << std::flush;
 
 			// Populate the grid map task container.
 			BOOST_ASSERT(gm_tasks.empty());
