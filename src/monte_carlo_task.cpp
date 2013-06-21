@@ -38,7 +38,7 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 		c0.torsions[i] = uniform_pi_gen();
 	}
 	lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
-	r = lig.compose_result(e0, f0, c0);
+	r = lig.compose_result(e0, c0);
 
 	// Initialize necessary variables for BFGS.
 	conformation c1(lig.num_active_torsions), c2(lig.num_active_torsions); // c2 = c1 + ap.
@@ -162,7 +162,7 @@ void monte_carlo_task(result& r, const ligand& lig, const size_t seed, const sco
 		// Accept c1 according to Metropolis criteria.
 		if (e1 < e0)
 		{
-			r = lig.compose_result(e1, f1, c1);
+			r = lig.compose_result(e1, c1);
 
 			// Save c1 into c0.
 			c0 = c1;

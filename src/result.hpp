@@ -12,14 +12,13 @@ class result
 {
 public:
 	float e; ///< Free energy.
-	float f; ///< Inter-molecular free energy.
 	vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
 	vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
 
 	result() {}
 
 	/// Constructs a result from free energy e, force f, heavy atom coordinates and hydrogen atom coordinates.
-	explicit result(const float e, const float f, vector<vec3>&& heavy_atoms_, vector<vec3>&& hydrogens_) : e(e), f(f), heavy_atoms(static_cast<vector<vec3>&&>(heavy_atoms_)), hydrogens(static_cast<vector<vec3>&&>(hydrogens_)) {}
+	explicit result(const float e, vector<vec3>&& heavy_atoms_, vector<vec3>&& hydrogens_) : e(e), heavy_atoms(static_cast<vector<vec3>&&>(heavy_atoms_)), hydrogens(static_cast<vector<vec3>&&>(hydrogens_)) {}
 
 	/// For sorting ptr_vector<result>.
 	bool operator<(const result& r) const

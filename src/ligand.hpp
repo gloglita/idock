@@ -62,8 +62,8 @@ public:
 	/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
 	bool evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, change& g) const;
 
-	/// Composes a result from free energy, inter-molecular free energy f, and conformation conf.
-	result compose_result(const float e, const float f, const conformation& conf) const;
+	/// Composes a result from free energy, and conformation conf.
+	result compose_result(const float e, const conformation& conf) const;
 
 	/// Writes a given number of conformations from a result container into a output ligand file in PDBQT format.
 	void write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const box& b, const vector<array3d<float>>& grid_maps);

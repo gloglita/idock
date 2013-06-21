@@ -483,7 +483,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	return true;
 }
 
-result ligand::compose_result(const float e, const float f, const conformation& conf) const
+result ligand::compose_result(const float e, const conformation& conf) const
 {
 	vector<vec3> origins(num_frames);
 	vector<qtn4> orientations_q(num_frames);
@@ -529,7 +529,7 @@ result ligand::compose_result(const float e, const float f, const conformation& 
 		}
 	}
 
-	return result(e, f, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
+	return result(e, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 }
 
 void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const box& b, const vector<array3d<float>>& grid_maps)
@@ -547,7 +547,6 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 	for (size_t i = 0; i < representatives.size(); ++i)
 	{
 		const result& r = results[representatives[i]];
-		const size_t num_hbonds = r.hbonds.size();
 		ofs << "MODEL     " << setw(4) << (i + 1) << '\n'
 			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n";
 		for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
