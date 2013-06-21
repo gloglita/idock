@@ -35,11 +35,6 @@ public:
 
 	/// Move constructor.
 	frame(frame&& f)      : parent(f.parent), rotorXsrn(f.rotorXsrn), rotorYsrn(f.rotorYsrn), rotorXidx(f.rotorXidx), rotorYidx(f.rotorYidx), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY) {}
-
-#ifdef __clang__ // In order to pass compilation by clang.
-	/// Copy assignment operator.
-	frame& operator=(const frame&) = default;
-#endif
 };
 
 /// Represents a ligand.

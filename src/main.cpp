@@ -457,11 +457,6 @@ int main(int argc, char* argv[])
 			continue;
 		}
 		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies), static_cast<vector<string>&&>(hbonds)));
-#ifdef __clang__ // Clang 3.1 on Mac OS X and FreeBSD does not support rvalue references.
-		energies.clear();
-		efficiencies.clear();
-		hbonds.clear();
-#endif
 	}
 
 	// Sort the summaries.
