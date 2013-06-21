@@ -11,15 +11,12 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 	// Initialize helper variables for parsing.
 	string residue = "XXXX"; // Current residue sequence, used to track residue change, initialized to a dummy value.
 	size_t residue_start; // The starting atom of the current residue.
-	size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 	string line;
 	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
-	// Parse ATOM/HETATM.
-	boost::filesystem::ifstream in(p); // Parsing starts. Open the p stream as late as possible.
-	while (getline(in, line))
+	// Parse the receptor line by line.
+	for (boost::filesystem::ifstream in(p); getline(in, line);)
 	{
-		++num_lines;
 		const string record = line.substr(0, 6);
 		if (record == "ATOM  " || record == "HETATM")
 		{
@@ -89,7 +86,6 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 			residue = "XXXX";
 		}
 	}
-	in.close(); // Parsing finishes. Close the p stream as soon as possible.
 
 	// Find all the heavy receptor atoms that are within 8A of the box.
 	vector<size_t> receptor_atoms_within_cutoff;

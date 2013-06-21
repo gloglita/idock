@@ -18,15 +18,12 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	size_t current = 0; // Index of current frame, initialized to ROOT frame.
 	frame* f = &frames.front(); // Pointer to the current frame.
 	f->rotorYidx = 0; // Assume the rotorY of ROOT frame is the first atom.
-	size_t num_lines = 0; // Used to track line number for reporting parsing errors, if any.
 	string line;
 	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
-	// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
-	boost::filesystem::ifstream ifs(p); // Parsing starts. Open the file stream as late as possible.
-	while (getline(ifs, line))
+	// Parse the ligand line by line.
+	for (boost::filesystem::ifstream ifs(p); getline(ifs, line);)
 	{
-		++num_lines;
 		const string record = line.substr(0, 6);
 		if (record == "ATOM  " || record == "HETATM")
 		{
@@ -181,8 +178,6 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			lines.push_back(line);
 		}
 	}
-	ifs.close(); // Parsing finishes. Close the file stream as soon as possible.
-	BOOST_ASSERT(lines.size() <= num_lines); // Some lines like "REMARK", "WARNING", "TER" will not be dumped to the output ligand file.
 	BOOST_ASSERT(current == 0); // current should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 	BOOST_ASSERT(f == &frames.front()); // The frame pointer should remain its original value if "BRANCH" and "ENDBRANCH" properly match each other.
 
