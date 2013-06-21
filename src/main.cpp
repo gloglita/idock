@@ -263,6 +263,7 @@ int main(int argc, char* argv[])
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << std::setprecision(3);
 	path input_ligand_path;
 	size_t num_ligands = 0; // Ligand counter.
+	ptr_vector<summary> summaries;
 	using namespace boost::filesystem;
 	const directory_iterator end_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(ligand_folder_path); dir_iter != end_dir_iter; ++dir_iter)
@@ -347,8 +348,10 @@ int main(int argc, char* argv[])
 		mc_tasks.clear();
 		cout << " | " << std::flush;
 
-		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
 		results.sort();
+		summaries.push_back(new summary(input_ligand_path.extension() == ".pdbqt" ? input_ligand_path.stem().string() : input_ligand_path.stem().stem().string(), results.front().e));
+
+		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
 		const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);
 		for (size_t i = 0; i < num_mc_tasks && representatives.size() < representatives.capacity(); ++i)
 		{
@@ -384,40 +387,6 @@ int main(int argc, char* argv[])
 		results.clear();
 	}
 
-	// Initialize necessary variables for storing ligand summaries.
-	ptr_vector<summary> summaries(num_ligands);
-	vector<float> energies;
-	energies.reserve(num_conformations);
-	string line;
-	line.reserve(79);
-
-	// Scan the output folder to retrieve ligand summaries.
-	using namespace boost::iostreams;
-	for (directory_iterator dir_iter(output_folder_path); dir_iter != end_dir_iter; ++dir_iter)
-	{
-		const path p = dir_iter->path();
-		ifstream in(p); // Parsing starts. Open the file stream as late as possible.
-		filtering_istream fis;
-		const string ext = p.extension().string();
-		if (ext == ".gz") fis.push(gzip_decompressor()); else if (ext == ".bz2") fis.push(bzip2_decompressor());
-		fis.push(in);
-		while (getline(fis, line))
-		{
-			const string record = line.substr(0, 6);
-			if (record == "REMARK")
-			{
-				energies.push_back(stof(line.substr(55, 8)));
-			}
-		}
-		in.close(); // Parsing finishes. Close the file stream as soon as possible.
-		if (energies.empty())
-		{
-			cout << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
-			continue;
-		}
-		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies)));
-	}
-
 	// Sort the summaries.
 	summaries.sort();
 
@@ -425,26 +394,11 @@ int main(int argc, char* argv[])
 	const size_t num_summaries = summaries.size();
 	cout << "Writing summary of " << num_summaries << " ligands to " << log_path << '\n';
 	ofstream log(log_path);
-	log << "Ligand,Conf";
-	for (size_t i = 1; i <= num_conformations; ++i)
-	{
-		log << ",FE" << i;
-	}
 	log.setf(std::ios::fixed, std::ios::floatfield);
-	log << '\n' << std::setprecision(3);
+	log << "Ligand,Free energy (kcal/mol)" << '\n' << std::setprecision(3);
 	for (size_t i = 0; i < num_summaries; ++i)
 	{
 		const summary& s = summaries[i];
-		const size_t num_conformations = s.energies.size();
-		log << s.stem << ',' << num_conformations;
-		for (size_t j = 0; j < num_conformations; ++j)
-		{
-			log << ',' << s.energies[j];
-		}
-		for (size_t j = num_conformations; j < num_conformations; ++j)
-		{
-			log << ",";
-		}
-		log << '\n';
+		log << s.stem << ',' << s.energy << '\n';
 	}
 }
