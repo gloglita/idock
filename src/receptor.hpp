@@ -16,7 +16,6 @@ public:
 
 	vector<atom> atoms; ///< Receptor atoms.
 	array3d<vector<size_t>> partitions; ///< Heavy atoms in partitions.
-	array3d<vector<size_t>> hbda_3d; ///< Hydrogen bond donors and acceptors in partitions.
 };
 
 #endif

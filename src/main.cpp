@@ -370,33 +370,6 @@ int main(int argc, char* argv[])
 		}
 		cout << std::setw(4) << representatives.size() << " |";
 
-		// Find the number of hydrogen bonds.
-		const size_t num_lig_hbda = lig.hbda.size();
-		for (size_t k = 0; k < representatives.size(); ++k)
-		{
-			result& r = results[representatives[k]];
-			for (size_t i = 0; i < num_lig_hbda; ++i)
-			{
-				const atom& lig_atom = lig.heavy_atoms[lig.hbda[i]];
-				BOOST_ASSERT(xs_is_donor_acceptor(lig_atom.xs));
-
-				// Find the possibly interacting receptor atoms via partitions.
-				const vec3 lig_coords = r.heavy_atoms[lig.hbda[i]];
-				const vector<size_t>& rec_hbda = rec.hbda_3d(b.partition_index(lig_coords));
-
-				// Accumulate individual free energies for each atom types to populate.
-				const size_t num_rec_hbda = rec_hbda.size();
-				for (size_t l = 0; l < num_rec_hbda; ++l)
-				{
-					const atom& rec_atom = rec.atoms[rec_hbda[l]];
-					BOOST_ASSERT(xs_is_donor_acceptor(rec_atom.xs));
-					if (!xs_hbond(lig_atom.xs, rec_atom.xs)) continue;
-					const float r2 = distance_sqr(lig_coords, rec_atom.coordinate);
-					if (r2 <= hbond_dist_sqr) r.hbonds.push_back(hbond(rec_atom.name, lig_atom.name));
-				}
-			}
-		}
-
 		// Write models to file.
 		lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
 
@@ -413,10 +386,8 @@ int main(int argc, char* argv[])
 
 	// Initialize necessary variables for storing ligand summaries.
 	ptr_vector<summary> summaries(num_ligands);
-	vector<float> energies, efficiencies;
+	vector<float> energies;
 	energies.reserve(num_conformations);
-	vector<string> hbonds;
-	hbonds.reserve(num_conformations);
 	string line;
 	line.reserve(79);
 
@@ -436,19 +407,15 @@ int main(int argc, char* argv[])
 			if (record == "REMARK")
 			{
 				energies.push_back(stof(line.substr(55, 8)));
-				getline(fis, line);
-				size_t start;
-				for (start = 56; line[start] == ' '; ++start);
-				hbonds.push_back(line.substr(start));
 			}
 		}
 		in.close(); // Parsing finishes. Close the file stream as soon as possible.
-		if (energies.empty() || hbonds.empty())
+		if (energies.empty())
 		{
 			cout << p.filename().string() << " contains no free energy, ligand efficiency or hydrogen bonds.\n";
 			continue;
 		}
-		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies), static_cast<vector<string>&&>(hbonds)));
+		summaries.push_back(new summary(ext == ".pdbqt" ? p.stem().string() : p.stem().stem().string(), static_cast<vector<float>&&>(energies)));
 	}
 
 	// Sort the summaries.
@@ -461,7 +428,7 @@ int main(int argc, char* argv[])
 	log << "Ligand,Conf";
 	for (size_t i = 1; i <= num_conformations; ++i)
 	{
-		log << ",FE" << i << ",HB" << i;
+		log << ",FE" << i;
 	}
 	log.setf(std::ios::fixed, std::ios::floatfield);
 	log << '\n' << std::setprecision(3);
@@ -472,11 +439,11 @@ int main(int argc, char* argv[])
 		log << s.stem << ',' << num_conformations;
 		for (size_t j = 0; j < num_conformations; ++j)
 		{
-			log << ',' << s.energies[j] << ',' << s.hbonds[j];
+			log << ',' << s.energies[j];
 		}
 		for (size_t j = num_conformations; j < num_conformations; ++j)
 		{
-			log << ",,";
+			log << ",";
 		}
 		log << '\n';
 	}

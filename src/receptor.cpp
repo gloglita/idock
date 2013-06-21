@@ -3,7 +3,7 @@
 #include "scoring_function.hpp"
 #include "receptor.hpp"
 
-receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), hbda_3d(b.num_partitions)
+receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 {
 	// Initialize necessary variables for constructing a receptor.
 	atoms.reserve(5000); // A receptor typically consists of <= 5,000 atoms.
@@ -111,9 +111,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 	for (size_t z = 0; z < b.num_partitions[2]; ++z)
 	{
 		vector<size_t>& par = partitions(x, y, z);
-		vector<size_t>& hbda = hbda_3d(x, y, z);
 		par.reserve(num_receptor_atoms_within_cutoff);
-		hbda.reserve(num_receptor_atoms_within_cutoff);
 		const array<size_t, 3> index1 = {{ x,     y,     z     }};
 		const array<size_t, 3> index2 = {{ x + 1, y + 1, z + 1 }};
 		const vec3 corner1 = b.partition_corner1(index1);
@@ -126,12 +124,6 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions), 
 			if (proj_dist_sqr < scoring_function::Cutoff_Sqr)
 			{
 				par.push_back(i);
-
-				// Find hydrogen bond donors and acceptors.
-				if (proj_dist_sqr < hbond_dist_sqr)
-				{
-					if (xs_is_donor_acceptor(a.xs)) hbda.push_back(i);
-				}
 			}
 		}
 	}

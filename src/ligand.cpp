@@ -560,14 +560,7 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 		const result& r = results[representatives[i]];
 		const size_t num_hbonds = r.hbonds.size();
 		fos << "MODEL     " << setw(4) << (i + 1) << '\n'
-			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n"
-			<< "REMARK               HYDROGEN BONDS PREDICTED BY IDOCK:" << setw(4) << num_hbonds;
-		for (size_t j = 0; j < num_hbonds; ++j)
-		{
-			const hbond& hb = r.hbonds[j];
-			fos << " | " << hb.receptor << " - " << hb.ligand;
-		}
-		fos << '\n';
+			<< "REMARK            TOTAL FREE ENERGY PREDICTED BY IDOCK:" << setw(8) << r.e       << " KCAL/MOL\n";
 		for (size_t j = 0, heavy_atom = 0, hydrogen = 0; j < num_lines; ++j)
 		{
 			const string& line = lines[j];
