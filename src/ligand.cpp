@@ -1,3 +1,5 @@
+#include <iomanip>
+#include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include "ligand.hpp"
 
@@ -21,7 +23,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 	// Parse ROOT, ATOM/HETATM, ENDROOT, BRANCH, ENDBRANCH, TORSDOF.
-	ifstream ifs(p); // Parsing starts. Open the file stream as late as possible.
+	boost::filesystem::ifstream ifs(p); // Parsing starts. Open the file stream as late as possible.
 	while (getline(ifs, line))
 	{
 		++num_lines;

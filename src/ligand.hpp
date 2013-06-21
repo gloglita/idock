@@ -2,6 +2,7 @@
 #ifndef IDOCK_LIGAND_HPP
 #define IDOCK_LIGAND_HPP
 
+#include <boost/filesystem/path.hpp>
 #include <boost/optional.hpp>
 #include "atom.hpp"
 #include "matrix.hpp"
@@ -9,6 +10,7 @@
 #include "box.hpp"
 #include "array3d.hpp"
 #include "result.hpp"
+using namespace boost::filesystem;
 
 /// Represents a ROOT or a BRANCH in PDBQT structure.
 class frame

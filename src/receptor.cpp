@@ -1,5 +1,5 @@
-#include <boost/algorithm/string.hpp>
 #include <boost/filesystem/fstream.hpp>
+#include <boost/algorithm/string.hpp>
 #include "scoring_function.hpp"
 #include "receptor.hpp"
 
@@ -16,7 +16,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 	// Parse ATOM/HETATM.
-	ifstream in(p); // Parsing starts. Open the p stream as late as possible.
+	boost::filesystem::ifstream in(p); // Parsing starts. Open the p stream as late as possible.
 	while (getline(in, line))
 	{
 		++num_lines;
