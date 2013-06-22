@@ -2,39 +2,36 @@
 #ifndef IDOCK_SCORING_FUNCTION_HPP
 #define IDOCK_SCORING_FUNCTION_HPP
 
-#include "atom.hpp"
-#include "matrix.hpp"
+#include <array>
+#include <vector>
+using namespace std;
 
-/// Represents a pair of scoring function value and dor at a specific combination of (t1, t2, r).
-class scoring_function_element
+class scoring_function
 {
 public:
-	float e; ///< Scoring function value.
-	float dor; ///< Scoring function derivative over r.
-};
-
-/// Represents a scoring function.
-class scoring_function : private triangular_matrix<vector<scoring_function_element>>
-{
-public:
-	static const float Cutoff; ///< Cutoff of a scoring function.
-	static const float Cutoff_Sqr; ///< Square of Cutoff.
-	static const size_t Num_Samples; ///< Number of sampling points within [0, Cutoff].
-
-	/// Returns the score between two atoms of XScore atom types t1 and t2 and distance r.
-	static float score(const size_t t1, const size_t t2, const float r);
+	static const size_t n = 15;
+	static const size_t np = n*(n+1)>>1;
+	static const size_t ns = 1024;
+	static const size_t cutoff = 8;
+	static const size_t nr = ns*cutoff*cutoff+1;
+	static const size_t ne = nr*np;
+	static const float cutoff_sqr;
 
 	/// Constructs an empty scoring function.
-	scoring_function() : triangular_matrix<vector<scoring_function_element>>(XS_TYPE_SIZE, vector<scoring_function_element>(Num_Samples, scoring_function_element())) {}
+	scoring_function();
+
+	size_t r(const size_t t1, const size_t t2) const;
+	size_t p(const size_t t1, const size_t t2) const;
+	size_t o(const size_t i, const float r2) const;
 
 	/// Precalculates the scoring function values of sample points for the type combination of t1 and t2.
-	int precalculate(const size_t t1, const size_t t2, const vector<float>& rs);
+	int precalculate(const size_t t1, const size_t t2);
 
-	/// Evaluates the scoring function given (t1, t2, r2).
-	scoring_function_element evaluate(const size_t type_pair_index, const float r2) const;
-
-	static const float Factor; ///< Scaling factor for r, i.e. distance between two atoms.
-	static const float Factor_Inverse; ///< 1 / Factor.
+	vector<float> e;
+	vector<float> d;
+private:
+	static const array<float, n> vdw;
+	vector<float> rs;
 };
 
 #endif

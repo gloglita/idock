@@ -140,16 +140,28 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// Initialize a Mersenne Twister random number generator.
-	cout << "Using random seed " << seed << '\n';
-	boost::random::mt19937_64 eng(seed);
+	// Initialize a thread pool and create worker threads for later use.
+	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << '\n';
+	thread_pool tp(num_threads);
 
-	// Initialize the search space of cuboid shape.
-	const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
+	// Precalculate the scoring function in parallel.
+	cout << "Precalculating a scoring function of " << scoring_function::n << " atom types in parallel" << endl;
+	scoring_function sf;
+	for (size_t t2 = 0; t2 < sf.n; ++t2)
+	for (size_t t1 = 0; t1 <=  t2; ++t1)
+	{
+		tp.push_back(packaged_task<int()>(bind(&scoring_function::precalculate, ref(sf), t1, t2)));
+	}
+	tp.sync();
 
 	// Parse the receptor.
 	cout << "Parsing receptor " << receptor_path << '\n';
+	const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 	const receptor rec(receptor_path, b);
+
+	// Initialize a Mersenne Twister random number generator.
+	cout << "Using random seed " << seed << '\n';
+	boost::random::mt19937_64 eng(seed);
 
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 	ptr_vector<result> results;
@@ -162,39 +174,9 @@ int main(int argc, char* argv[])
 	vector<size_t> atom_types_to_populate;
 	atom_types_to_populate.reserve(XS_TYPE_SIZE);
 
-	// Initialize a thread pool and create worker threads for later use.
-	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << '\n';
-	thread_pool tp(num_threads);
-
-	// Precalculate the scoring function in parallel.
-	cout << "Precalculating scoring function in parallel\n";
-	scoring_function sf;
-	{
-		// Precalculate reciprocal square root values.
-		vector<float> rs(scoring_function::Num_Samples, 0);
-		for (size_t i = 0; i < scoring_function::Num_Samples; ++i)
-		{
-			rs[i] = sqrt(i * scoring_function::Factor_Inverse);
-		}
-		assert(rs.front() == 0);
-		assert(rs.back() == scoring_function::Cutoff);
-
-		// Populate the scoring function task container.
-		assert(tp.empty());
-		for (size_t t1 =  0; t1 < XS_TYPE_SIZE; ++t1)
-		for (size_t t2 = t1; t2 < XS_TYPE_SIZE; ++t2)
-		{
-			tp.push_back(packaged_task<int()>(bind(&scoring_function::precalculate, ref(sf), t1, t2, cref(rs))));
-		}
-
-		// Run the scoring function tasks in parallel.
-		tp.sync();
-	}
-
-	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
-
 	// Perform docking for each file in the ligand folder.
 	cout.setf(ios::fixed, ios::floatfield);
+	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(3);
 	size_t num_ligands = 0; // Ligand counter.
 	ptr_vector<summary> summaries;

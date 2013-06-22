@@ -422,11 +422,11 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		const interacting_pair& p = interacting_pairs[i];
 		const vec3 r = coordinates[p.i2] - coordinates[p.i1];
 		const float r2 = r.norm_sqr();
-		if (r2 < scoring_function::Cutoff_Sqr)
+		if (r2 < scoring_function::cutoff_sqr)
 		{
-			const scoring_function_element element = sf.evaluate(p.type_pair_index, r2);
-			e += element.e;
-			const vec3 derivative = element.dor * r;
+			const size_t o = sf.o(p.type_pair_index, r2);
+			e += sf.e[o];
+			const vec3 derivative = sf.d[o] * r;
 			derivatives[p.i1] -= derivative;
 			derivatives[p.i2] += derivative;
 		}

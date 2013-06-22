@@ -24,14 +24,13 @@ int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_
 			const atom& a = rec.atoms[receptor_atoms[l]];
 			if (a.is_hydrogen()) continue;
 			const float r2 = distance_sqr(probe_coords, a.coordinate);
-			if (r2 <= scoring_function::Cutoff_Sqr)
+			if (r2 <= scoring_function::cutoff_sqr)
 			{
 				const size_t t1 = a.xs;
 				for (size_t i = 0; i < num_atom_types_to_populate; ++i)
 				{
 					const size_t t2 = atom_types_to_populate[i];
-					const size_t type_pair_index = triangular_matrix_permissive_index(t1, t2);
-					e[i] += sf.evaluate(type_pair_index, r2).e;
+					e[i] += sf.e[sf.o(sf.p(t1, t2), r2)];
 				}
 			}
 		}
