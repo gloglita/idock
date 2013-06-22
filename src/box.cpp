@@ -10,18 +10,15 @@ box::box(const vec3& center, const vec3& span_, const float grid_granularity) : 
 	{
 		// Slightly expand the user-input span to the nearest multiple of granularity.
 		num_grids[i] = static_cast<size_t>(ceil(span_[i] * grid_size_inverse[i]));
-		assert(num_grids[i] > 0);
 		span[i] = grid_size[i] * num_grids[i];
 		num_probes[i] = num_grids[i] + 1;
 
 		// Determine the two extreme corners.
 		corner1[i] = center[i]  - span[i] * 0.5f;
 		corner2[i] = corner1[i] + span[i];
-		assert(corner1[i] < corner2[i]);
 
 		// Determine the number of partitions.
 		num_partitions[i] = static_cast<size_t>(span[i] * Default_Partition_Granularity_Inverse);
-		assert(num_partitions[i] > 0);
 		partition_size[i] = span[i] / num_partitions[i];
 		partition_size_inverse[i] = 1 / partition_size[i];
 	}

@@ -4,7 +4,6 @@
 
 #include <string>
 #include "vec3.hpp"
-using std::string;
 
 // AutoDock4 atom types.
 const size_t AD_TYPE_H    =  0;	///< Non-polar hydrogen, i.e. bonded to carbon.
@@ -84,21 +83,18 @@ inline size_t parse_ad_type_string(const string& ad_type_string)
 /// Returns true if the AutoDock4 atom type is a hydrogen bond donor.
 inline bool ad_is_donor(const size_t ad)
 {
-	assert(ad < AD_TYPE_SIZE);
 	return (ad == AD_TYPE_HD) || (ad >= AD_TYPE_Zn);
 }
 
 /// Returns true if the AutoDock4 atom type is a hydrogen bond acceptor.
 inline bool ad_is_acceptor(const size_t ad)
 {
-	assert(ad < AD_TYPE_SIZE);
 	return (ad == AD_TYPE_NA) || (ad == AD_TYPE_OA);
 }
 
 /// Returns true if the AutoDock4 atom type is either a hydrogen bond donor or a hydrogen bond acceptor.
 inline bool ad_is_donor_acceptor(const size_t ad)
 {
-	assert(ad < AD_TYPE_SIZE);
 	return ad_is_donor(ad) || ad_is_acceptor(ad);
 }
 
@@ -185,14 +181,12 @@ const float xs_vdw_radii[] = ///< Van der Waals radii for XScore atom types.
 /// Returns Van der Waals radius from an XScore atom type.
 inline float xs_vdw_radius(const size_t xs)
 {
-	assert(xs < XS_TYPE_SIZE);
 	return xs_vdw_radii[xs];
 }
 
 /// Returns true if the XScore atom type is hydrophobic.
 inline bool xs_is_hydrophobic(const size_t xs)
 {
-	assert(xs < XS_TYPE_SIZE);
 	return xs == XS_TYPE_C_H
 		|| xs == XS_TYPE_F_H
 		|| xs == XS_TYPE_Cl_H
@@ -203,7 +197,6 @@ inline bool xs_is_hydrophobic(const size_t xs)
 /// Returns true if the XScore atom type is a hydrogen bond donor.
 inline bool xs_is_donor(const size_t xs)
 {
-	assert(xs < XS_TYPE_SIZE);
 	return xs == XS_TYPE_N_D
 		|| xs == XS_TYPE_N_DA
 		|| xs == XS_TYPE_O_DA
@@ -213,7 +206,6 @@ inline bool xs_is_donor(const size_t xs)
 /// Returns true if the XScore atom type is a hydrogen bond acceptor.
 inline bool xs_is_acceptor(const size_t xs)
 {
-	assert(xs < XS_TYPE_SIZE);
 	return xs == XS_TYPE_N_A
 		|| xs == XS_TYPE_N_DA
 		|| xs == XS_TYPE_O_A
@@ -223,7 +215,6 @@ inline bool xs_is_acceptor(const size_t xs)
 /// Returns true if the XScore atom type is either a hydrogen bond donor or a hydrogen bond acceptor.
 inline bool xs_is_donor_acceptor(const size_t xs)
 {
-	assert(xs < XS_TYPE_SIZE);
 	return xs_is_donor(xs) || xs_is_acceptor(xs);
 }
 
@@ -303,7 +294,6 @@ public:
 	/// Returns true if the current atom is covalently bonded to a given atom.
 	bool is_neighbor(const atom& a) const
 	{
-		assert(this != &a);
 		const float s = covalent_radius() + a.covalent_radius();
 		return distance_sqr(coordinate, a.coordinate) < s * s;
 	}
@@ -322,7 +312,6 @@ public:
 	/// For carbon, revises the XScore atom type to make it non-hydrophobic.
 	void dehydrophobicize()
 	{
-		assert(!is_hetero());
 		xs = XS_TYPE_C_P;
 	}
 };

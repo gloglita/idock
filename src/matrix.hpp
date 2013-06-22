@@ -5,7 +5,6 @@
 /// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
 inline size_t triangular_matrix_restrictive_index(const size_t i, const size_t j)
 {
-	assert(i <= j);
 	return i + j * (j + 1) / 2;
 }
 

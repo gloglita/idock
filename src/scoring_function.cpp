@@ -8,8 +8,6 @@ const size_t scoring_function::Num_Samples = static_cast<size_t>(Factor * Cutoff
 
 float scoring_function::score(const size_t t1, const size_t t2, const float r)
 {
-	assert(r <= Cutoff_Sqr);
-
 	// Calculate the surface distance d.
 	const float d = r - (xs_vdw_radius(t1) + xs_vdw_radius(t2));
 
@@ -25,7 +23,6 @@ float scoring_function::score(const size_t t1, const size_t t2, const float r)
 int scoring_function::precalculate(const size_t t1, const size_t t2, const vector<float>& rs)
 {
 	vector<scoring_function_element>& p = (*this)[triangular_matrix_restrictive_index(t1, t2)];
-	assert(p.size() == Num_Samples);
 
 	// Calculate the value of scoring function evaluated at (t1, t2, d).
 	for (size_t i = 0; i < Num_Samples; ++i)
@@ -45,6 +42,5 @@ int scoring_function::precalculate(const size_t t1, const size_t t2, const vecto
 
 scoring_function_element scoring_function::evaluate(const size_t type_pair_index, const float r2) const
 {
-	assert(r2 <= Cutoff_Sqr);
 	return (*this)[type_pair_index][static_cast<size_t>(Factor * r2)];
 }

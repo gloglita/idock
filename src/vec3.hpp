@@ -3,12 +3,12 @@
 #define IDOCK_VEC3_HPP
 
 #include <vector>
-#include <boost/array.hpp>
-using std::vector;
-using boost::array;
+#include <array>
+#include <cmath>
+using namespace std;
 
 /// Represents a vector of 3 floating point elements.
-class vec3 : private array<float, 3>
+class vec3 : public array<float, 3>
 {
 public:
 	/// Constructs a vector with uninitialized values.
@@ -17,43 +17,21 @@ public:
 	/// Constructs a vector with specified values.
 	vec3(const float d0, const float d1, const float d2)
 	{
-		elems[0] = d0;
-		elems[1] = d1;
-		elems[2] = d2;
-	}
-
-	/// Assigns a value to all the 3 elements.
-	void assign(const float s)
-	{
-		elems[0] = s;
-		elems[1] = s;
-		elems[2] = s;
-	}
-
-	/// Returns a constant reference to the element at index i.
-	const float& operator[](const size_t i) const
-	{
-		assert(i < 3);
-		return elems[i];
-	}
-
-	/// Returns a mutable reference to the element at index i.
-	float& operator[](const size_t i)
-	{
-		assert(i < 3);
-		return elems[i];
+		(*this)[0] = d0;
+		(*this)[1] = d1;
+		(*this)[2] = d2;
 	}
 
 	/// Returns true is the vector is (0, 0, 0).
 	bool zero() const
 	{
-		return elems[0] < 1e-5f && elems[1] < 1e-5f && elems[2] < 1e-5f;
+		return (*this)[0] < 1e-5f && (*this)[1] < 1e-5f && (*this)[2] < 1e-5f;
 	}
 
 	/// Returns the square norm.
 	float norm_sqr() const
 	{
-		return elems[0] * elems[0] + elems[1] * elems[1] + elems[2] * elems[2];
+		return (*this)[0] * (*this)[0] + (*this)[1] * (*this)[1] + (*this)[2] * (*this)[2];
 	}
 
 	/// Returns the norm.
@@ -72,48 +50,48 @@ public:
 	vec3 normalize() const
 	{
 		const float factor = 1.0f / norm();
-		return vec3(factor * elems[0], factor * elems[1], factor * elems[2]);
+		return vec3(factor * (*this)[0], factor * (*this)[1], factor * (*this)[2]);
 	}
 
 	/// Returns the dot product of the current vector and the given vector.
 	float operator*(const vec3& v) const
 	{
-		return elems[0] * v[0] + elems[1] * v[1] + elems[2] * v[2];
+		return (*this)[0] * v[0] + (*this)[1] * v[1] + (*this)[2] * v[2];
 	}
 
 	/// Returns the result of pairwise multiplication of the current vector and the given vector.
 	vec3 operator*(const array<size_t, 3>& v) const
 	{
-		return vec3(elems[0] * v[0], elems[1] * v[1], elems[2] * v[2]);
+		return vec3((*this)[0] * v[0], (*this)[1] * v[1], (*this)[2] * v[2]);
 	}
 
 	/// Returns the result of pairwise addition of the current vector and the given vector.
 	vec3 operator+(const vec3& v) const
 	{
-		return vec3(elems[0] + v[0], elems[1] + v[1], elems[2] + v[2]);
+		return vec3((*this)[0] + v[0], (*this)[1] + v[1], (*this)[2] + v[2]);
 	}
 
 	/// Returns the result of pairwise subtraction of the current vector and the given vector.
 	vec3 operator-(const vec3& v) const
 	{
-		return vec3(elems[0] - v[0], elems[1] - v[1], elems[2] - v[2]);
+		return vec3((*this)[0] - v[0], (*this)[1] - v[1], (*this)[2] - v[2]);
 	}
 
 	/// Pairwise add a given vector to the current vector.
 	const vec3& operator+=(const vec3& v)
 	{
-		elems[0] += v[0];
-		elems[1] += v[1];
-		elems[2] += v[2];
+		(*this)[0] += v[0];
+		(*this)[1] += v[1];
+		(*this)[2] += v[2];
 		return *this;
 	}
 
 	/// Pairwise subtract a given vector from the current vector.
 	const vec3& operator-=(const vec3& v)
 	{
-		elems[0] -= v[0];
-		elems[1] -= v[1];
-		elems[2] -= v[2];
+		(*this)[0] -= v[0];
+		(*this)[1] -= v[1];
+		(*this)[2] -= v[2];
 		return *this;
 	}
 };
@@ -151,8 +129,6 @@ inline float distance_sqr(const vec3& a, const vec3& b)
 inline float distance_sqr(const vector<vec3>& a, const vector<vec3>& b)
 {
 	const size_t n = a.size();
-	assert(n > 0);
-	assert(n == b.size());
 	float sum = 0.0f;
 	for (size_t i = 0; i < n; ++i)
 		sum += distance_sqr(a[i], b[i]);

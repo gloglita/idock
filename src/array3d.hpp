@@ -3,8 +3,8 @@
 #define IDOCK_ARRAY3D_HPP
 
 #include <vector>
-#include <boost/assert.hpp>
-#include <boost/array.hpp>
+#include <array>
+using namespace std;
 
 /// Represents a generic 3D array.
 template<typename T>
