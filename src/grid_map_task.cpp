@@ -23,7 +23,7 @@ int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_
 		{
 			const atom& a = rec.atoms[receptor_atoms[l]];
 			if (a.is_hydrogen()) continue;
-			const float r2 = distance_sqr(probe_coords, a.coordinate);
+			const float r2 = distance_sqr(probe_coords, a.coord);
 			if (r2 <= scoring_function::cutoff_sqr)
 			{
 				const size_t t1 = a.xs;

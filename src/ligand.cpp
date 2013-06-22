@@ -163,8 +163,8 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 
 			// Calculate parent_rotorY_to_current_rotorY and parent_rotorX_to_current_rotorY.
 			const frame& p = frames[f->parent];
-			f->parent_rotorY_to_current_rotorY =  rotorY.coordinate - heavy_atoms[p.rotorYidx].coordinate;
-			f->parent_rotorX_to_current_rotorY = (rotorY.coordinate - rotorX.coordinate).normalize();
+			f->parent_rotorY_to_current_rotorY =  rotorY.coord - heavy_atoms[p.rotorYidx].coord;
+			f->parent_rotorX_to_current_rotorY = (rotorY.coord - rotorX.coord).normalize();
 
 			// Now the parent of the following frame is the parent of current frame.
 			current = f->parent;
@@ -203,18 +203,18 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 		if (xs_is_donor_acceptor(heavy_atoms[i].xs)) hbda.push_back(i);
 	}
 
-	// Update heavy_atoms[].coordinate and hydrogens[].coordinate relative to frame origin.
+	// Update heavy_atoms[].coord and hydrogens[].coord relative to frame origin.
 	for (size_t k = 0; k < num_frames; ++k)
 	{
 		const frame& f = frames[k];
-		const vec3 origin = heavy_atoms[f.rotorYidx].coordinate;
+		const vec3 origin = heavy_atoms[f.rotorYidx].coord;
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
-			heavy_atoms[i].coordinate -= origin;
+			heavy_atoms[i].coord -= origin;
 		}
 		for (size_t i = f.hybegin; i < f.hyend; ++i)
 		{
-			hydrogens[i].coordinate -= origin;
+			hydrogens[i].coord -= origin;
 		}
 	}
 
@@ -318,7 +318,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	orientations_m.front() = conf.orientation.to_mat3();
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
-		coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coordinate;
+		coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coord;
 	}
 
 	// Apply torsions to BRANCH frames.
@@ -349,7 +349,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
-			coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coordinate;
+			coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coord;
 		}
 	}
 
@@ -496,11 +496,11 @@ result ligand::compose_result(const float e, const conformation& conf) const
 	const frame& root = frames.front();
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
-		heavy_atoms[i] = origins.front() + orientations_m.front() * this->heavy_atoms[i].coordinate;
+		heavy_atoms[i] = origins.front() + orientations_m.front() * this->heavy_atoms[i].coord;
 	}
 	for (size_t i = root.hybegin; i < root.hyend; ++i)
 	{
-		hydrogens[i]   = origins.front() + orientations_m.front() * this->hydrogens[i].coordinate;
+		hydrogens[i]   = origins.front() + orientations_m.front() * this->hydrogens[i].coord;
 	}
 
 	// Calculate the coordinates of both heavy atoms and hydrogens of BRANCH frames.
@@ -518,11 +518,11 @@ result ligand::compose_result(const float e, const conformation& conf) const
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
-			heavy_atoms[i] = origins[k] + orientations_m[k] * this->heavy_atoms[i].coordinate;
+			heavy_atoms[i] = origins[k] + orientations_m[k] * this->heavy_atoms[i].coord;
 		}
 		for (size_t i = f.hybegin; i < f.hyend; ++i)
 		{
-			hydrogens[i]   = origins[k] + orientations_m[k] * this->hydrogens[i].coordinate;
+			hydrogens[i]   = origins[k] + orientations_m[k] * this->hydrogens[i].coord;
 		}
 	}
 

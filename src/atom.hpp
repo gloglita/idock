@@ -265,12 +265,12 @@ class atom
 public:
 	size_t serial; ///< Serial number.
 	string name; ///< Atom name;
-	vec3 coordinate; ///< 3D coordinate.
+	vec3 coord; ///< 3D coordinate.
 	size_t ad; ///< AutoDock4 atom type.
 	size_t xs; ///< XScore atom type.
 
 	/// Constructs an atom with 3D coordinate and AutoDock4 atom type.
-	explicit atom(const size_t serial, const string& name, const vec3& coordinate, const size_t ad) : serial(serial), name(name), coordinate(coordinate), ad(ad), xs(ad_to_xs[ad]) {}
+	explicit atom(const size_t serial, const string& name, const vec3& coord, const size_t ad) : serial(serial), name(name), coord(coord), ad(ad), xs(ad_to_xs[ad]) {}
 
 	/// Returns the covalent radius of current AutoDock4 atom type.
 	float covalent_radius() const
@@ -294,7 +294,7 @@ public:
 	bool is_neighbor(const atom& a) const
 	{
 		const float s = covalent_radius() + a.covalent_radius();
-		return distance_sqr(coordinate, a.coordinate) < s * s;
+		return distance_sqr(coord, a.coord) < s * s;
 	}
 
 	/// For nitrogen and oxygen, revises the XScore atom type to make it a hydrogen bond donor.
