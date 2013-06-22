@@ -14,7 +14,7 @@ using namespace boost::filesystem;
 int main(int argc, char* argv[])
 {
 	path receptor_path, ligand_folder_path, output_folder_path, log_path;
-	float center_x, center_y, center_z, size_x, size_y, size_z;
+	vec3 center, size;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	float grid_granularity;
 
@@ -35,12 +35,12 @@ int main(int argc, char* argv[])
 		input_options.add_options()
 			("receptor", value<path>(&receptor_path)->required(), "receptor in PDBQT format")
 			("ligand_folder", value<path>(&ligand_folder_path)->required(), "folder of ligands in PDBQT format")
-			("center_x", value<float>(&center_x)->required(), "x coordinate of the search space center")
-			("center_y", value<float>(&center_y)->required(), "y coordinate of the search space center")
-			("center_z", value<float>(&center_z)->required(), "z coordinate of the search space center")
-			("size_x", value<float>(&size_x)->required(), "size in the x dimension in Angstrom")
-			("size_y", value<float>(&size_y)->required(), "size in the y dimension in Angstrom")
-			("size_z", value<float>(&size_z)->required(), "size in the z dimension in Angstrom")
+			("center_x", value<float>(&center[0])->required(), "x coordinate of the search space center")
+			("center_y", value<float>(&center[1])->required(), "y coordinate of the search space center")
+			("center_z", value<float>(&center[2])->required(), "z coordinate of the search space center")
+			("size_x", value<float>(&size[0])->required(), "size in the x dimension in Angstrom")
+			("size_y", value<float>(&size[1])->required(), "size in the y dimension in Angstrom")
+			("size_z", value<float>(&size[2])->required(), "size in the z dimension in Angstrom")
 			;
 		options_description output_options("output (optional)");
 		output_options.add_options()
@@ -104,9 +104,9 @@ int main(int argc, char* argv[])
 		}
 
 		// Validate size_x, size_y, size_z.
-		if (size_x < receptor::Default_Partition_Granularity ||
-		    size_y < receptor::Default_Partition_Granularity ||
-		    size_z < receptor::Default_Partition_Granularity)
+		if (size[0] < receptor::Default_Partition_Granularity ||
+		    size[1] < receptor::Default_Partition_Granularity ||
+		    size[2] < receptor::Default_Partition_Granularity)
 		{
 			cerr << "Search space must be "
 				 << receptor::Default_Partition_Granularity << "A x "
@@ -155,7 +155,7 @@ int main(int argc, char* argv[])
 
 	// Parse the receptor.
 	cout << "Parsing receptor " << receptor_path << '\n';
-	receptor rec(receptor_path, vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
+	receptor rec(receptor_path, center, size, grid_granularity);
 
 	// Initialize a Mersenne Twister random number generator.
 	cout << "Using random seed " << seed << '\n';
