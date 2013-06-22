@@ -13,7 +13,7 @@ int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_
 	{
 		// Find the possibly interacting receptor atoms via partitions.
 		const array<size_t, 3> grid_index = { x, y, z };
-		const vec3 probe_coords = b.grid_corner1(grid_index);
+		const vec3 probe_coords = b.grid_corner0(grid_index);
 		const vector<size_t>& receptor_atoms = rec.partitions(b.partition_index(probe_coords));
 
 		// Accumulate individual free energies for each atom types to populate.

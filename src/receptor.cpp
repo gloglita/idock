@@ -110,13 +110,13 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 		par.reserve(num_receptor_atoms_within_cutoff);
 		const array<size_t, 3> index1 = { x,     y,     z     };
 		const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
-		const vec3 corner1 = b.partition_corner1(index1);
-		const vec3 corner2 = b.partition_corner1(index2);
+		const vec3 corner0 = b.partition_corner0(index1);
+		const vec3 corner1 = b.partition_corner0(index2);
 		for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
 		{
 			const size_t i = receptor_atoms_within_cutoff[l];
 			const atom& a = atoms[i];
-			const float proj_dist_sqr = b.project_distance_sqr(corner1, corner2, a.coord);
+			const float proj_dist_sqr = b.project_distance_sqr(corner0, corner1, a.coord);
 			if (proj_dist_sqr < scoring_function::cutoff_sqr)
 			{
 				par.push_back(i);

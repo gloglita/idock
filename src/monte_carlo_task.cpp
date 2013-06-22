@@ -21,9 +21,9 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	mt19937_64 eng(seed);
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box0_gen(eng, uniform_real_distribution<float>(b.corner1[0], b.corner2[0]));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box1_gen(eng, uniform_real_distribution<float>(b.corner1[1], b.corner2[1]));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box2_gen(eng, uniform_real_distribution<float>(b.corner1[2], b.corner2[2]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box0_gen(eng, uniform_real_distribution<float>(b.corner0[0], b.corner1[0]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box1_gen(eng, uniform_real_distribution<float>(b.corner0[1], b.corner1[1]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box2_gen(eng, uniform_real_distribution<float>(b.corner0[2], b.corner1[2]));
 
 	// Generate an initial random conformation c0, and evaluate it.
 	conformation c0(lig.num_active_torsions);

@@ -13,8 +13,8 @@ public:
 
 	const vec3 center; ///< Box center.
 	vec3 span; ///< 3D sizes of box.
-	vec3 corner1; ///< Box boundary corner with smallest values of all the 3 dimensions.
-	vec3 corner2; ///< Box boundary corner with largest values of all the 3 dimensions.
+	vec3 corner0; ///< Box boundary corner with smallest values of all the 3 dimensions.
+	vec3 corner1; ///< Box boundary corner with largest values of all the 3 dimensions.
 	const float grid_granularity; ///< 1D size of grids.
 	const float grid_granularity_inverse; ///< 1 / grid_granularity.
 	const vec3 grid_size; ///< 3D sizes of grids.
@@ -31,20 +31,20 @@ public:
 	/// @param grid_granularity 1D size of grids.
 	box(const vec3& center, const vec3& span_, const float grid_granularity);
 
-	/// Returns true if a coordinate is within current half-open-half-close box, i.e. [corner1, corner2).
+	/// Returns true if a coordinate is within current half-open-half-close box, i.e. [corner0, corner1).
 	bool within(const vec3& coordinate) const;
 
-	/// Returns true if the distance between a coordinate and the surface of a box determined by boundary corner1 and corner2 is within cutoff.
-	float project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const;
+	/// Returns true if the distance between a coordinate and the surface of a box determined by boundary corner0 and corner1 is within cutoff.
+	float project_distance_sqr(const vec3& corner0, const vec3& corner1, const vec3& coordinate) const;
 
 	/// Returns true if the distance between a coordinate and the surface of current box is within cutoff.
 	float project_distance_sqr(const vec3& coordinate) const;
 
-	/// Returns the coordinate of boundary corner1 of the grid at the given 3D index.
-	vec3 grid_corner1(const array<size_t, 3>& index) const;
+	/// Returns the coordinate of boundary corner0 of the grid at the given 3D index.
+	vec3 grid_corner0(const array<size_t, 3>& index) const;
 
-	/// Returns the coordinate of boundary corner1 of the partition at the given 3D index.
-	vec3 partition_corner1(const array<size_t, 3>& index) const;
+	/// Returns the coordinate of boundary corner0 of the partition at the given 3D index.
+	vec3 partition_corner0(const array<size_t, 3>& index) const;
 
 	/// Returns the index of the half-open-half-close grid containing the given coordinate.
 	array<size_t, 3> grid_index(const vec3& coordinate) const;

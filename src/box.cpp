@@ -14,8 +14,8 @@ box::box(const vec3& center, const vec3& span_, const float grid_granularity) : 
 		num_probes[i] = num_grids[i] + 1;
 
 		// Determine the two extreme corners.
-		corner1[i] = center[i]  - span[i] * 0.5f;
-		corner2[i] = corner1[i] + span[i];
+		corner0[i] = center[i]  - span[i] * 0.5f;
+		corner1[i] = corner0[i] + span[i];
 
 		// Determine the number of partitions.
 		num_partitions[i] = static_cast<size_t>(span[i] * Default_Partition_Granularity_Inverse);
@@ -28,21 +28,21 @@ bool box::within(const vec3& coordinate) const
 {
 	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
 	{
-		// Half-open-half-close box, i.e. [corner1, corner2)
-		if (coordinate[i] < corner1[i] || corner2[i] <= coordinate[i])
+		// Half-open-half-close box, i.e. [corner0, corner1)
+		if (coordinate[i] < corner0[i] || corner1[i] <= coordinate[i])
 			return false;
 	}
 	return true;
 }
 
-float box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const vec3& coordinate) const
+float box::project_distance_sqr(const vec3& corner0, const vec3& corner1, const vec3& coordinate) const
 {
 	// Calculate the projection point of the given coordinate onto the surface of the given box.
 	vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.
 	for (size_t i = 0; i < 3; ++i)
 	{
-		if (projection[i] < corner1[i]) projection[i] = corner1[i];
-		if (projection[i] > corner2[i]) projection[i] = corner2[i];
+		if (projection[i] < corner0[i]) projection[i] = corner0[i];
+		if (projection[i] > corner1[i]) projection[i] = corner1[i];
 	}
 
 	// Check if the distance between the projection and the given coordinate is within cutoff.
@@ -51,17 +51,17 @@ float box::project_distance_sqr(const vec3& corner1, const vec3& corner2, const 
 
 float box::project_distance_sqr(const vec3& coordinate) const
 {
-	return project_distance_sqr(corner1, corner2, coordinate);
+	return project_distance_sqr(corner0, corner1, coordinate);
 }
 
-vec3 box::grid_corner1(const array<size_t, 3>& index) const
+vec3 box::grid_corner0(const array<size_t, 3>& index) const
 {
-	return corner1 + (grid_size * index);
+	return corner0 + (grid_size * index);
 }
 
-vec3 box::partition_corner1(const array<size_t, 3>& index) const
+vec3 box::partition_corner0(const array<size_t, 3>& index) const
 {
-	return corner1 + (partition_size * index);
+	return corner0 + (partition_size * index);
 }
 
 array<size_t, 3> box::grid_index(const vec3& coordinate) const
@@ -69,9 +69,9 @@ array<size_t, 3> box::grid_index(const vec3& coordinate) const
 	array<size_t, 3> index;
 	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
 	{
-		index[i] = static_cast<size_t>((coordinate[i] - corner1[i]) * grid_size_inverse[i]);
+		index[i] = static_cast<size_t>((coordinate[i] - corner0[i]) * grid_size_inverse[i]);
 		// Boundary checking is not necessary because the given coordinate is a ligand atom,
-		// which has been restricted within the half-open-half-close box [corner1, corner2).
+		// which has been restricted within the half-open-half-close box [corner0, corner1).
 		//if (index[i] == num_grids[i]) index[i] = num_grids[i] - 1;
 	}
 	return index;
@@ -82,7 +82,7 @@ array<size_t, 3> box::partition_index(const vec3& coordinate) const
 	array<size_t, 3> index;
 	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
 	{
-		index[i] = static_cast<size_t>((coordinate[i] - corner1[i]) * partition_size_inverse[i]);
+		index[i] = static_cast<size_t>((coordinate[i] - corner0[i]) * partition_size_inverse[i]);
 		// The following condition occurs if and only if coordinate[i] is exactly at the right boundary of the box.
 		// In such case, merge it into the last partition.
 		// Boundary checking is necessary because the given coordinate is a probe atom.
