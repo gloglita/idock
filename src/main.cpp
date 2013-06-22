@@ -6,7 +6,6 @@
 #include "receptor.hpp"
 #include "ligand.hpp"
 #include "thread_pool.hpp"
-#include "grid_map_task.hpp"
 #include "monte_carlo_task.hpp"
 #include "summary.hpp"
 using namespace std;
@@ -207,7 +206,7 @@ int main(int argc, char* argv[])
 			assert(tp.empty());
 			for (size_t z = 0; z < rec.num_probes[2]; ++z)
 			{
-				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(rec), cref(atom_types_to_populate), z, cref(sf))));
+				tp.push_back(packaged_task<int()>(bind(&receptor::grid_map_task, ref(rec), cref(atom_types_to_populate), z, cref(sf))));
 			}
 
 			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
