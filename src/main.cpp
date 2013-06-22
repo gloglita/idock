@@ -151,9 +151,6 @@ int main(int argc, char* argv[])
 	cout << "Parsing receptor " << receptor_path << '\n';
 	const receptor rec(receptor_path, b);
 
-	// Reserve storage for task containers.
-	const size_t num_gm_tasks = b.num_probes[0];
-
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 	ptr_vector<result> results;
 	results.resize(num_mc_tasks);
@@ -229,9 +226,9 @@ int main(int argc, char* argv[])
 
 			// Populate the grid map task container.
 			assert(tp.empty());
-			for (size_t x = 0; x < num_gm_tasks; ++x)
+			for (size_t z = 0; z < b.num_probes[2]; ++z)
 			{
-				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), x, cref(sf), cref(b), cref(rec))));
+				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), z, cref(sf), cref(b), cref(rec))));
 			}
 
 			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.

@@ -32,25 +32,25 @@ public:
 		static_cast<vector<T>&>(*this).resize(n[0] * n[1] * n[2]);
 	}
 
-	/// Reeturns a constant reference to the element at index (i, j, k) where k is the lowest dimension.
+	/// Reeturns a constant reference to the element at index (i, j, k) where i is the lowest dimension.
 	const T& operator()(const size_t i, const size_t j, const size_t k) const
 	{
-		return (*this)[n[2] * (n[1] * i + j) + k];
+		return (*this)[n[0] * (n[1] * k + j) + i];
 	}
 
-	/// Returns a mutable reference to the element at index (i, j, k) where k is the lowest dimension.
+	/// Returns a mutable reference to the element at index (i, j, k) where i is the lowest dimension.
 	T& operator()(const size_t i, const size_t j, const size_t k)
 	{
 		return const_cast<T&>(static_cast<const array3d<T>&>(*this)(i, j, k));
 	}
 
-	/// Returns a constant reference to the element at index (i[0], i[1], i[2]) where i[2] is the lowest dimension.
+	/// Returns a constant reference to the element at index (i[0], i[1], i[2]) where i[0] is the lowest dimension.
 	const T& operator()(const array<size_t, 3> i) const
 	{
 		return this->operator()(i[0], i[1], i[2]);
 	}
 
-	/// Returns a mutable reference to the element at index (i[0], i[1], i[2]) where i[2] is the lowest dimension.
+	/// Returns a mutable reference to the element at index (i[0], i[1], i[2]) where i[0] is the lowest dimension.
 	T& operator()(const array<size_t, 3> i)
 	{
 		return const_cast<T&>(static_cast<const array3d<T>&>(*this)(i));
@@ -61,6 +61,6 @@ private:
 };
 
 template<typename T>
-const array<size_t, 3> array3d<T>::Zero = {{0, 0, 0}};
+const array<size_t, 3> array3d<T>::Zero = {0, 0, 0};
 
 #endif

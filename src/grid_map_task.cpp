@@ -1,18 +1,18 @@
 #include "grid_map_task.hpp"
 
-int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t x, const scoring_function& sf, const box& b, const receptor& rec)
+int grid_map_task(vector<array3d<float>>& grid_maps, const vector<size_t>& atom_types_to_populate, const size_t z, const scoring_function& sf, const box& b, const receptor& rec)
 {
 	const size_t num_atom_types_to_populate = atom_types_to_populate.size();
 	vector<float> e(num_atom_types_to_populate);
 
 	// For each probe atom of the given X dimension value.
 	const size_t num_y_probes = b.num_probes[1];
-	const size_t num_z_probes = b.num_probes[2];
+	const size_t num_x_probes = b.num_probes[0];
 	for (size_t y = 0; y < num_y_probes; ++y)
-	for (size_t z = 0; z < num_z_probes; ++z)
+	for (size_t x = 0; x < num_x_probes; ++x)
 	{
 		// Find the possibly interacting receptor atoms via partitions.
-		const array<size_t, 3> grid_index = {{ x, y, z }};
+		const array<size_t, 3> grid_index = { x, y, z };
 		const vec3 probe_coords = b.grid_corner1(grid_index);
 		const vector<size_t>& receptor_atoms = rec.partitions(b.partition_index(probe_coords));
 
