@@ -42,7 +42,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			// Parse the Cartesian coordinate.
 			string name = line.substr(12, 4);
 			boost::algorithm::trim(name);
-			atom a(stoul(line.substr(6, 5)), name, name, vec3(stof(line.substr(30, 8)), stof(line.substr(38, 8)), stof(line.substr(46, 8))), ad);
+			atom a(stoul(line.substr(6, 5)), name, vec3(stof(line.substr(30, 8)), stof(line.substr(38, 8)), stof(line.substr(46, 8))), ad);
 
 			if (a.is_hydrogen()) // Current atom is a hydrogen.
 			{
