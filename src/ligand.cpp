@@ -289,7 +289,7 @@ vector<size_t> ligand::get_atom_types() const
 	return atom_types;
 }
 
-bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, vector<float>& g) const
+bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
@@ -384,7 +384,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		}
 
 		// Retrieve the grid map in need.
-		const array3d<float>& grid_map = grid_maps[heavy_atoms[i].xs];
+		const array3d<float>& grid_map = rec.grid_maps[heavy_atoms[i].xs];
 		assert(grid_map.initialized());
 
 		// Find the index and fraction of the current coordinates.
@@ -529,7 +529,7 @@ result ligand::compose_result(const float e, const conformation& conf) const
 	return result(e, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 }
 
-void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const vector<array3d<float>>& grid_maps)
+void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives)
 {
 	assert(representatives.size());
 	assert(representatives.size() <= results.size());

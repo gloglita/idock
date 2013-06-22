@@ -5,6 +5,7 @@
 #include <boost/filesystem/path.hpp>
 #include "atom.hpp"
 #include "array3d.hpp"
+#include "scoring_function.hpp"
 using namespace boost::filesystem;
 
 /// Represents a receptor.
@@ -30,6 +31,7 @@ public:
 	array<size_t, 3> num_partitions; ///< Number of partitions.
 	vec3 partition_size; ///< 3D sizes of partitions.
 	vec3 partition_size_inverse; ///< (1, 1, 1) / partition_size.
+	vector<array3d<float>> grid_maps;
 
 	/// Constructs a receptor by parsing a receptor file in pdbqt format.
 	/// @param center Box center.
