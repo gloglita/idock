@@ -289,7 +289,7 @@ vector<size_t> ligand::get_atom_types() const
 	return atom_types;
 }
 
-bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, vector<float>& g) const
+bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const vector<array3d<float>>& grid_maps, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
@@ -374,7 +374,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	e = 0;
 	for (size_t i = 0; i < num_heavy_atoms; ++i)
 	{
-		if (!b.within(coordinates[i]))
+		if (!rec.within(coordinates[i]))
 		{
 			e += 10;
 			derivatives[i][0] = 0;
@@ -388,12 +388,12 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		assert(grid_map.initialized());
 
 		// Find the index and fraction of the current coordinates.
-		const array<size_t, 3> index = b.grid_index(coordinates[i]);
+		const array<size_t, 3> index = rec.grid_index(coordinates[i]);
 
 		// Assert the validity of index.
-		assert(index[0] < b.num_grids[0]);
-		assert(index[1] < b.num_grids[1]);
-		assert(index[2] < b.num_grids[2]);
+		assert(index[0] < rec.num_grids[0]);
+		assert(index[1] < rec.num_grids[1]);
+		assert(index[2] < rec.num_grids[2]);
 
 		// (x0, y0, z0) is the beginning corner of the partition.
 		const size_t x0 = index[0];
@@ -405,9 +405,9 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		const float e100 = grid_map(x0 + 1, y0,     z0    );
 		const float e010 = grid_map(x0,     y0 + 1, z0    );
 		const float e001 = grid_map(x0,     y0,     z0 + 1);
-		derivatives[i][0] = (e100 - e000) * b.grid_granularity_inverse;
-		derivatives[i][1] = (e010 - e000) * b.grid_granularity_inverse;
-		derivatives[i][2] = (e001 - e000) * b.grid_granularity_inverse;
+		derivatives[i][0] = (e100 - e000) * rec.grid_granularity_inverse;
+		derivatives[i][1] = (e010 - e000) * rec.grid_granularity_inverse;
+		derivatives[i][2] = (e001 - e000) * rec.grid_granularity_inverse;
 
 		e += e000; // Aggregate the energy.
 	}
@@ -529,7 +529,7 @@ result ligand::compose_result(const float e, const conformation& conf) const
 	return result(e, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 }
 
-void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const box& b, const vector<array3d<float>>& grid_maps)
+void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives, const vector<array3d<float>>& grid_maps)
 {
 	assert(representatives.size());
 	assert(representatives.size() <= results.size());
@@ -551,14 +551,13 @@ void ligand::write_models(const path& output_ligand_path, const ptr_vector<resul
 			const string& line = lines[j];
 			if (line.size() >= 79) // This line starts with "ATOM" or "HETATM"
 			{
-				const float free_energy = line[77] == 'H' ? 0 : grid_maps[heavy_atoms[heavy_atom].xs](b.grid_index(r.heavy_atoms[heavy_atom]));
 				const vec3& coordinate = line[77] == 'H' ? r.hydrogens[hydrogen++] : r.heavy_atoms[heavy_atom++];
 				ofs << line.substr(0, 30)
 					<< setw(8) << coordinate[0]
 					<< setw(8) << coordinate[1]
 					<< setw(8) << coordinate[2]
 					<< line.substr(54, 16)
-					<< setw(6) << free_energy
+					<< setw(6) << 0
 					<< line.substr(76);
 			}
 			else // This line starts with "ROOT", "ENDROOT", "BRANCH", "ENDBRANCH", TORSDOF", which will not change during docking.

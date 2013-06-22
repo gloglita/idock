@@ -105,14 +105,14 @@ int main(int argc, char* argv[])
 		}
 
 		// Validate size_x, size_y, size_z.
-		if (size_x < box::Default_Partition_Granularity ||
-		    size_y < box::Default_Partition_Granularity ||
-		    size_z < box::Default_Partition_Granularity)
+		if (size_x < receptor::Default_Partition_Granularity ||
+		    size_y < receptor::Default_Partition_Granularity ||
+		    size_z < receptor::Default_Partition_Granularity)
 		{
 			cerr << "Search space must be "
-				 << box::Default_Partition_Granularity << "A x "
-				 << box::Default_Partition_Granularity << "A x "
-				 << box::Default_Partition_Granularity << "A or larger\n";
+				 << receptor::Default_Partition_Granularity << "A x "
+				 << receptor::Default_Partition_Granularity << "A x "
+				 << receptor::Default_Partition_Granularity << "A or larger\n";
 			return 1;
 		}
 
@@ -156,8 +156,7 @@ int main(int argc, char* argv[])
 
 	// Parse the receptor.
 	cout << "Parsing receptor " << receptor_path << '\n';
-	const box b(vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
-	const receptor rec(receptor_path, b);
+	const receptor rec(receptor_path, vec3(center_x, center_y, center_z), vec3(size_x, size_y, size_z), grid_granularity);
 
 	// Initialize a Mersenne Twister random number generator.
 	cout << "Using random seed " << seed << '\n';
@@ -197,7 +196,7 @@ int main(int argc, char* argv[])
 			assert(t < XS_TYPE_SIZE);
 			array3d<float>& grid_map = grid_maps[t];
 			if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
-			grid_map.resize(b.num_probes); // An exception may be thrown in case memory is exhausted.
+			grid_map.resize(rec.num_probes); // An exception may be thrown in case memory is exhausted.
 			atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
 		}
 		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
@@ -208,9 +207,9 @@ int main(int argc, char* argv[])
 
 			// Populate the grid map task container.
 			assert(tp.empty());
-			for (size_t z = 0; z < b.num_probes[2]; ++z)
+			for (size_t z = 0; z < rec.num_probes[2]; ++z)
 			{
-				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), z, cref(sf), cref(b), cref(rec))));
+				tp.push_back(packaged_task<int()>(bind(grid_map_task, ref(grid_maps), cref(atom_types_to_populate), z, cref(sf), cref(rec))));
 			}
 
 			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
@@ -229,7 +228,7 @@ int main(int argc, char* argv[])
 		assert(tp.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), boost::cref(b), cref(grid_maps))));
+			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), cref(rec), cref(grid_maps))));
 		}
 
 		// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
@@ -263,7 +262,7 @@ int main(int argc, char* argv[])
 
 		// Write models to file.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
-		lig.write_models(output_ligand_path, results, representatives, b, grid_maps);
+		lig.write_models(output_ligand_path, results, representatives, grid_maps);
 
 		// Display the free energies of the top 4 conformations.
 		for (size_t i = 0; i < min<size_t>(representatives.size(), 4); ++i)

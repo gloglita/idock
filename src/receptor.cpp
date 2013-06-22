@@ -1,10 +1,31 @@
 #include <boost/filesystem/fstream.hpp>
-#include <boost/algorithm/string.hpp>
 #include "scoring_function.hpp"
 #include "receptor.hpp"
 
-receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
+const float receptor::Default_Partition_Granularity = 3.0f;
+const float receptor::Default_Partition_Granularity_Inverse = 1 / Default_Partition_Granularity;
+
+receptor::receptor(const path& p, const vec3& center, const vec3& span_, const float grid_granularity) : center(center), grid_granularity(grid_granularity), grid_granularity_inverse(1 / grid_granularity), grid_size(vec3(grid_granularity, grid_granularity, grid_granularity)), grid_size_inverse(vec3(grid_granularity_inverse, grid_granularity_inverse, grid_granularity_inverse))
 {
+	// The loop may be unrolled by enabling compiler optimization.
+	for (size_t i = 0; i < 3; ++i)
+	{
+		// Slightly expand the user-input span to the nearest multiple of granularity.
+		num_grids[i] = static_cast<size_t>(ceil(span_[i] * grid_size_inverse[i]));
+		span[i] = grid_size[i] * num_grids[i];
+		num_probes[i] = num_grids[i] + 1;
+
+		// Determine the two extreme corners.
+		corner0[i] = center[i]  - span[i] * 0.5f;
+		corner1[i] = corner0[i] + span[i];
+
+		// Determine the number of partitions.
+		num_partitions[i] = static_cast<size_t>(span[i] * Default_Partition_Granularity_Inverse);
+		partition_size[i] = span[i] / num_partitions[i];
+		partition_size_inverse[i] = 1 / partition_size[i];
+	}
+	partitions.resize(num_partitions);
+
 	// Initialize necessary variables for constructing a receptor.
 	atoms.reserve(5000); // A receptor typically consists of <= 5,000 atoms.
 
@@ -39,9 +60,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 			if (ad == AD_TYPE_H) continue;
 
 			// Parse the Cartesian coordinate.
-			string name = line.substr(12, 4);
-			boost::algorithm::trim(name);
-			atom a(stoul(line.substr(6, 5)), name, vec3(stof(line.substr(30, 8)), stof(line.substr(38, 8)), stof(line.substr(46, 8))), ad);
+			atom a(stoul(line.substr(6, 5)), line.substr(12, 4), vec3(stof(line.substr(30, 8)), stof(line.substr(38, 8)), stof(line.substr(46, 8))), ad);
 
 			// For a polar hydrogen, the bonded hetero atom must be a hydrogen bond donor.
 			if (ad == AD_TYPE_HD)
@@ -94,7 +113,7 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 	for (size_t i = 0; i < num_rec_atoms; ++i)
 	{
 		const atom& a = atoms[i];
-		if (b.project_distance_sqr(a.coord) < scoring_function::cutoff_sqr)
+		if (project_distance_sqr(a.coord) < scoring_function::cutoff_sqr)
 		{
 			receptor_atoms_within_cutoff.push_back(i);
 		}
@@ -102,25 +121,92 @@ receptor::receptor(const path& p, const box& b) : partitions(b.num_partitions)
 	const size_t num_receptor_atoms_within_cutoff = receptor_atoms_within_cutoff.size();
 
 	// Allocate each nearby receptor atom to its corresponding partition.
-	for (size_t z = 0; z < b.num_partitions[2]; ++z)
-	for (size_t y = 0; y < b.num_partitions[1]; ++y)
-	for (size_t x = 0; x < b.num_partitions[0]; ++x)
+	for (size_t z = 0; z < num_partitions[2]; ++z)
+	for (size_t y = 0; y < num_partitions[1]; ++y)
+	for (size_t x = 0; x < num_partitions[0]; ++x)
 	{
 		vector<size_t>& par = partitions(x, y, z);
 		par.reserve(num_receptor_atoms_within_cutoff);
 		const array<size_t, 3> index1 = { x,     y,     z     };
 		const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
-		const vec3 corner0 = b.partition_corner0(index1);
-		const vec3 corner1 = b.partition_corner0(index2);
+		const vec3 corner0 = partition_corner0(index1);
+		const vec3 corner1 = partition_corner0(index2);
 		for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
 		{
 			const size_t i = receptor_atoms_within_cutoff[l];
 			const atom& a = atoms[i];
-			const float proj_dist_sqr = b.project_distance_sqr(corner0, corner1, a.coord);
+			const float proj_dist_sqr = project_distance_sqr(corner0, corner1, a.coord);
 			if (proj_dist_sqr < scoring_function::cutoff_sqr)
 			{
 				par.push_back(i);
 			}
 		}
 	}
+}
+
+bool receptor::within(const vec3& coordinate) const
+{
+	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
+	{
+		// Half-open-half-close box, i.e. [corner0, corner1)
+		if (coordinate[i] < corner0[i] || corner1[i] <= coordinate[i])
+			return false;
+	}
+	return true;
+}
+
+float receptor::project_distance_sqr(const vec3& corner0, const vec3& corner1, const vec3& coordinate) const
+{
+	// Calculate the projection point of the given coordinate onto the surface of the given box.
+	vec3 projection = coordinate; // The loop may be unrolled by enabling compiler optimization.
+	for (size_t i = 0; i < 3; ++i)
+	{
+		if (projection[i] < corner0[i]) projection[i] = corner0[i];
+		if (projection[i] > corner1[i]) projection[i] = corner1[i];
+	}
+
+	// Check if the distance between the projection and the given coordinate is within cutoff.
+	return distance_sqr(projection, coordinate);
+}
+
+float receptor::project_distance_sqr(const vec3& coordinate) const
+{
+	return project_distance_sqr(corner0, corner1, coordinate);
+}
+
+vec3 receptor::grid_corner0(const array<size_t, 3>& index) const
+{
+	return corner0 + (grid_size * index);
+}
+
+vec3 receptor::partition_corner0(const array<size_t, 3>& index) const
+{
+	return corner0 + (partition_size * index);
+}
+
+array<size_t, 3> receptor::grid_index(const vec3& coordinate) const
+{
+	array<size_t, 3> index;
+	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
+	{
+		index[i] = static_cast<size_t>((coordinate[i] - corner0[i]) * grid_size_inverse[i]);
+		// Boundary checking is not necessary because the given coordinate is a ligand atom,
+		// which has been restricted within the half-open-half-close box [corner0, corner1).
+		//if (index[i] == num_grids[i]) index[i] = num_grids[i] - 1;
+	}
+	return index;
+}
+
+array<size_t, 3> receptor::partition_index(const vec3& coordinate) const
+{
+	array<size_t, 3> index;
+	for (size_t i = 0; i < 3; ++i) // The loop may be unrolled by enabling compiler optimization.
+	{
+		index[i] = static_cast<size_t>((coordinate[i] - corner0[i]) * partition_size_inverse[i]);
+		// The following condition occurs if and only if coordinate[i] is exactly at the right boundary of the box.
+		// In such case, merge it into the last partition.
+		// Boundary checking is necessary because the given coordinate is a probe atom.
+		if (index[i] == num_partitions[i]) index[i] = num_partitions[i] - 1;
+	}
+	return index;
 }

@@ -1,7 +1,7 @@
 #include <boost/random.hpp>
 #include "monte_carlo_task.hpp"
 
-int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps)
+int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const receptor& rec, const vector<array3d<float>>& grid_maps)
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
@@ -21,9 +21,9 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	mt19937_64 eng(seed);
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box0_gen(eng, uniform_real_distribution<float>(b.corner0[0], b.corner1[0]));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box1_gen(eng, uniform_real_distribution<float>(b.corner0[1], b.corner1[1]));
-	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box2_gen(eng, uniform_real_distribution<float>(b.corner0[2], b.corner1[2]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box0_gen(eng, uniform_real_distribution<float>(rec.corner0[0], rec.corner1[0]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box1_gen(eng, uniform_real_distribution<float>(rec.corner0[1], rec.corner1[1]));
+	variate_generator<mt19937_64&, uniform_real_distribution<float>> uniform_box2_gen(eng, uniform_real_distribution<float>(rec.corner0[2], rec.corner1[2]));
 
 	// Generate an initial random conformation c0, and evaluate it.
 	conformation c0(lig.num_active_torsions);
@@ -36,7 +36,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	{
 		c0.torsions[i] = uniform_11(eng);
 	}
-	lig.evaluate(c0, sf, b, grid_maps, e_upper_bound, e0, f0, g0);
+	lig.evaluate(c0, sf, rec, grid_maps, e_upper_bound, e0, f0, g0);
 	r = lig.compose_result(e0, c0);
 
 	// Initialize necessary variables for BFGS.
@@ -67,7 +67,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 		c1 = c0;
 //		c1.position += vec3(1, 1, 1);
 		c1.position += vec3(uniform_11(eng), uniform_11(eng), uniform_11(eng));
-		lig.evaluate(c1, sf, b, grid_maps, e_upper_bound, e1, f1, g1);
+		lig.evaluate(c1, sf, rec, grid_maps, e_upper_bound, e1, f1, g1);
 
 		// Initialize the Hessian matrix to identity.
 		h = identity_hessian;
@@ -112,7 +112,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 				// Evaluate c2, subject to Wolfe conditions http://en.wikipedia.org/wiki/Wolfe_conditions
 				// 1) Armijo rule ensures that the step length alpha decreases f sufficiently.
 				// 2) The curvature condition ensures that the slope has been reduced sufficiently.
-				if (lig.evaluate(c2, sf, b, grid_maps, e1 + 0.0001f * alpha * pg1, e2, f2, g2))
+				if (lig.evaluate(c2, sf, rec, grid_maps, e1 + 0.0001f * alpha * pg1, e2, f2, g2))
 				{
 					pg2 = 0;
 					for (size_t i = 0; i < num_variables; ++i)

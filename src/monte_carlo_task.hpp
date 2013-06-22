@@ -5,6 +5,6 @@
 #include "ligand.hpp"
 
 /// Task for running Monte Carlo Simulated Annealing algorithm to find local minimums of the scoring function.
-int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const box& b, const vector<array3d<float>>& grid_maps);
+int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const receptor& rec, const vector<array3d<float>>& grid_maps);
 
 #endif
