@@ -26,16 +26,11 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 	}
 	partitions.resize(num_partitions);
 
-	// Initialize necessary variables for constructing a receptor.
+	// Parse the receptor line by line.
 	atoms.reserve(5000); // A receptor typically consists of <= 5,000 atoms.
-
-	// Initialize helper variables for parsing.
 	string residue = "XXXX"; // Current residue sequence, used to track residue change, initialized to a dummy value.
 	size_t residue_start; // The starting atom of the current residue.
 	string line;
-	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
-
-	// Parse the receptor line by line.
 	for (boost::filesystem::ifstream in(p); getline(in, line);)
 	{
 		const string record = line.substr(0, 6);
@@ -74,6 +69,7 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 						break;
 					}
 				}
+				continue;
 			}
 			else if (a.is_hetero()) // It is a hetero atom.
 			{
@@ -98,7 +94,10 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 					}
 				}
 			}
-			atoms.push_back(a);
+			if (project_distance_sqr(a.coord) < scoring_function::cutoff_sqr)
+			{
+				atoms.push_back(a);
+			}
 		}
 		else if (record == "TER   ")
 		{
@@ -106,39 +105,20 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 		}
 	}
 
-	// Find all the heavy receptor atoms that are within 8A of the box.
-	vector<size_t> receptor_atoms_within_cutoff;
-	receptor_atoms_within_cutoff.reserve(atoms.size());
-	const size_t num_rec_atoms = atoms.size();
-	for (size_t i = 0; i < num_rec_atoms; ++i)
-	{
-		const atom& a = atoms[i];
-		if (project_distance_sqr(a.coord) < scoring_function::cutoff_sqr)
-		{
-			receptor_atoms_within_cutoff.push_back(i);
-		}
-	}
-	const size_t num_receptor_atoms_within_cutoff = receptor_atoms_within_cutoff.size();
-
 	// Allocate each nearby receptor atom to its corresponding partition.
 	for (size_t z = 0; z < num_partitions[2]; ++z)
 	for (size_t y = 0; y < num_partitions[1]; ++y)
 	for (size_t x = 0; x < num_partitions[0]; ++x)
 	{
-		vector<size_t>& par = partitions(x, y, z);
-		par.reserve(num_receptor_atoms_within_cutoff);
-		const array<size_t, 3> index1 = { x,     y,     z     };
-		const array<size_t, 3> index2 = { x + 1, y + 1, z + 1 };
-		const vec3 corner0 = partition_corner0(index1);
-		const vec3 corner1 = partition_corner0(index2);
-		for (size_t l = 0; l < num_receptor_atoms_within_cutoff; ++l)
+		vector<size_t>& p = partitions(x, y, z);
+		p.reserve(100);
+		const vec3 corner0 = partition_corner0({x  , y  , z  });
+		const vec3 corner1 = partition_corner0({x+1, y+1, z+1});
+		for (size_t i = 0; i < atoms.size(); ++i)
 		{
-			const size_t i = receptor_atoms_within_cutoff[l];
-			const atom& a = atoms[i];
-			const float proj_dist_sqr = project_distance_sqr(corner0, corner1, a.coord);
-			if (proj_dist_sqr < scoring_function::cutoff_sqr)
+			if (project_distance_sqr(corner0, corner1, atoms[i].coord) < scoring_function::cutoff_sqr)
 			{
-				par.push_back(i);
+				p.push_back(i);
 			}
 		}
 	}
@@ -233,7 +213,7 @@ int receptor::grid_map_task(const vector<size_t>& atom_types_to_populate, const 
 		for (size_t l = 0; l < num_receptor_atoms; ++l)
 		{
 			const atom& a = atoms[receptor_atoms[l]];
-			if (a.is_hydrogen()) continue;
+			assert(!a.is_hydrogen());
 			const float r2 = distance_sqr(probe_coords, a.coord);
 			if (r2 <= scoring_function::cutoff_sqr)
 			{
