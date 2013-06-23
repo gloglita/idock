@@ -21,7 +21,6 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	frame* f = &frames.front(); // Pointer to the current frame.
 	f->rotorYidx = 0; // Assume the rotorY of ROOT frame is the first atom.
 	string line;
-	line.reserve(79); // According to PDBQT specification, the last item AutoDock atom type locates at 1-based [78, 79].
 
 	// Parse the ligand line by line.
 	for (boost::filesystem::ifstream ifs(p); getline(ifs, line);)
@@ -140,7 +139,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 
 			// A frame may be empty, e.g. "BRANCH   4   9" is immediately followed by "ENDBRANCH   4   9".
 			// This emptiness is likely to be caused by invalid input structure, especially when all the atoms are located in the same plane.
-			if (f->habegin == heavy_atoms.size()) throw std::domain_error("Error parsing " + p.filename().string() + ": an empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
+			if (f->habegin == heavy_atoms.size()) throw domain_error("Error parsing " + p.filename().string() + ": an empty BRANCH has been detected, indicating the input ligand structure is probably invalid.");
 
 			// If the current frame consists of rotor Y and a few hydrogens only, e.g. -OH and -NH2,
 			// the torsion of this frame will have no effect on scoring and is thus redundant.
@@ -197,13 +196,6 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	assert(num_torsions + 1 == num_frames);
 	assert(num_torsions >= num_active_torsions);
 	assert(num_heavy_atoms + num_hydrogens + (num_torsions << 1) + 3 == lines.size()); // ATOM/HETATM lines + BRANCH/ENDBRANCH lines + ROOT/ENDROOT/TORSDOF lines == lines.size()
-
-	// Find hydrogen bond donors and acceptors.
-	hbda.reserve(num_heavy_atoms);
-	for (size_t i = 0; i < num_heavy_atoms; ++i)
-	{
-		if (xs_is_donor_acceptor(heavy_atoms[i].xs)) hbda.push_back(i);
-	}
 
 	// Update heavy_atoms[].coord and hydrogens[].coord relative to frame origin.
 	for (size_t k = 0; k < num_frames; ++k)

@@ -67,7 +67,6 @@ public:
 	vector<frame> frames; ///< ROOT and BRANCH frames.
 	vector<atom> heavy_atoms; ///< Heavy atoms. Coordinates are relative to frame origin, which is the first atom by default.
 	vector<atom> hydrogens; ///< Hydrogen atoms. Coordinates are relative to frame origin, which is the first atom by default.
-	vector<size_t> hbda; // Hydrogen bond donors and acceptors.
 	size_t num_heavy_atoms; ///< Number of heavy atoms.
 	size_t num_hydrogens; ///< Number of hydrogens.
 	size_t num_frames; ///< Number of frames.
