@@ -5,16 +5,14 @@
 #include "mat3.hpp"
 
 /// Represents a quaternion.
-class qtn4
+class qtn4 : public array<float, 4>
 {
 public:
-	float a, b, c, d;
-
 	/// Constructs an uninitialized quaternion.
 	explicit qtn4() {}
 
 	/// Constructs a quaternion by its four components.
-	explicit qtn4(const float a, const float b, const float c, const float d);
+	explicit qtn4(const float q0, const float q1, const float q2, const float q3);
 
 	/// Constructs a quaternion by a normalized axis and a rotation angle.
 	explicit qtn4(const vec3& axis, const float angle);
@@ -43,10 +41,10 @@ inline qtn4 operator *(const qtn4& q1, const qtn4& q2)
 {
     return qtn4
 	(
-		q1.a * q2.a - q1.b * q2.b - q1.c * q2.c - q1.d * q2.d,
-		q1.a * q2.b + q1.b * q2.a + q1.c * q2.d - q1.d * q2.c,
-		q1.a * q2.c - q1.b * q2.d + q1.c * q2.a + q1.d * q2.b,
-		q1.a * q2.d + q1.b * q2.c - q1.c * q2.b + q1.d * q2.a
+		q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
+		q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
+		q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
+		q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
 	);
 }
 

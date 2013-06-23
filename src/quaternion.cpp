@@ -1,15 +1,21 @@
 #include "quaternion.hpp"
 
-qtn4::qtn4(const float a, const float b, const float c, const float d) : a(a), b(b), c(c), d(d) {}
+qtn4::qtn4(const float q0, const float q1, const float q2, const float q3)
+{
+	(*this)[0] = q0;
+	(*this)[1] = q1;
+	(*this)[2] = q2;
+	(*this)[3] = q3;
+}
 
 qtn4::qtn4(const vec3& axis, const float angle)
 {
 //	assert(axis.normalized());
-	a = cos(angle * 0.5f);
+	(*this)[0] = cos(angle * 0.5f);
 	const float s = sin(angle * 0.5f);
-	b = s * axis[0];
-	c = s * axis[1];
-	d = s * axis[2];
+	(*this)[1] = s * axis[0];
+	(*this)[2] = s * axis[1];
+	(*this)[3] = s * axis[2];
 }
 
 qtn4::qtn4(const vec3& rotation)
@@ -28,7 +34,7 @@ qtn4::qtn4(const vec3& rotation)
 
 float qtn4::norm_sqr() const
 {
-	return a * a + b * b + c * c + d * d;
+	return (*this)[0] * (*this)[0] + (*this)[1] * (*this)[1] + (*this)[2] * (*this)[2] + (*this)[3] * (*this)[3];
 }
 
 float qtn4::norm() const
@@ -44,22 +50,22 @@ bool qtn4::is_normalized() const
 qtn4 qtn4::normalize() const
 {
 	const float norm_inv = 1.0f / norm();
-	return qtn4(a * norm_inv, b * norm_inv, c * norm_inv, d * norm_inv);
+	return qtn4((*this)[0] * norm_inv, (*this)[1] * norm_inv, (*this)[2] * norm_inv, (*this)[3] * norm_inv);
 }
 
 mat3 qtn4::to_mat3() const
 {
 //	assert(is_normalized());
-	const float aa = a*a;
-	const float ab = a*b;
-	const float ac = a*c;
-	const float ad = a*d;
-	const float bb = b*b;
-	const float bc = b*c;
-	const float bd = b*d;
-	const float cc = c*c;
-	const float cd = c*d;
-	const float dd = d*d;
+	const float aa = (*this)[0]*(*this)[0];
+	const float ab = (*this)[0]*(*this)[1];
+	const float ac = (*this)[0]*(*this)[2];
+	const float ad = (*this)[0]*(*this)[3];
+	const float bb = (*this)[1]*(*this)[1];
+	const float bc = (*this)[1]*(*this)[2];
+	const float bd = (*this)[1]*(*this)[3];
+	const float cc = (*this)[2]*(*this)[2];
+	const float cd = (*this)[2]*(*this)[3];
+	const float dd = (*this)[3]*(*this)[3];
 
 	// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
 	// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
