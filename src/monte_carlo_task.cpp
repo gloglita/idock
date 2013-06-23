@@ -11,7 +11,7 @@ int monte_carlo_task(result& r, const ligand& lig, const scoring_function& sf, c
 	const float e_upper_bound = 40.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
 	const float pi = 3.1415926535897932f; ///< Pi.
 
-	mt19937_64 eng(seed);
+	mt19937_64 rng(seed);
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
 	// Generate an initial random conformation c0, and evaluate it.
@@ -19,11 +19,11 @@ int monte_carlo_task(result& r, const ligand& lig, const scoring_function& sf, c
 	float e0, f0;
 	vector<float> g0(6 + lig.num_active_torsions);
 	// Randomize conformation c0.
-	c0.position = rec.center + (uniform_11(eng) * rec.span);
-	c0.orientation = qtn4(uniform_11(eng), uniform_11(eng), uniform_11(eng), uniform_11(eng)).normalize();
+	c0.position = rec.center + (uniform_11(rng) * rec.span);
+	c0.orientation = qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)).normalize();
 	for (size_t i = 0; i < lig.num_active_torsions; ++i)
 	{
-		c0.torsions[i] = uniform_11(eng);
+		c0.torsions[i] = uniform_11(rng);
 	}
 	lig.evaluate(c0, sf, rec, e_upper_bound, e0, f0, g0);
 	r = lig.compose_result(e0, c0);
@@ -55,7 +55,7 @@ int monte_carlo_task(result& r, const ligand& lig, const scoring_function& sf, c
 		// Make a copy, so the previous conformation is retained.
 		c1 = c0;
 //		c1.position += vec3(1, 1, 1);
-		c1.position += vec3(uniform_11(eng), uniform_11(eng), uniform_11(eng));
+		c1.position += vec3(uniform_11(rng), uniform_11(rng), uniform_11(rng));
 		lig.evaluate(c1, sf, rec, e_upper_bound, e1, f1, g1);
 
 		// Initialize the Hessian matrix to identity.

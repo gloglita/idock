@@ -160,7 +160,7 @@ int main(int argc, char* argv[])
 	receptor rec(receptor_path, center, size, grid_granularity);
 
 	cout << "Using random seed " << seed << endl;
-	mt19937_64 eng(seed);
+	mt19937_64 rng(seed);
 
 	// Perform docking for each file in the ligand folder.
 	ptr_vector<result> results;
@@ -208,7 +208,7 @@ int main(int argc, char* argv[])
 		// Run the Monte Carlo tasks in parallel
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), cref(sf), cref(rec), eng(), num_generations)));
+			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), cref(sf), cref(rec), rng(), num_generations)));
 		}
 		tp.sync(25);
 		cout << " | " << flush;
