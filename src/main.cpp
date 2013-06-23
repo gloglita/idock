@@ -184,7 +184,7 @@ int main(int argc, char* argv[])
 	{
 		// Parse the ligand.
 		const path input_ligand_path = dir_iter->path();
-		ligand lig(input_ligand_path);
+		const ligand lig(input_ligand_path);
 
 		// Create grid maps on the fly if necessary.
 		assert(atom_types_to_populate.empty());

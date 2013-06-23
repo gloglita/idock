@@ -529,7 +529,7 @@ result ligand::compose_result(const float e, const conformation& conf) const
 	return result(e, static_cast<vector<vec3>&&>(heavy_atoms), static_cast<vector<vec3>&&>(hydrogens));
 }
 
-void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives)
+void ligand::write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives) const
 {
 	assert(representatives.size());
 	assert(representatives.size() <= results.size());
