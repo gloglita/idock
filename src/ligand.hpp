@@ -51,12 +51,6 @@ public:
 
 	/// Constructs an active frame, and relates it to its parent frame.
 	explicit frame(const size_t parent, const size_t rotorXsrn, const size_t rotorYsrn, const size_t rotorXidx, const size_t habegin, const size_t hybegin) : parent(parent), rotorXsrn(rotorXsrn), rotorYsrn(rotorYsrn), rotorXidx(rotorXidx), habegin(habegin), hybegin(hybegin), active(true) {}
-
-	/// Copy constructor.
-	frame(const frame& f) : parent(f.parent), rotorXsrn(f.rotorXsrn), rotorYsrn(f.rotorYsrn), rotorXidx(f.rotorXidx), rotorYidx(f.rotorYidx), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY) {}
-
-	/// Move constructor.
-	frame(frame&& f)      : parent(f.parent), rotorXsrn(f.rotorXsrn), rotorYsrn(f.rotorYsrn), rotorXidx(f.rotorXidx), rotorYidx(f.rotorYidx), habegin(f.habegin), haend(f.haend), hybegin(f.hybegin), hyend(f.hyend), active(f.active), parent_rotorY_to_current_rotorY(f.parent_rotorY_to_current_rotorY), parent_rotorX_to_current_rotorY(f.parent_rotorX_to_current_rotorY) {}
 };
 
 /// Represents a ligand.
