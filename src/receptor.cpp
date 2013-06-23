@@ -1,6 +1,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include "scoring_function.hpp"
 #include "receptor.hpp"
+#include "utility.hpp"
 
 const float receptor::Default_Partition_Granularity = 3.0f;
 const float receptor::Default_Partition_Granularity_Inverse = 1.0f / Default_Partition_Granularity;
@@ -218,7 +219,7 @@ int receptor::populate(const vector<size_t>& xs, const size_t z, const scoring_f
 				for (size_t i = 0; i < xs.size(); ++i)
 				{
 					const size_t t2 = xs[i];
-					e[i] += sf.e[sf.o(sf.p(t1, t2), r2)];
+					e[i] += sf.e[sf.o(mp(t1, t2), r2)];
 				}
 			}
 		}
