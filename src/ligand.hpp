@@ -5,7 +5,6 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 #include "atom.hpp"
-#include "matrix.hpp"
 #include "scoring_function.hpp"
 #include "array3d.hpp"
 #include "receptor.hpp"

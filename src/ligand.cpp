@@ -3,6 +3,7 @@
 #include <boost/filesystem/fstream.hpp>
 #include <boost/algorithm/string.hpp>
 #include "ligand.hpp"
+#include "utility.hpp"
 
 ligand::ligand(const path& p) : num_active_torsions(0)
 {
@@ -267,7 +268,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 				for (size_t j = f2.habegin; j < f2.haend; ++j)
 				{
 					if (((k1 == f2.parent) && ((j == f2.rotorYidx) || (i == f2.rotorXidx))) || (find(neighbors.begin(), neighbors.end(), j) != neighbors.end())) continue;
-					const size_t type_pair_index = triangular_matrix_permissive_index(heavy_atoms[i].xs, heavy_atoms[j].xs);
+					const size_t type_pair_index = mp(heavy_atoms[i].xs, heavy_atoms[j].xs);
 					interacting_pairs.push_back(interacting_pair(i, j, type_pair_index));
 				}
 			}
@@ -577,7 +578,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 		// See N&R for a recipe to find this initializer.
 		fill(h.begin(), h.end(), 0.0f);
 		for (i = 0; i < num_variables; ++i)
-			h[triangular_matrix_restrictive_index(i, i)] = 1.0f;
+			h[mr(i, i)] = 1.0f;
 
 		// Given the mutated conformation c1, use BFGS to find a local minimum.
 		// The conformation of the local minimum is saved to c2, and its derivative is saved to g2.
@@ -591,7 +592,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 			{
 				float sum = 0.0f;
 				for (j = 0; j < num_variables; ++j)
-					sum += h[triangular_matrix_permissive_index(i, j)] * g1[j];
+					sum += h[mp(i, j)] * g1[j];
 				p[i] = -sum;
 			}
 
@@ -648,7 +649,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 			{
 				float sum = 0.0f;
 				for (j = 0; j < num_variables; ++j)
-					sum += h[triangular_matrix_permissive_index(i, j)] * y[j];
+					sum += h[mp(i, j)] * y[j];
 				mhy[i] = -sum;
 			}
 			yhy = 0;
@@ -662,7 +663,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 			for (i = 0; i < num_variables; ++i)
 			for (j = i; j < num_variables; ++j) // includes i
 			{
-				h[triangular_matrix_restrictive_index(i, j)] += ryp * (mhy[i] * p[j] + mhy[j] * p[i]) + pco * p[i] * p[j];
+				h[mr(i, j)] += ryp * (mhy[i] * p[j] + mhy[j] * p[i]) + pco * p[i] * p[j];
 			}
 
 			// Move to the next iteration.
