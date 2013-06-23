@@ -9,7 +9,7 @@
 #include "scoring_function.hpp"
 #include "array3d.hpp"
 #include "receptor.hpp"
-#include "conformation.hpp"
+#include "quaternion.hpp"
 using namespace boost::filesystem;
 using boost::ptr_vector;
 
@@ -31,6 +31,18 @@ public:
 	{
 		return e < r.e;
 	}
+};
+
+/// Represents a ligand conformation.
+class conformation
+{
+public:
+	vec3 position; ///< Ligand origin coordinate.
+	qtn4 orientation; ///< Ligand orientation.
+	vector<float> torsions; ///< Ligand torsions.
+
+	/// Constructs an initial conformation.
+	explicit conformation(const size_t num_active_torsions) : position(zero3), orientation(qtn4id), torsions(num_active_torsions, 0) {}
 };
 
 /// Represents a ROOT or a BRANCH in PDBQT structure.
