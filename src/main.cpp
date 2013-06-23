@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 	size_t num_ligands = 0; // Ligand counter.
 	cout.setf(ios::fixed, ios::floatfield);
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
-	cout << "   Index |          Ligand |                  Progress | Conf | kcal/mol\n" << setprecision(2);
+	cout << "   Index |          Ligand |                  Progress | kcal/mol | Conf\n" << setprecision(2);
 	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(input_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
@@ -212,6 +212,7 @@ int main(int argc, char* argv[])
 		cout << " | " << flush;
 
 		results.sort();
+		cout << setw(8) << results.front().e << " | " << flush;
 		summaries.push_back(new summary(stem, results.front().e));
 
 		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
@@ -234,7 +235,7 @@ int main(int argc, char* argv[])
 				representatives.push_back(i);
 			}
 		}
-		cout << setw(4) << representatives.size() << " | " << setw(8) << results.front().e << '\n';
+		cout << setw(4) << representatives.size() << '\n';
 
 		// Write models to file.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
