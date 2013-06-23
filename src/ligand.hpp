@@ -8,7 +8,7 @@
 #include "scoring_function.hpp"
 #include "array3d.hpp"
 #include "receptor.hpp"
-#include "quaternion.hpp"
+#include "qtn4.hpp"
 using namespace boost::filesystem;
 using boost::ptr_vector;
 

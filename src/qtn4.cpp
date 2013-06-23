@@ -1,4 +1,4 @@
-#include "quaternion.hpp"
+#include "qtn4.hpp"
 
 qtn4::qtn4(const float q0, const float q1, const float q2, const float q3)
 {
