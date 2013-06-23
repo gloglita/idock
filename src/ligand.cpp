@@ -274,24 +274,16 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {
 	// Initialize frame-wide conformational variables.
-	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
-	vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
-	vector<qtn4> orientations_q; ///< Orientation in the form of quaternion.
-	vector<array<float, 9>> orientations_m; ///< Orientation in the form of 3x3 matrix.
-	vector<vec3> forces; ///< Aggregated derivatives of heavy atoms.
-	vector<vec3> torques; /// Torque of the force.
-	origins.resize(num_frames);
-	axes.resize(num_frames);
-	orientations_q.resize(num_frames);
-	orientations_m.resize(num_frames);
-	forces.resize(num_frames, zero3); // Initialize forces to zero3 for subsequent aggregation.
-	torques.resize(num_frames, zero3); // Initialize torques to zero3 for subsequent aggregation.
+	vector<vec3> origins(num_frames); ///< Origin coordinate, which is rotorY.
+	vector<vec3> axes(num_frames); ///< Vector pointing from rotor Y to rotor X.
+	vector<qtn4> orientations_q(num_frames); ///< Orientation in the form of quaternion.
+	vector<array<float, 9>> orientations_m(num_frames); ///< Orientation in the form of 3x3 matrix.
+	vector<vec3> forces(num_frames, zero3); ///< Aggregated derivatives of heavy atoms.
+	vector<vec3> torques(num_frames, zero3); /// Torque of the force.
 
 	// Initialize atom-wide conformational variables.
-	vector<vec3> coordinates; ///< Heavy atom coordinates.
-	vector<vec3> derivatives; ///< Heavy atom derivatives.
-	coordinates.resize(num_heavy_atoms);
-	derivatives.resize(num_heavy_atoms);
+	vector<vec3> coordinates(num_heavy_atoms); ///< Heavy atom coordinates.
+	vector<vec3> derivatives(num_heavy_atoms); ///< Heavy atom derivatives.
 
 	// Apply position and orientation to ROOT frame.
 	const frame& root = frames.front();
