@@ -15,7 +15,7 @@ using namespace boost::filesystem;
 
 int main(int argc, char* argv[])
 {
-	path receptor_path, ligand_folder_path, output_folder_path, log_path;
+	path receptor_path, input_folder_path, output_folder_path, log_path;
 	vec3 center, size;
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	float grid_granularity;
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 		options_description input_options("input (required)");
 		input_options.add_options()
 			("receptor", value<path>(&receptor_path)->required(), "receptor in PDBQT format")
-			("ligand_folder", value<path>(&ligand_folder_path)->required(), "folder of ligands in PDBQT format")
+			("input_folder", value<path>(&input_folder_path)->required(), "folder of ligands in PDBQT format")
 			("center_x", value<float>(&center[0])->required(), "x coordinate of the search space center")
 			("center_y", value<float>(&center[1])->required(), "y coordinate of the search space center")
 			("center_z", value<float>(&center[2])->required(), "z coordinate of the search space center")
@@ -67,14 +67,14 @@ int main(int argc, char* argv[])
 		variables_map vm;
 		store(parse_command_line(argc, argv, all_options), vm);
 
-		// If no command line argument is supplied or help is requested, simply print the usage and exit.
+		// If no command line argument is supplied or help is requested, print the usage and exit.
 		if (argc == 1 || vm.count("help"))
 		{
 			cout << all_options;
 			return 0;
 		}
 
-		// If version is requested, simply print the version and exit.
+		// If version is requested, print the version and exit.
 		if (vm.count("version"))
 		{
 			cout << "3.0.0" << endl;
@@ -98,10 +98,10 @@ int main(int argc, char* argv[])
 			return 1;
 		}
 
-		// Validate ligand_folder.
-		if (!is_directory(ligand_folder_path))
+		// Validate input_folder.
+		if (!is_directory(input_folder_path))
 		{
-			cerr << "Ligand folder " << ligand_folder_path << " does not exist or is not a directory\n";
+			cerr << "Input folder " << input_folder_path << " does not exist or is not a directory\n";
 			return 1;
 		}
 
@@ -163,24 +163,24 @@ int main(int argc, char* argv[])
 	cout << "Using random seed " << seed << '\n';
 	mt19937_64 eng(seed);
 
+	// Initialize a vector of atom types to populate.
+	vector<size_t> atom_types_to_populate;
+	atom_types_to_populate.reserve(scoring_function::n);
+
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 	ptr_vector<result> results;
 	results.resize(num_mc_tasks);
 	vector<size_t> representatives;
 	representatives.reserve(max_conformations);
-
-	// Initialize a vector of empty grid maps. Each grid map corresponds to an XScore atom type.
-	vector<size_t> atom_types_to_populate;
-	atom_types_to_populate.reserve(XS_TYPE_SIZE);
+	ptr_vector<summary> summaries;
 
 	// Perform docking for each file in the ligand folder.
 	cout.setf(ios::fixed, ios::floatfield);
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
 	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(3);
 	size_t num_ligands = 0; // Ligand counter.
-	ptr_vector<summary> summaries;
 	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
-	for (directory_iterator dir_iter(ligand_folder_path); dir_iter != const_dir_iter; ++dir_iter)
+	for (directory_iterator dir_iter(input_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
 		// Parse the ligand.
 		const path input_ligand_path = dir_iter->path();
