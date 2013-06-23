@@ -36,16 +36,4 @@ public:
 	array<float, 9> to_mat3() const;
 };
 
-/// Returns the product of two quaternions.
-inline qtn4 operator *(const qtn4& q1, const qtn4& q2)
-{
-    return qtn4
-	(
-		q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
-		q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
-		q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
-		q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
-	);
-}
-
 #endif
