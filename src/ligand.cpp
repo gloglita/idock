@@ -53,7 +53,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 					{
 						atom& b = heavy_atoms[--i];
 						if (!b.is_hetero()) continue; // Only a hetero atom can be a hydrogen bond donor.
-						if (a.is_neighbor(b))
+						if (a.has_covalent_bond(b))
 						{
 							b.donorize();
 							break;
@@ -73,7 +73,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 				for (size_t i = heavy_atoms.size(); i > f->habegin;)
 				{
 					atom& b = heavy_atoms[--i];
-					if (a.is_neighbor(b))
+					if (a.has_covalent_bond(b))
 					{
 						bonds[heavy_atoms.size()].push_back(i);
 						bonds[i].push_back(heavy_atoms.size());

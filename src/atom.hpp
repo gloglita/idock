@@ -291,7 +291,7 @@ public:
 	}
 
 	/// Returns true if the current atom is covalently bonded to a given atom.
-	bool is_neighbor(const atom& a) const
+	bool has_covalent_bond(const atom& a) const
 	{
 		const float s = covalent_radius() + a.covalent_radius();
 		return distance_sqr(coord, a.coord) < s * s;

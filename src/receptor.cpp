@@ -63,7 +63,7 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 				for (size_t i = atoms.size(); i > residue_start;)
 				{
 					atom& b = atoms[--i];
-					if (b.is_hetero() && b.is_neighbor(a))
+					if (b.is_hetero() && b.has_covalent_bond(a))
 					{
 						b.donorize();
 						break;
@@ -76,7 +76,7 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 				for (size_t i = atoms.size(); i > residue_start;)
 				{
 					atom& b = atoms[--i];
-					if (!b.is_hetero() && b.is_neighbor(a))
+					if (!b.is_hetero() && b.has_covalent_bond(a))
 					{
 						b.dehydrophobicize();
 					}
@@ -87,7 +87,7 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 				for (size_t i = atoms.size(); i > residue_start;)
 				{
 					const atom& b = atoms[--i];
-					if (b.is_hetero() && b.is_neighbor(a))
+					if (b.is_hetero() && b.has_covalent_bond(a))
 					{
 						a.dehydrophobicize();
 						break;
