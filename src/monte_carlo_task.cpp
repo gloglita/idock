@@ -2,11 +2,10 @@
 #include "monte_carlo_task.hpp"
 using namespace std;
 
-int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const receptor& rec)
+int monte_carlo_task(result& r, const ligand& lig, const scoring_function& sf, const receptor& rec, const size_t seed, const size_t num_generations)
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
-	const size_t num_mc_iterations = 50; // The number of iterations.
 	const size_t num_entities  = 2 + lig.num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + lig.num_active_torsions; // Number of variables to optimize.
 	const float e_upper_bound = 40.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
@@ -51,7 +50,7 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	vector<float> mhy(6 + lig.num_active_torsions); // mhy = -h * y.
 	float yhy, yp, ryp, pco;
 
-	for (size_t mc_i = 0; mc_i < num_mc_iterations; ++mc_i)
+	for (size_t mc_i = 0; mc_i < num_generations; ++mc_i)
 	{
 		// Make a copy, so the previous conformation is retained.
 		c1 = c0;

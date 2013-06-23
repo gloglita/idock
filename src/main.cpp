@@ -17,7 +17,7 @@ int main(int argc, char* argv[])
 {
 	path receptor_path, input_folder_path, output_folder_path, log_path;
 	vec3 center, size;
-	size_t num_threads, seed, num_mc_tasks, max_conformations;
+	size_t num_threads, seed, num_mc_tasks, num_generations, max_conformations;
 	float grid_granularity;
 
 	// Parse program options in a try/catch block.
@@ -29,6 +29,7 @@ int main(int argc, char* argv[])
 		const size_t default_num_threads = thread::hardware_concurrency();
 		const size_t default_seed = chrono::system_clock::now().time_since_epoch().count();
 		const size_t default_num_mc_tasks = 2048;
+		const size_t default_num_generations = 100;
 		const size_t default_max_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 
@@ -55,6 +56,7 @@ int main(int argc, char* argv[])
 			("threads", value<size_t>(&num_threads)->default_value(default_num_threads), "number of worker threads to use")
 			("seed", value<size_t>(&seed)->default_value(default_seed), "explicit non-negative random seed")
 			("tasks", value<size_t>(&num_mc_tasks)->default_value(default_num_mc_tasks), "number of Monte Carlo tasks for global search")
+			("generations", value<size_t>(&num_generations)->default_value(default_num_generations), "number of generations in BFGS")
 			("max_conformations", value<size_t>(&max_conformations)->default_value(default_max_conformations), "number of binding conformations to write")
 			("granularity", value<float>(&grid_granularity)->default_value(default_grid_granularity), "density of probe atoms of grid maps")
 			("help", "help information")
@@ -206,7 +208,7 @@ int main(int argc, char* argv[])
 		// Run the Monte Carlo tasks in parallel
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), cref(rec))));
+			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), cref(sf), cref(rec), eng(), num_generations)));
 		}
 		tp.sync(25);
 		cout << " | " << flush;
