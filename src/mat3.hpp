@@ -36,12 +36,6 @@ public:
 		(*this)[6] = d20; (*this)[7] = d21; (*this)[8] = d22;
 	}
 
-	/// Returns the value at index (i, j) where j is the lowest dimension.
-	float operator()(const size_t i, const size_t j) const
-	{
-		return (*this)[3 * i + j];
-	}
-
 	/// Transforms a vector by current 3x3 matrix.
 	vec3 operator*(const vec3& v) const
 	{
@@ -53,7 +47,5 @@ public:
 		);
 	}
 };
-
-const mat3 mat3id(1, 0, 0, 0, 1, 0, 0, 0, 1); ///< Identity 3x3 transformation matrix.
 
 #endif
