@@ -277,7 +277,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
 	vector<vec3> axes; ///< Vector pointing from rotor Y to rotor X.
 	vector<qtn4> orientations_q; ///< Orientation in the form of quaternion.
-	vector<mat3> orientations_m; ///< Orientation in the form of 3x3 matrix.
+	vector<array<float, 9>> orientations_m; ///< Orientation in the form of 3x3 matrix.
 	vector<vec3> forces; ///< Aggregated derivatives of heavy atoms.
 	vector<vec3> torques; /// Torque of the force.
 	origins.resize(num_frames);
@@ -305,7 +305,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 	orientations_m.front() = orientations_q.front().to_mat3();
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
-		coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coord;
+		coordinates[i] = origins.front() + mat3_mul_vec3(orientations_m.front(), heavy_atoms[i].coord);
 	}
 
 	// Apply torsions to BRANCH frames.
@@ -314,7 +314,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		const frame& f = frames[k];
 
 		// Update origin.
-		origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
+		origins[k] = origins[f.parent] + mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorY_to_current_rotorY);
 
 		// If the current BRANCH frame does not have an active torsion, skip it.
 		if (!f.active)
@@ -327,7 +327,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 
 		// Update orientation.
 		assert(f.parent_rotorX_to_current_rotorY.normalized());
-		axes[k] = orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY;
+		axes[k] = mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY);
 		assert(axes[k].normalized());
 		orientations_q[k] = qtn4(axes[k], conf[7 + t++]) * orientations_q[f.parent];
 		assert(orientations_q[k].is_normalized());
@@ -336,7 +336,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
-			coordinates[i] = origins[k] + orientations_m[k] * heavy_atoms[i].coord;
+			coordinates[i] = origins[k] + mat3_mul_vec3(orientations_m[k], heavy_atoms[i].coord);
 		}
 	}
 
@@ -471,7 +471,7 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 {
 	vector<vec3> origins(num_frames);
 	vector<qtn4> orientations_q(num_frames);
-	vector<mat3> orientations_m(num_frames);
+	vector<array<float, 9>> orientations_m(num_frames);
 	vector<vec3> heavy_atoms(num_heavy_atoms);
 	vector<vec3> hydrogens(num_hydrogens);
 
@@ -488,11 +488,11 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 	const frame& root = frames.front();
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
-		heavy_atoms[i] = origins.front() + orientations_m.front() * this->heavy_atoms[i].coord;
+		heavy_atoms[i] = origins.front() + mat3_mul_vec3(orientations_m.front(), this->heavy_atoms[i].coord);
 	}
 	for (size_t i = root.hybegin; i < root.hyend; ++i)
 	{
-		hydrogens[i]   = origins.front() + orientations_m.front() * this->hydrogens[i].coord;
+		hydrogens[i]   = origins.front() + mat3_mul_vec3(orientations_m.front(), this->hydrogens[i].coord);
 	}
 
 	// Calculate the coordinates of both heavy atoms and hydrogens of BRANCH frames.
@@ -501,20 +501,20 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 		const frame& f = frames[k];
 
 		// Update origin.
-		origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
+		origins[k] = origins[f.parent] + mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorY_to_current_rotorY);
 
 		// Update orientation.
-		orientations_q[k] = qtn4(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf[7 + t++] : 0) * orientations_q[f.parent];
+		orientations_q[k] = qtn4(mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY), f.active ? conf[7 + t++] : 0) * orientations_q[f.parent];
 		orientations_m[k] = orientations_q[k].to_mat3();
 
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
 		{
-			heavy_atoms[i] = origins[k] + orientations_m[k] * this->heavy_atoms[i].coord;
+			heavy_atoms[i] = origins[k] + mat3_mul_vec3(orientations_m[k], this->heavy_atoms[i].coord);
 		}
 		for (size_t i = f.hybegin; i < f.hyend; ++i)
 		{
-			hydrogens[i]   = origins[k] + orientations_m[k] * this->hydrogens[i].coord;
+			hydrogens[i]   = origins[k] + mat3_mul_vec3(orientations_m[k], this->hydrogens[i].coord);
 		}
 	}
 

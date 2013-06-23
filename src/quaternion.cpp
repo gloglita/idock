@@ -53,7 +53,7 @@ qtn4 qtn4::normalize() const
 	return qtn4((*this)[0] * norm_inv, (*this)[1] * norm_inv, (*this)[2] * norm_inv, (*this)[3] * norm_inv);
 }
 
-mat3 qtn4::to_mat3() const
+array<float, 9> qtn4::to_mat3() const
 {
 //	assert(is_normalized());
 	const float aa = (*this)[0]*(*this)[0];
@@ -69,10 +69,10 @@ mat3 qtn4::to_mat3() const
 
 	// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
 	// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-	return mat3
-	(
+	return
+	{
 		aa+bb-cc-dd, 2*(-ad+bc), 2*(ac+bd),
 		2*(ad+bc), aa-bb+cc-dd, 2*(-ab+cd),
 		2*(-ac+bd), 2*(ab+cd), aa-bb-cc+dd
-	);
+	};
 }
