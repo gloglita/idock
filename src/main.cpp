@@ -169,7 +169,7 @@ int main(int argc, char* argv[])
 	size_t num_ligands = 0; // Ligand counter.
 	cout.setf(ios::fixed, ios::floatfield);
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
-	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(2);
+	cout << "   Index |          Ligand |                  Progress | Conf | kcal/mol\n" << setprecision(2);
 	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(input_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
@@ -190,27 +190,25 @@ int main(int argc, char* argv[])
 		}
 		if (xs.size())
 		{
-			cout << "Creating " << setw(2) << xs.size() << " grid map" << (xs.size() == 1 ? ' ' : 's') << "    " << flush;
-			assert(tp.empty());
+			cout << "Creating " << setw(2) << xs.size() << " grid map" << (xs.size() == 1 ? ' ' : 's') << "        " << flush;
 			for (size_t z = 0; z < rec.num_probes[2]; ++z)
 			{
 				tp.push_back(packaged_task<int()>(bind(&receptor::grid_map_task, ref(rec), cref(xs), z, cref(sf))));
 			}
-			tp.sync(10);
-			cout << '\r' << setw(36) << '\r';
+			tp.sync(25);
+			cout << '\r' << setw(55) << '\r';
 		}
 
-		// Dump the ligand filename.
+		// Output the ligand file stem.
 		const string stem = input_ligand_path.stem().string();
-		cout << setw(7) << ++num_ligands << " | " << setw(12) << stem << " | " << flush;
+		cout << setw(8) << ++num_ligands << " | " << setw(15) << stem << " | " << flush;
 
 		// Run the Monte Carlo tasks in parallel
-		assert(tp.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
 			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), cref(rec))));
 		}
-		tp.sync(10);
+		tp.sync(25);
 		cout << " | " << flush;
 
 		results.sort();
@@ -236,20 +234,11 @@ int main(int argc, char* argv[])
 				representatives.push_back(i);
 			}
 		}
-		cout << setw(4) << representatives.size() << " |";
+		cout << setw(4) << representatives.size() << " | " << setw(8) << results.front().e << '\n';
 
 		// Write models to file.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
 		lig.write_models(output_ligand_path, results, representatives);
-
-		// Display the free energies of the top 4 conformations.
-		for (size_t i = 0; i < min<size_t>(representatives.size(), 4); ++i)
-		{
-			cout << setw(8) << results[representatives[i]].e;
-		}
-		cout << '\n';
-
-		// Clear the results of the current ligand.
 		results.clear();
 	}
 
