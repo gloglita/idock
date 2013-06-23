@@ -31,6 +31,31 @@ inline qtn4 qtn4_mul_qtn4(const qtn4& q1, const qtn4& q2)
 	);
 }
 
+/// Transforms the current quaternion into a 3x3 transformation matrix, e.g. quaternion(1, 0, 0, 0) => identity matrix.
+inline array<float, 9> qtn4_to_mat3(const qtn4& q)
+{
+//	assert(is_normalized());
+	const float aa = q[0]*q[0];
+	const float ab = q[0]*q[1];
+	const float ac = q[0]*q[2];
+	const float ad = q[0]*q[3];
+	const float bb = q[1]*q[1];
+	const float bc = q[1]*q[2];
+	const float bd = q[1]*q[3];
+	const float cc = q[2]*q[2];
+	const float cd = q[2]*q[3];
+	const float dd = q[3]*q[3];
+
+	// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
+	// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+	return
+	{
+		aa+bb-cc-dd, 2*(-ad+bc), 2*(ac+bd),
+		2*(ad+bc), aa-bb+cc-dd, 2*(-ab+cd),
+		2*(-ac+bd), 2*(ab+cd), aa-bb-cc+dd
+	};
+}
+
 /// Transforms a vector by a 3x3 matrix.
 inline vec3 mat3_mul_vec3(const array<float, 9>& m, const vec3& v)
 {

@@ -31,9 +31,6 @@ public:
 
 	/// Returns a normalized quaternion of current quaternion.
 	qtn4 normalize() const;
-
-	/// Transforms the current quaternion into a 3x3 transformation matrix, e.g. quaternion(1, 0, 0, 0) => identity matrix.
-	array<float, 9> to_mat3() const;
 };
 
 #endif

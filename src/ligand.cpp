@@ -302,7 +302,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 	orientations_q.front()[1] = conf[4];
 	orientations_q.front()[2] = conf[5];
 	orientations_q.front()[3] = conf[6];
-	orientations_m.front() = orientations_q.front().to_mat3();
+	orientations_m.front() = qtn4_to_mat3(orientations_q.front());
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
 		coordinates[i] = origins.front() + mat3_mul_vec3(orientations_m.front(), heavy_atoms[i].coord);
@@ -331,7 +331,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		assert(axes[k].normalized());
 		orientations_q[k] = qtn4_mul_qtn4(qtn4(axes[k], conf[7 + t++]), orientations_q[f.parent]);
 		assert(orientations_q[k].is_normalized());
-		orientations_m[k] = orientations_q[k].to_mat3();
+		orientations_m[k] = qtn4_to_mat3(orientations_q[k]);
 
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
@@ -482,7 +482,7 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 	orientations_q.front()[1] = conf[4];
 	orientations_q.front()[2] = conf[5];
 	orientations_q.front()[3] = conf[6];
-	orientations_m.front() = orientations_q.front().to_mat3();
+	orientations_m.front() = qtn4_to_mat3(orientations_q.front());
 
 	// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
 	const frame& root = frames.front();
@@ -505,7 +505,7 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 
 		// Update orientation.
 		orientations_q[k] = qtn4_mul_qtn4(qtn4(mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY), f.active ? conf[7 + t++] : 0), orientations_q[f.parent]);
-		orientations_m[k] = orientations_q[k].to_mat3();
+		orientations_m[k] = qtn4_to_mat3(orientations_q[k]);
 
 		// Update coordinates.
 		for (size_t i = f.habegin; i < f.haend; ++i)
