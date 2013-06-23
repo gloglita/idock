@@ -19,12 +19,6 @@ public:
 	/// Constructs a 3D array with specified sizes.
 	explicit array3d(const array<size_t, 3> n_) : vector<T>(n_[0] * n_[1] * n_[2]), n(n_) {}
 
-	/// Returns true if all the 3 dimensions are non-zero.
-	bool initialized() const
-	{
-		return n[0] && n[1] && n[2];
-	}
-
 	/// Resizes the 3D array.
 	void resize(const array<size_t, 3>& n)
 	{
