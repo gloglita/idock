@@ -1,5 +1,6 @@
-#include <boost/random.hpp>
+#include <random>
 #include "monte_carlo_task.hpp"
+using namespace std;
 
 int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scoring_function& sf, const receptor& rec)
 {
@@ -11,13 +12,6 @@ int monte_carlo_task(result& r, const ligand& lig, const size_t seed, const scor
 	const float e_upper_bound = 40.0f * lig.num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
 	const float pi = 3.1415926535897932f; ///< Pi.
 
-	// On Linux, the std namespace contains std::mt19937 and std::normal_distribution.
-	// In order to avoid ambiguity, use the complete scope.
-	using boost::random::mt19937_64;
-	using boost::random::variate_generator;
-	using boost::random::uniform_real_distribution;
-	using boost::random::uniform_int_distribution;
-	using boost::random::normal_distribution;
 	mt19937_64 eng(seed);
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
