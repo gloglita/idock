@@ -1,5 +1,7 @@
 #include <chrono>
-#include <boost/random.hpp>
+#include <random>
+#include <iostream>
+#include <iomanip>
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/fstream.hpp>
@@ -159,7 +161,7 @@ int main(int argc, char* argv[])
 
 	// Initialize a Mersenne Twister random number generator.
 	cout << "Using random seed " << seed << '\n';
-	boost::random::mt19937_64 eng(seed);
+	mt19937_64 eng(seed);
 
 	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
 	ptr_vector<result> results;
