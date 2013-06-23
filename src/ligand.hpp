@@ -33,18 +33,6 @@ public:
 	}
 };
 
-/// Represents a ligand conformation.
-class conformation
-{
-public:
-	vec3 position; ///< Ligand origin coordinate.
-	qtn4 orientation; ///< Ligand orientation.
-	vector<float> torsions; ///< Ligand torsions.
-
-	/// Constructs an initial conformation.
-	explicit conformation(const size_t num_active_torsions) : position(zero3), orientation(qtn4id), torsions(num_active_torsions, 0) {}
-};
-
 /// Represents a ROOT or a BRANCH in PDBQT structure.
 class frame
 {
@@ -92,10 +80,10 @@ public:
 	ligand(const path& p);
 
 	/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
-	bool evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const;
+	bool evaluate(const vector<float>& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const;
 
 	/// Composes a result from free energy, and conformation conf.
-	result compose_result(const float e, const conformation& conf) const;
+	result compose_result(const float e, const vector<float>& conf) const;
 
 	/// Task for running Monte Carlo Simulated Annealing algorithm to find local minimums of the scoring function.
 	int bfgs(result& r, const scoring_function& sf, const receptor& rec, const size_t seed, const size_t num_generations) const;

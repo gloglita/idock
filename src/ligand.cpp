@@ -278,7 +278,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	}
 }
 
-bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const
+bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins; ///< Origin coordinate, which is rotorY.
@@ -302,9 +302,14 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 
 	// Apply position and orientation to ROOT frame.
 	const frame& root = frames.front();
-	origins.front() = conf.position;
-	orientations_q.front() = conf.orientation;
-	orientations_m.front() = conf.orientation.to_mat3();
+	origins.front()[0] = conf[0];
+	origins.front()[1] = conf[1];
+	origins.front()[2] = conf[2];
+	orientations_q.front()[0] = conf[3];
+	orientations_q.front()[1] = conf[4];
+	orientations_q.front()[2] = conf[5];
+	orientations_q.front()[3] = conf[6];
+	orientations_m.front() = orientations_q.front().to_mat3();
 	for (size_t i = root.habegin; i < root.haend; ++i)
 	{
 		coordinates[i] = origins.front() + orientations_m.front() * heavy_atoms[i].coord;
@@ -331,7 +336,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 		assert(f.parent_rotorX_to_current_rotorY.normalized());
 		axes[k] = orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY;
 		assert(axes[k].normalized());
-		orientations_q[k] = qtn4(axes[k], conf.torsions[t++]) * orientations_q[f.parent];
+		orientations_q[k] = qtn4(axes[k], conf[7 + t++]) * orientations_q[f.parent];
 		assert(orientations_q[k].is_normalized());
 		orientations_m[k] = orientations_q[k].to_mat3();
 
@@ -469,7 +474,7 @@ bool ligand::evaluate(const conformation& conf, const scoring_function& sf, cons
 	return true;
 }
 
-result ligand::compose_result(const float e, const conformation& conf) const
+result ligand::compose_result(const float e, const vector<float>& conf) const
 {
 	vector<vec3> origins(num_frames);
 	vector<qtn4> orientations_q(num_frames);
@@ -477,9 +482,14 @@ result ligand::compose_result(const float e, const conformation& conf) const
 	vector<vec3> heavy_atoms(num_heavy_atoms);
 	vector<vec3> hydrogens(num_hydrogens);
 
-	origins.front() = conf.position;
-	orientations_q.front() = conf.orientation;
-	orientations_m.front() = conf.orientation.to_mat3();
+	origins.front()[0] = conf[0];
+	origins.front()[1] = conf[1];
+	origins.front()[2] = conf[2];
+	orientations_q.front()[0] = conf[3];
+	orientations_q.front()[1] = conf[4];
+	orientations_q.front()[2] = conf[5];
+	orientations_q.front()[3] = conf[6];
+	orientations_m.front() = orientations_q.front().to_mat3();
 
 	// Calculate the coordinates of both heavy atoms and hydrogens of ROOT frame.
 	const frame& root = frames.front();
@@ -501,7 +511,7 @@ result ligand::compose_result(const float e, const conformation& conf) const
 		origins[k] = origins[f.parent] + orientations_m[f.parent] * f.parent_rotorY_to_current_rotorY;
 
 		// Update orientation.
-		orientations_q[k] = qtn4(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf.torsions[t++] : 0) * orientations_q[f.parent];
+		orientations_q[k] = qtn4(orientations_m[f.parent] * f.parent_rotorX_to_current_rotorY, f.active ? conf[7 + t++] : 0) * orientations_q[f.parent];
 		orientations_m[k] = orientations_q[k].to_mat3();
 
 		// Update coordinates.
@@ -531,21 +541,28 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
 	// Generate an initial random conformation c0, and evaluate it.
-	conformation c0(num_active_torsions);
+	vector<float> c0(7 + num_active_torsions);
 	float e0, f0;
 	vector<float> g0(6 + num_active_torsions);
 	// Randomize conformation c0.
-	c0.position = rec.center + (uniform_11(rng) * rec.span);
-	c0.orientation = qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)).normalize();
+	c0[0] = rec.center[0] + uniform_11(rng) * rec.span[0];
+	c0[1] = rec.center[1] + uniform_11(rng) * rec.span[1];
+	c0[2] = rec.center[2] + uniform_11(rng) * rec.span[2];
+	const qtn4 c0orientation = qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)).normalize();
+	assert(c0orientation.normalized());
+	c0[3] = c0orientation[0];
+	c0[4] = c0orientation[1];
+	c0[5] = c0orientation[2];
+	c0[6] = c0orientation[3];
 	for (size_t i = 0; i < num_active_torsions; ++i)
 	{
-		c0.torsions[i] = uniform_11(rng);
+		c0[7 + i] = uniform_11(rng);
 	}
 	evaluate(c0, sf, rec, e_upper_bound, e0, f0, g0);
 	r = compose_result(e0, c0);
 
 	// Initialize necessary variables for BFGS.
-	conformation c1(num_active_torsions), c2(num_active_torsions); // c2 = c1 + ap.
+	vector<float> c1(7 + num_active_torsions), c2(7 + num_active_torsions); // c2 = c1 + ap.
 	float e1, f1, e2, f2;
 	vector<float> g1(6 + num_active_torsions), g2(6 + num_active_torsions);
 	vector<float> p(6 + num_active_torsions); // Descent direction.
@@ -570,8 +587,9 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	{
 		// Make a copy, so the previous conformation is retained.
 		c1 = c0;
-//		c1.position += vec3(1, 1, 1);
-		c1.position += vec3(uniform_11(rng), uniform_11(rng), uniform_11(rng));
+		c1[0] += uniform_11(rng);
+		c1[1] += uniform_11(rng);
+		c1[2] += uniform_11(rng);
 		evaluate(c1, sf, rec, e_upper_bound, e1, f1, g1);
 
 		// Initialize the Hessian matrix to identity.
@@ -605,13 +623,20 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 			for (num_alpha_trials = 0; num_alpha_trials < num_alphas; ++num_alpha_trials)
 			{
 				// Calculate c2 = c1 + ap.
-				c2.position = c1.position + alpha * vec3(p[0], p[1], p[2]);
-				assert(c1.orientation.is_normalized());
-				c2.orientation = qtn4(alpha * vec3(p[3], p[4], p[5])) * c1.orientation;
-				assert(c2.orientation.is_normalized());
+				c2[0] = c1[0] + alpha * p[0];
+				c2[1] = c1[1] + alpha * p[1];
+				c2[2] = c1[2] + alpha * p[2];
+				const qtn4 c1orientation(c1[3], c1[4], c1[5], c1[6]);
+				assert(c1orientation.is_normalized());
+				const qtn4 c2orientation = qtn4(alpha * vec3(p[3], p[4], p[5])) * c1orientation;
+				assert(c2orientation.is_normalized());
+				c2[3] = c2orientation[0];
+				c2[4] = c2orientation[1];
+				c2[5] = c2orientation[2];
+				c2[6] = c2orientation[3];
 				for (size_t i = 0; i < num_active_torsions; ++i)
 				{
-					c2.torsions[i] = c1.torsions[i] + alpha * p[6 + i];
+					c2[7 + i] = c1[7 + i] + alpha * p[6 + i];
 				}
 
 				// Evaluate c2, subject to Wolfe conditions http://en.wikipedia.org/wiki/Wolfe_conditions
