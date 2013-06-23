@@ -48,6 +48,4 @@ inline qtn4 operator *(const qtn4& q1, const qtn4& q2)
 	);
 }
 
-const qtn4 qtn4id(1, 0, 0, 0); ///< Identity quaternion.
-
 #endif

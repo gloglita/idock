@@ -22,7 +22,10 @@ qtn4::qtn4(const vec3& rotation)
 {
 	if (rotation.zero())
 	{
-		*this = qtn4id;
+		(*this)[0] = 1;
+		(*this)[1] = 0;
+		(*this)[2] = 0;
+		(*this)[3] = 0;
 	}
 	else
 	{
