@@ -3,14 +3,35 @@
 #define IDOCK_LIGAND_HPP
 
 #include <boost/filesystem/path.hpp>
-#include <boost/optional.hpp>
+#include <boost/ptr_container/ptr_vector.hpp>
 #include "atom.hpp"
 #include "matrix.hpp"
 #include "scoring_function.hpp"
 #include "array3d.hpp"
-#include "result.hpp"
 #include "receptor.hpp"
+#include "conformation.hpp"
 using namespace boost::filesystem;
+using boost::ptr_vector;
+
+/// Represents a result found by BFGS local optimization for later clustering.
+class result
+{
+public:
+	float e; ///< Free energy.
+	vector<vec3> heavy_atoms; ///< Heavy atom coordinates.
+	vector<vec3> hydrogens; ///< Hydrogen atom coordinates.
+
+	result() {}
+
+	/// Constructs a result from free energy e, force f, heavy atom coordinates and hydrogen atom coordinates.
+	explicit result(const float e, vector<vec3>&& heavy_atoms_, vector<vec3>&& hydrogens_) : e(e), heavy_atoms(static_cast<vector<vec3>&&>(heavy_atoms_)), hydrogens(static_cast<vector<vec3>&&>(hydrogens_)) {}
+
+	/// For sorting ptr_vector<result>.
+	bool operator<(const result& r) const
+	{
+		return e < r.e;
+	}
+};
 
 /// Represents a ROOT or a BRANCH in PDBQT structure.
 class frame
@@ -63,6 +84,9 @@ public:
 
 	/// Composes a result from free energy, and conformation conf.
 	result compose_result(const float e, const conformation& conf) const;
+
+	/// Task for running Monte Carlo Simulated Annealing algorithm to find local minimums of the scoring function.
+	int bfgs(result& r, const scoring_function& sf, const receptor& rec, const size_t seed, const size_t num_generations) const;
 
 	/// Writes a given number of conformations from a result container into a output ligand file in PDBQT format.
 	void write_models(const path& output_ligand_path, const ptr_vector<result>& results, const vector<size_t>& representatives) const;

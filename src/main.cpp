@@ -8,10 +8,23 @@
 #include "receptor.hpp"
 #include "ligand.hpp"
 #include "thread_pool.hpp"
-#include "monte_carlo_task.hpp"
-#include "summary.hpp"
 using namespace std;
 using namespace boost::filesystem;
+
+/// Represents a summary of docking results of a ligand.
+class summary
+{
+public:
+	const string stem;
+	const float energy;
+	explicit summary(const string& stem, const float energy) : stem(stem), energy(energy) {}
+};
+
+/// For sorting ptr_vector<summary>.
+inline bool operator<(const summary& a, const summary& b)
+{
+	return a.energy < b.energy;
+}
 
 int main(int argc, char* argv[])
 {
@@ -208,7 +221,7 @@ int main(int argc, char* argv[])
 		// Run the Monte Carlo tasks in parallel
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
-			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), cref(sf), cref(rec), rng(), num_generations)));
+			tp.push_back(packaged_task<int()>(bind(&ligand::bfgs, cref(lig), ref(results[i]), cref(sf), cref(rec), rng(), num_generations)));
 		}
 		tp.sync(25);
 		cout << " | " << flush;
