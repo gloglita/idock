@@ -19,6 +19,35 @@ inline size_t mp(const size_t i, const size_t j)
 	return i <= j ? mr(i, j) : mr(j, i);
 }
 
+/// Constructs a quaternion by a normalized axis and a rotation angle.
+inline qtn4 vec4_to_qtn4(const vec3& axis, const float angle)
+{
+//	assert(axis.normalized());
+	const float s = sin(angle * 0.5f);
+	return qtn4
+	(
+		cos(angle * 0.5f),
+		s * axis[0],
+		s * axis[1],
+		s * axis[2]
+	);
+}
+
+/// Constructs a quaternion by a rotation vector.
+inline qtn4 vec3_to_qtn4(const vec3& rotation)
+{
+	if (rotation.zero())
+	{
+		return qtn4(1, 0, 0, 0);
+	}
+	else
+	{
+		const float angle = rotation.norm();
+		const vec3 axis = (1.0f / angle) * rotation;
+		return vec4_to_qtn4(axis, angle);
+	}
+}
+
 /// Returns the product of two quaternions.
 inline qtn4 qtn4_mul_qtn4(const qtn4& q1, const qtn4& q2)
 {

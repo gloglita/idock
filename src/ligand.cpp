@@ -329,7 +329,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		assert(f.parent_rotorX_to_current_rotorY.normalized());
 		axes[k] = mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY);
 		assert(axes[k].normalized());
-		orientations_q[k] = qtn4_mul_qtn4(qtn4(axes[k], conf[7 + t++]), orientations_q[f.parent]);
+		orientations_q[k] = qtn4_mul_qtn4(vec4_to_qtn4(axes[k], conf[7 + t++]), orientations_q[f.parent]);
 		assert(orientations_q[k].is_normalized());
 		orientations_m[k] = qtn4_to_mat3(orientations_q[k]);
 
@@ -504,7 +504,7 @@ result ligand::compose_result(const float e, const vector<float>& conf) const
 		origins[k] = origins[f.parent] + mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorY_to_current_rotorY);
 
 		// Update orientation.
-		orientations_q[k] = qtn4_mul_qtn4(qtn4(mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY), f.active ? conf[7 + t++] : 0), orientations_q[f.parent]);
+		orientations_q[k] = qtn4_mul_qtn4(vec4_to_qtn4(mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY), f.active ? conf[7 + t++] : 0), orientations_q[f.parent]);
 		orientations_m[k] = qtn4_to_mat3(orientations_q[k]);
 
 		// Update coordinates.
@@ -605,7 +605,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 				c2[2] = c1[2] + alpha * p[2];
 				const qtn4 c1orientation(c1[3], c1[4], c1[5], c1[6]);
 				assert(c1orientation.is_normalized());
-				const qtn4 c2orientation = qtn4_mul_qtn4(qtn4(alpha * vec3(p[3], p[4], p[5])), c1orientation);
+				const qtn4 c2orientation = qtn4_mul_qtn4(vec3_to_qtn4(alpha * vec3(p[3], p[4], p[5])), c1orientation);
 				assert(c2orientation.is_normalized());
 				c2[3] = c2orientation[0];
 				c2[4] = c2orientation[1];

@@ -14,12 +14,6 @@ public:
 	/// Constructs a quaternion by its four components.
 	explicit qtn4(const float q0, const float q1, const float q2, const float q3);
 
-	/// Constructs a quaternion by a normalized axis and a rotation angle.
-	explicit qtn4(const vec3& axis, const float angle);
-
-	/// Constructs a quaternion by a rotation vector.
-	explicit qtn4(const vec3& rotation);
-
 	/// Returns the square norm of current quaternion.
 	float norm_sqr() const;
 
