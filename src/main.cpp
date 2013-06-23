@@ -243,14 +243,12 @@ int main(int argc, char* argv[])
 		results.clear();
 	}
 
-	// Sort the summaries.
-	summaries.sort();
-
-	// Write ligand summary to the log file.
+	// Sort and write ligand summary to the log file.
 	cout << "Writing summary of " << num_ligands << " ligand" << (num_ligands == 1 ? "" : "s") << " to " << log_path << '\n';
+	summaries.sort();
 	boost::filesystem::ofstream log(log_path);
 	log.setf(ios::fixed, ios::floatfield);
-	log << "Ligand,Free energy (kcal/mol)" << '\n' << setprecision(2);
+	log << "Ligand,kcal/mol\n" << setprecision(2);
 	for (size_t i = 0; i < num_ligands; ++i)
 	{
 		const summary& s = summaries[i];
