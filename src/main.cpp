@@ -20,7 +20,7 @@ int main(int argc, char* argv[])
 	size_t num_threads, seed, num_mc_tasks, max_conformations;
 	float grid_granularity;
 
-	// Process program options.
+	// Parse program options in a try/catch block.
 	try
 	{
 		// Initialize the default values of optional arguments.
@@ -32,6 +32,7 @@ int main(int argc, char* argv[])
 		const size_t default_max_conformations = 9;
 		const float default_grid_granularity = 0.15625f;
 
+		// Set up options description.
 		using namespace boost::program_options;
 		options_description input_options("input (required)");
 		input_options.add_options()
@@ -141,11 +142,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	// Initialize a thread pool and create worker threads for later use.
 	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << '\n';
 	thread_pool tp(num_threads);
 
-	// Precalculate the scoring function in parallel.
 	cout << "Precalculating a scoring function of " << scoring_function::n << " atom types in parallel" << endl;
 	scoring_function sf;
 	for (size_t t2 = 0; t2 < sf.n; ++t2)
@@ -155,30 +154,22 @@ int main(int argc, char* argv[])
 	}
 	tp.sync();
 
-	// Parse the receptor.
 	cout << "Parsing receptor " << receptor_path << '\n';
 	receptor rec(receptor_path, center, size, grid_granularity);
 
-	// Initialize a Mersenne Twister random number generator.
 	cout << "Using random seed " << seed << '\n';
 	mt19937_64 eng(seed);
 
-	// Initialize a vector of atom types to populate.
-	vector<size_t> atom_types_to_populate;
-	atom_types_to_populate.reserve(scoring_function::n);
-
-	// Reserve storage for result containers. ptr_vector<T> is used for fast sorting.
+	// Perform docking for each file in the ligand folder.
 	ptr_vector<result> results;
 	results.resize(num_mc_tasks);
 	vector<size_t> representatives;
 	representatives.reserve(max_conformations);
 	ptr_vector<summary> summaries;
-
-	// Perform docking for each file in the ligand folder.
+	size_t num_ligands = 0; // Ligand counter.
 	cout.setf(ios::fixed, ios::floatfield);
 	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
-	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(3);
-	size_t num_ligands = 0; // Ligand counter.
+	cout << "  Index |       Ligand |   Progress | Conf | Top 4 conf free energy in kcal/mol\n" << setprecision(2);
 	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(input_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
@@ -187,35 +178,25 @@ int main(int argc, char* argv[])
 		const ligand lig(input_ligand_path);
 
 		// Create grid maps on the fly if necessary.
-		assert(atom_types_to_populate.empty());
-		const vector<size_t> ligand_atom_types = lig.get_atom_types();
-		const size_t num_ligand_atom_types = ligand_atom_types.size();
-		for (size_t i = 0; i < num_ligand_atom_types; ++i)
+		vector<size_t> xs;
+		for (size_t i = 0; i < lig.num_heavy_atoms; ++i)
 		{
-			const size_t t = ligand_atom_types[i];
-			array3d<float>& grid_map = rec.grid_maps[t];
-			if (grid_map.initialized()) continue; // The grid map of XScore atom type t has already been populated.
-			grid_map.resize(rec.num_probes); // An exception may be thrown in case memory is exhausted.
-			atom_types_to_populate.push_back(t);  // The grid map of XScore atom type t has not been populated and should be populated now.
+			const size_t t = lig.heavy_atoms[i].xs;
+			if (!rec.grid_maps[t].initialized() && find(xs.cbegin(), xs.cend(), t) == xs.cend())
+			{
+				xs.push_back(t);
+				rec.grid_maps[t].resize(rec.num_probes);
+			}
 		}
-		const size_t num_atom_types_to_populate = atom_types_to_populate.size();
-		if (num_atom_types_to_populate)
+		if (xs.size())
 		{
-			// Creating grid maps is an intermediate step, and thus should not be dumped to the log file.
-			cout << "Creating " << setw(2) << num_atom_types_to_populate << " grid map" << (num_atom_types_to_populate == 1 ? ' ' : 's') << "    " << flush;
-
-			// Populate the grid map task container.
+			cout << "Creating " << setw(2) << xs.size() << " grid map" << (xs.size() == 1 ? ' ' : 's') << "    " << flush;
 			assert(tp.empty());
 			for (size_t z = 0; z < rec.num_probes[2]; ++z)
 			{
-				tp.push_back(packaged_task<int()>(bind(&receptor::grid_map_task, ref(rec), cref(atom_types_to_populate), z, cref(sf))));
+				tp.push_back(packaged_task<int()>(bind(&receptor::grid_map_task, ref(rec), cref(xs), z, cref(sf))));
 			}
-
-			// Run the grid map tasks in parallel asynchronously and display the progress bar with hashes.
 			tp.sync(10);
-			atom_types_to_populate.clear();
-
-			// Clear the current line and reset the cursor to the beginning.
 			cout << '\r' << setw(36) << '\r';
 		}
 
@@ -223,14 +204,12 @@ int main(int argc, char* argv[])
 		const string stem = input_ligand_path.stem().string();
 		cout << setw(7) << ++num_ligands << " | " << setw(12) << stem << " | " << flush;
 
-		// Populate the Monte Carlo task container.
+		// Run the Monte Carlo tasks in parallel
 		assert(tp.empty());
 		for (size_t i = 0; i < num_mc_tasks; ++i)
 		{
 			tp.push_back(packaged_task<int()>(bind(monte_carlo_task, ref(results[i]), cref(lig), eng(), cref(sf), cref(rec))));
 		}
-
-		// Run the Monte Carlo tasks in parallel asynchronously and display the progress bar with hashes.
 		tp.sync(10);
 		cout << " | " << flush;
 
@@ -238,7 +217,7 @@ int main(int argc, char* argv[])
 		summaries.push_back(new summary(stem, results.front().e));
 
 		// Cluster results. Ligands with RMSD < 2.0 will be clustered into the same cluster.
-		const float required_square_error = static_cast<float>(4 * lig.num_heavy_atoms);
+		const float required_square_error = 4.0f * lig.num_heavy_atoms;
 		for (size_t i = 0; i < num_mc_tasks && representatives.size() < representatives.capacity(); ++i)
 		{
 			const result& r = results[i];
@@ -277,7 +256,7 @@ int main(int argc, char* argv[])
 	// Sort the summaries.
 	summaries.sort();
 
-	// Dump ligand summaries to the log file.
+	// Write ligand summary to the log file.
 	cout << "Writing summary of " << num_ligands << " ligand" << (num_ligands == 1 ? "" : "s") << " to " << log_path << '\n';
 	boost::filesystem::ofstream log(log_path);
 	log.setf(ios::fixed, ios::floatfield);

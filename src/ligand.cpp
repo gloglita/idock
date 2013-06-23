@@ -277,17 +277,6 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 	}
 }
 
-vector<size_t> ligand::get_atom_types() const
-{
-	vector<size_t> atom_types;
-	atom_types.reserve(10); // A ligand typically consists of <= 10 XScore atom types.
-	for (size_t i = 0; i < num_heavy_atoms; ++i)
-	{
-		const size_t t = heavy_atoms[i].xs;
-		if (find(atom_types.begin(), atom_types.end(), t) == atom_types.end()) atom_types.push_back(t);
-	}
-	return atom_types;
-}
 
 bool ligand::evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const
 {

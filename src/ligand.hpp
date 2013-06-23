@@ -58,9 +58,6 @@ public:
 	/// @exception parsing_error Thrown when an atom type is not recognized or an empty branch is detected.
 	ligand(const path& p);
 
-	/// Returns the XScore atom types presented in current ligand.
-	vector<size_t> get_atom_types() const;
-
 	/// Evaluates free energy e, force f, and change g. Returns true if the conformation is accepted.
 	bool evaluate(const conformation& conf, const scoring_function& sf, const receptor& rec, const float e_upper_bound, float& e, float& f, vector<float>& g) const;
 
