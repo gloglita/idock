@@ -532,18 +532,19 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 {
 	// Define constants.
 	const size_t num_alphas = 5; // Number of alpha values for determining step size in BFGS
-	const size_t num_entities  = 2 + num_active_torsions; // Number of entities to mutate.
 	const size_t num_variables = 6 + num_active_torsions; // Number of variables to optimize.
 	const float e_upper_bound = 40.0f * num_heavy_atoms; // A conformation will be droped if its free energy is not better than e_upper_bound.
-	const float pi = 3.1415926535897932f; ///< Pi.
 
+	// Declare variable.
+	vector<float> c0(7 + num_active_torsions), c1(7 + num_active_torsions), c2(7 + num_active_torsions);
+	vector<float> g0(6 + num_active_torsions), g1(6 + num_active_torsions), g2(6 + num_active_torsions);
+	vector<float> p(6 + num_active_torsions), y(6 + num_active_torsions), mhy(6 + num_active_torsions);
+	vector<float> h(num_variables*(num_variables+1)>>1); // Symmetric triangular Hessian matrix.
+	float e0, f0, e1, f1, e2, f2, alpha, pg1, pg2, yhy, yp, ryp, pco;
+	size_t g, i, j;
 	mt19937_64 rng(seed);
 	uniform_real_distribution<float> uniform_11(-1.0f, 1.0f);
 
-	// Generate an initial random conformation c0, and evaluate it.
-	vector<float> c0(7 + num_active_torsions);
-	float e0, f0;
-	vector<float> g0(6 + num_active_torsions);
 	// Randomize conformation c0.
 	c0[0] = rec.center[0] + uniform_11(rng) * rec.span[0];
 	c0[1] = rec.center[1] + uniform_11(rng) * rec.span[1];
@@ -554,36 +555,14 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	c0[4] = c0orientation[1];
 	c0[5] = c0orientation[2];
 	c0[6] = c0orientation[3];
-	for (size_t i = 0; i < num_active_torsions; ++i)
+	for (i = 0; i < num_active_torsions; ++i)
 	{
 		c0[7 + i] = uniform_11(rng);
 	}
 	evaluate(c0, sf, rec, e_upper_bound, e0, f0, g0);
 	r = compose_result(e0, c0);
 
-	// Initialize necessary variables for BFGS.
-	vector<float> c1(7 + num_active_torsions), c2(7 + num_active_torsions); // c2 = c1 + ap.
-	float e1, f1, e2, f2;
-	vector<float> g1(6 + num_active_torsions), g2(6 + num_active_torsions);
-	vector<float> p(6 + num_active_torsions); // Descent direction.
-	float alpha, pg1, pg2; // pg1 = p * g1. pg2 = p * g2.
-	size_t num_alpha_trials;
-
-	// Initialize the inverse Hessian matrix to identity matrix.
-	// An easier option that works fine in practice is to use a scalar multiple of the identity matrix,
-	// where the scaling factor is chosen to be in the range of the eigenvalues of the true Hessian.
-	// See N&R for a recipe to find this initializer.
-	triangular_matrix<float> identity_hessian(num_variables, 0); // Symmetric triangular matrix.
-	for (size_t i = 0; i < num_variables; ++i)
-		identity_hessian[triangular_matrix_restrictive_index(i, i)] = 1;
-
-	// Initialize necessary variables for updating the Hessian matrix h.
-	triangular_matrix<float> h(identity_hessian);
-	vector<float> y(6 + num_active_torsions); // y = g2 - g1.
-	vector<float> mhy(6 + num_active_torsions); // mhy = -h * y.
-	float yhy, yp, ryp, pco;
-
-	for (size_t mc_i = 0; mc_i < num_generations; ++mc_i)
+	for (g = 0; g < num_generations; ++g)
 	{
 		// Make a copy, so the previous conformation is retained.
 		c1 = c0;
@@ -592,8 +571,13 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 		c1[2] += uniform_11(rng);
 		evaluate(c1, sf, rec, e_upper_bound, e1, f1, g1);
 
-		// Initialize the Hessian matrix to identity.
-		h = identity_hessian;
+		// Initialize the inverse Hessian matrix to identity matrix.
+		// An easier option that works fine in practice is to use a scalar multiple of the identity matrix,
+		// where the scaling factor is chosen to be in the range of the eigenvalues of the true Hessian.
+		// See N&R for a recipe to find this initializer.
+		fill(h.begin(), h.end(), 0.0f);
+		for (i = 0; i < num_variables; ++i)
+			h[triangular_matrix_restrictive_index(i, i)] = 1.0f;
 
 		// Given the mutated conformation c1, use BFGS to find a local minimum.
 		// The conformation of the local minimum is saved to c2, and its derivative is saved to g2.
@@ -603,24 +587,24 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 		while (true)
 		{
 			// Calculate p = -h*g, where p is for descent direction, h for Hessian, and g for gradient.
-			for (size_t i = 0; i < num_variables; ++i)
+			for (i = 0; i < num_variables; ++i)
 			{
 				float sum = 0.0f;
-				for (size_t j = 0; j < num_variables; ++j)
+				for (j = 0; j < num_variables; ++j)
 					sum += h[triangular_matrix_permissive_index(i, j)] * g1[j];
 				p[i] = -sum;
 			}
 
 			// Calculate pg = p*g = -h*g^2 < 0
 			pg1 = 0;
-			for (size_t i = 0; i < num_variables; ++i)
+			for (i = 0; i < num_variables; ++i)
 				pg1 += p[i] * g1[i];
 
 			// Perform a line search to find an appropriate alpha.
 			// Try different alpha values for num_alphas times.
 			// alpha starts with 1, and shrinks to alpha_factor of itself iteration by iteration.
 			alpha = 1.0;
-			for (num_alpha_trials = 0; num_alpha_trials < num_alphas; ++num_alpha_trials)
+			for (j = 0; j < num_alphas; ++j)
 			{
 				// Calculate c2 = c1 + ap.
 				c2[0] = c1[0] + alpha * p[0];
@@ -634,7 +618,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 				c2[4] = c2orientation[1];
 				c2[5] = c2orientation[2];
 				c2[6] = c2orientation[3];
-				for (size_t i = 0; i < num_active_torsions; ++i)
+				for (i = 0; i < num_active_torsions; ++i)
 				{
 					c2[7 + i] = c1[7 + i] + alpha * p[6 + i];
 				}
@@ -645,7 +629,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 				if (evaluate(c2, sf, rec, e1 + 0.0001f * alpha * pg1, e2, f2, g2))
 				{
 					pg2 = 0;
-					for (size_t i = 0; i < num_variables; ++i)
+					for (i = 0; i < num_variables; ++i)
 						pg2 += p[i] * g2[i];
 					if (pg2 >= 0.9f * pg1)
 						break; // An appropriate alpha is found.
@@ -655,28 +639,28 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 			}
 
 			// If an appropriate alpha cannot be found, exit the BFGS loop.
-			if (num_alpha_trials == num_alphas) break;
+			if (j == num_alphas) break;
 
 			// Update Hessian matrix h.
-			for (size_t i = 0; i < num_variables; ++i) // Calculate y = g2 - g1.
+			for (i = 0; i < num_variables; ++i) // Calculate y = g2 - g1.
 				y[i] = g2[i] - g1[i];
-			for (size_t i = 0; i < num_variables; ++i) // Calculate mhy = -h * y.
+			for (i = 0; i < num_variables; ++i) // Calculate mhy = -h * y.
 			{
 				float sum = 0.0f;
-				for (size_t j = 0; j < num_variables; ++j)
+				for (j = 0; j < num_variables; ++j)
 					sum += h[triangular_matrix_permissive_index(i, j)] * y[j];
 				mhy[i] = -sum;
 			}
 			yhy = 0;
-			for (size_t i = 0; i < num_variables; ++i) // Calculate yhy = -y * mhy = -y * (-hy).
+			for (i = 0; i < num_variables; ++i) // Calculate yhy = -y * mhy = -y * (-hy).
 				yhy -= y[i] * mhy[i];
 			yp = 0;
-			for (size_t i = 0; i < num_variables; ++i) // Calculate yp = y * p.
+			for (i = 0; i < num_variables; ++i) // Calculate yp = y * p.
 				yp += y[i] * p[i];
 			ryp = 1 / yp;
 			pco = ryp * (ryp * yhy + alpha);
-			for (size_t i = 0; i < num_variables; ++i)
-			for (size_t j = i; j < num_variables; ++j) // includes i
+			for (i = 0; i < num_variables; ++i)
+			for (j = i; j < num_variables; ++j) // includes i
 			{
 				h[triangular_matrix_restrictive_index(i, j)] += ryp * (mhy[i] * p[j] + mhy[j] * p[i]) + pco * p[i] * p[j];
 			}
@@ -692,8 +676,6 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 		if (e1 < e0)
 		{
 			r = compose_result(e1, c1);
-
-			// Save c1 into c0.
 			c0 = c1;
 			e0 = e1;
 		}
