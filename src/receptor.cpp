@@ -3,7 +3,7 @@
 #include "receptor.hpp"
 
 const float receptor::Default_Partition_Granularity = 3.0f;
-const float receptor::Default_Partition_Granularity_Inverse = 1 / Default_Partition_Granularity;
+const float receptor::Default_Partition_Granularity_Inverse = 1.0f / Default_Partition_Granularity;
 
 receptor::receptor(const path& p, const vec3& center, const vec3& span_, const float grid_granularity) : center(center), grid_granularity(grid_granularity), grid_granularity_inverse(1 / grid_granularity), grid_size(vec3(grid_granularity, grid_granularity, grid_granularity)), grid_size_inverse(vec3(grid_granularity_inverse, grid_granularity_inverse, grid_granularity_inverse)), grid_maps(scoring_function::n)
 {
@@ -22,7 +22,7 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 		// Determine the number of partitions.
 		num_partitions[i] = static_cast<size_t>(span[i] * Default_Partition_Granularity_Inverse);
 		partition_size[i] = span[i] / num_partitions[i];
-		partition_size_inverse[i] = 1 / partition_size[i];
+		partition_size_inverse[i] = 1.0f / partition_size[i];
 	}
 	partitions.resize(num_partitions);
 
@@ -191,10 +191,9 @@ array<size_t, 3> receptor::partition_index(const vec3& coordinate) const
 	return index;
 }
 
-int receptor::grid_map_task(const vector<size_t>& atom_types_to_populate, const size_t z, const scoring_function& sf)
+int receptor::populate(const vector<size_t>& xs, const size_t z, const scoring_function& sf)
 {
-	const size_t num_atom_types_to_populate = atom_types_to_populate.size();
-	vector<float> e(num_atom_types_to_populate);
+	vector<float> e(xs.size());
 
 	// For each probe atom of the given X dimension value.
 	const size_t num_y_probes = num_probes[1];
@@ -205,31 +204,29 @@ int receptor::grid_map_task(const vector<size_t>& atom_types_to_populate, const 
 		// Find the possibly interacting receptor atoms via partitions.
 		const array<size_t, 3> grid_index = { x, y, z };
 		const vec3 probe_coords = grid_corner0(grid_index);
-		const vector<size_t>& receptor_atoms = partitions(partition_index(probe_coords));
 
 		// Accumulate individual free energies for each atom types to populate.
 		fill(e.begin(), e.end(), 0.0f);
-		const size_t num_receptor_atoms = receptor_atoms.size();
-		for (size_t l = 0; l < num_receptor_atoms; ++l)
+		for (const auto p : partitions(partition_index(probe_coords)))
 		{
-			const atom& a = atoms[receptor_atoms[l]];
+			const atom& a = atoms[p];
 			assert(!a.is_hydrogen());
 			const float r2 = distance_sqr(probe_coords, a.coord);
 			if (r2 <= scoring_function::cutoff_sqr)
 			{
 				const size_t t1 = a.xs;
-				for (size_t i = 0; i < num_atom_types_to_populate; ++i)
+				for (size_t i = 0; i < xs.size(); ++i)
 				{
-					const size_t t2 = atom_types_to_populate[i];
+					const size_t t2 = xs[i];
 					e[i] += sf.e[sf.o(sf.p(t1, t2), r2)];
 				}
 			}
 		}
 
 		// Save accumulated free energies into grid maps.
-		for (size_t i = 0; i < num_atom_types_to_populate; ++i)
+		for (size_t i = 0; i < xs.size(); ++i)
 		{
-			const size_t t = atom_types_to_populate[i];
+			const size_t t = xs[i];
 			grid_maps[t](grid_index) = e[i];
 		}
 	}

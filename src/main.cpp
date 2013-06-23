@@ -95,14 +95,14 @@ int main(int argc, char* argv[])
 		// Validate receptor.
 		if (!is_regular_file(receptor_path))
 		{
-			cerr << "Receptor " << receptor_path << " does not exist or is not a regular file\n";
+			cerr << "Receptor " << receptor_path << " does not exist or is not a regular file" << endl;
 			return 1;
 		}
 
 		// Validate input_folder.
 		if (!is_directory(input_folder_path))
 		{
-			cerr << "Input folder " << input_folder_path << " does not exist or is not a directory\n";
+			cerr << "Input folder " << input_folder_path << " does not exist or is not a directory" << endl;
 			return 1;
 		}
 
@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 			cerr << "Search space must be "
 				 << receptor::Default_Partition_Granularity << "A x "
 				 << receptor::Default_Partition_Granularity << "A x "
-				 << receptor::Default_Partition_Granularity << "A or larger\n";
+				 << receptor::Default_Partition_Granularity << "A or larger" << endl;
 			return 1;
 		}
 
@@ -123,7 +123,7 @@ int main(int argc, char* argv[])
 		{
 			if (!is_directory(output_folder_path))
 			{
-				cerr << "Output folder " << output_folder_path << " is not a directory\n";
+				cerr << "Output folder " << output_folder_path << " is not a directory" << endl;
 				return 1;
 			}
 		}
@@ -131,18 +131,18 @@ int main(int argc, char* argv[])
 		{
 			if (!create_directories(output_folder_path))
 			{
-				cerr << "Failed to create output folder " << output_folder_path << '\n';
+				cerr << "Failed to create output folder " << output_folder_path << endl;
 				return 1;
 			}
 		}
 	}
 	catch (const exception& e)
 	{
-		cerr << e.what() << '\n';
+		cerr << e.what() << endl;
 		return 1;
 	}
 
-	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << '\n';
+	cout << "Creating a thread pool of " << num_threads << " worker thread" << (num_threads == 1 ? "" : "s") << endl;
 	thread_pool tp(num_threads);
 
 	cout << "Precalculating a scoring function of " << scoring_function::n << " atom types in parallel" << endl;
@@ -154,10 +154,10 @@ int main(int argc, char* argv[])
 	}
 	tp.sync();
 
-	cout << "Parsing receptor " << receptor_path << '\n';
+	cout << "Parsing receptor " << receptor_path << endl;
 	receptor rec(receptor_path, center, size, grid_granularity);
 
-	cout << "Using random seed " << seed << '\n';
+	cout << "Using random seed " << seed << endl;
 	mt19937_64 eng(seed);
 
 	// Perform docking for each file in the ligand folder.
@@ -168,8 +168,8 @@ int main(int argc, char* argv[])
 	ptr_vector<summary> summaries;
 	size_t num_ligands = 0; // Ligand counter.
 	cout.setf(ios::fixed, ios::floatfield);
-	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand\n";
-	cout << "   Index |          Ligand |                  Progress | kcal/mol | Conf\n" << setprecision(2);
+	cout << "Running " << num_mc_tasks << " Monte Carlo task" << (num_mc_tasks == 1 ? "" : "s") << " per ligand in parallel" << endl;
+	cout << "   Index |          Ligand |                  Progress | kcal/mol | Conf" << endl << setprecision(2);
 	const directory_iterator const_dir_iter; // A default constructed directory_iterator acts as the end iterator.
 	for (directory_iterator dir_iter(input_folder_path); dir_iter != const_dir_iter; ++dir_iter)
 	{
@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
 			cout << "Creating " << setw(2) << xs.size() << " grid map" << (xs.size() == 1 ? ' ' : 's') << "        " << flush;
 			for (size_t z = 0; z < rec.num_probes[2]; ++z)
 			{
-				tp.push_back(packaged_task<int()>(bind(&receptor::grid_map_task, ref(rec), cref(xs), z, cref(sf))));
+				tp.push_back(packaged_task<int()>(bind(&receptor::populate, ref(rec), cref(xs), z, cref(sf))));
 			}
 			tp.sync(25);
 			cout << '\r' << setw(55) << '\r';
@@ -235,7 +235,7 @@ int main(int argc, char* argv[])
 				representatives.push_back(i);
 			}
 		}
-		cout << setw(4) << representatives.size() << '\n';
+		cout << setw(4) << representatives.size() << endl;
 
 		// Write models to file.
 		const path output_ligand_path = output_folder_path / input_ligand_path.filename();
@@ -244,7 +244,7 @@ int main(int argc, char* argv[])
 	}
 
 	// Sort and write ligand summary to the log file.
-	cout << "Writing summary of " << num_ligands << " ligand" << (num_ligands == 1 ? "" : "s") << " to " << log_path << '\n';
+	cout << "Writing summary of " << num_ligands << " ligand" << (num_ligands == 1 ? "" : "s") << " to " << log_path << endl;
 	summaries.sort();
 	boost::filesystem::ofstream log(log_path);
 	log.setf(ios::fixed, ios::floatfield);
