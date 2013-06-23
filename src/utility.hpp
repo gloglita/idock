@@ -19,6 +19,31 @@ inline size_t mp(const size_t i, const size_t j)
 	return i <= j ? mr(i, j) : mr(j, i);
 }
 
+/// Returns the square norm of current quaternion.
+inline float norm_sqr(const qtn4& q)
+{
+	return q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
+}
+
+/// Returns the norm of current quaternion.
+inline float norm(const qtn4& q)
+{
+	return sqrt(norm_sqr(q));
+}
+
+/// Returns true if the current quaternion is normalized.
+inline bool is_normalized(const qtn4& q)
+{
+	return norm_sqr(q) - 1.0f < 1e-5f;
+}
+
+/// Returns a normalized quaternion of current quaternion.
+inline qtn4 normalize(const qtn4& q)
+{
+	const float norm_inv = 1.0f / norm(q);
+	return qtn4(q[0] * norm_inv, q[1] * norm_inv, q[2] * norm_inv, q[3] * norm_inv);
+}
+
 /// Constructs a quaternion by a normalized axis and a rotation angle.
 inline qtn4 vec4_to_qtn4(const vec3& axis, const float angle)
 {

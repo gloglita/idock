@@ -330,7 +330,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		axes[k] = mat3_mul_vec3(orientations_m[f.parent], f.parent_rotorX_to_current_rotorY);
 		assert(axes[k].normalized());
 		orientations_q[k] = qtn4_mul_qtn4(vec4_to_qtn4(axes[k], conf[7 + t++]), orientations_q[f.parent]);
-		assert(orientations_q[k].is_normalized());
+		assert(normalized(orientations_q[k]));
 		orientations_m[k] = qtn4_to_mat3(orientations_q[k]);
 
 		// Update coordinates.
@@ -542,8 +542,8 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	c0[0] = rec.center[0] + uniform_11(rng) * rec.span[0];
 	c0[1] = rec.center[1] + uniform_11(rng) * rec.span[1];
 	c0[2] = rec.center[2] + uniform_11(rng) * rec.span[2];
-	const qtn4 c0orientation = qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)).normalize();
-	assert(c0orientation.normalized());
+	const qtn4 c0orientation = normalize(qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)));
+	assert(is_normalized(c0orientation));
 	c0[3] = c0orientation[0];
 	c0[4] = c0orientation[1];
 	c0[5] = c0orientation[2];
@@ -604,9 +604,9 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 				c2[1] = c1[1] + alpha * p[1];
 				c2[2] = c1[2] + alpha * p[2];
 				const qtn4 c1orientation(c1[3], c1[4], c1[5], c1[6]);
-				assert(c1orientation.is_normalized());
+				assert(normalized(c1orientation));
 				const qtn4 c2orientation = qtn4_mul_qtn4(vec3_to_qtn4(alpha * vec3(p[3], p[4], p[5])), c1orientation);
-				assert(c2orientation.is_normalized());
+				assert(normalized(c2orientation));
 				c2[3] = c2orientation[0];
 				c2[4] = c2orientation[1];
 				c2[5] = c2orientation[2];
