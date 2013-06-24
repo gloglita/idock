@@ -18,6 +18,42 @@ inline size_t mp(const size_t i, const size_t j)
 	return i <= j ? mr(i, j) : mr(j, i);
 }
 
+/// Returns the square norm.
+inline float norm_sqr(const array<float, 3>& a)
+{
+	return a[0] * a[0] + a[1] * a[1] + a[2] * a[2];
+}
+
+/// Returns the norm.
+inline float norm(const array<float, 3>& a)
+{
+	return sqrt(norm_sqr(a));
+}
+
+/// Returns true if the norm equals 1.
+inline bool normalized(const array<float, 3>& a)
+{
+	return norm_sqr(a) - 1.0f < 1e-5f;
+}
+
+/// Normalize the vector.
+inline vec3 normalize(const array<float, 3>& a)
+{
+	const float norm_inv = 1.0f / norm(a);
+	return vec3
+	(
+		a[0] * norm_inv,
+		a[1] * norm_inv,
+		a[2] * norm_inv
+	);
+}
+
+/// Returns the normalized vector of a vector.
+inline vec3 normalize(const vec3& v)
+{
+	return (1.0f / norm(v)) * v;
+}
+
 /// Returns the square norm of current quaternion.
 inline float norm_sqr(const array<float, 4>& q)
 {
@@ -75,7 +111,7 @@ inline array<float, 4> vec3_to_qtn4(const vec3& rotation)
 	}
 	else
 	{
-		const float angle = rotation.norm();
+		const float angle = norm(rotation);
 		const vec3 axis = (1.0f / angle) * rotation;
 		return vec4_to_qtn4(axis, angle);
 	}

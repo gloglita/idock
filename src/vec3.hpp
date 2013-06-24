@@ -28,31 +28,6 @@ public:
 		return (*this)[0] < 1e-5f && (*this)[1] < 1e-5f && (*this)[2] < 1e-5f;
 	}
 
-	/// Returns the square norm.
-	float norm_sqr() const
-	{
-		return (*this)[0] * (*this)[0] + (*this)[1] * (*this)[1] + (*this)[2] * (*this)[2];
-	}
-
-	/// Returns the norm.
-	float norm() const
-	{
-		return sqrt(norm_sqr());
-	}
-
-	/// Returns true if the norm equals 1.
-	bool normalized() const
-	{
-		return norm_sqr() - 1.0f < 1e-5f;
-	}
-
-	/// Normalize the vector.
-	vec3 normalize() const
-	{
-		const float factor = 1.0f / norm();
-		return vec3(factor * (*this)[0], factor * (*this)[1], factor * (*this)[2]);
-	}
-
 	/// Returns the dot product of the current vector and the given vector.
 	float operator*(const vec3& v) const
 	{
@@ -102,12 +77,6 @@ const vec3 zero3(0, 0, 0); ///< Constant vector with all the 3 elements of zero.
 inline vec3 operator*(const float s, const vec3& v)
 {
 	return vec3(s * v[0], s * v[1], s * v[2]);
-}
-
-/// Returns the normalized vector of a vector.
-inline vec3 normalize(const vec3& v)
-{
-	return (1.0f / v.norm()) * v;
 }
 
 /// Returns the cross product of two vectors.

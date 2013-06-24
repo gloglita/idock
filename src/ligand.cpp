@@ -165,7 +165,7 @@ ligand::ligand(const path& p) : num_active_torsions(0)
 			// Calculate parent_rotorY_to_current_rotorY and parent_rotorX_to_current_rotorY.
 			const frame& p = frames[f->parent];
 			f->parent_rotorY_to_current_rotorY =  rotorY.coord - heavy_atoms[p.rotorYidx].coord;
-			f->parent_rotorX_to_current_rotorY = (rotorY.coord - rotorX.coord).normalize();
+			f->parent_rotorX_to_current_rotorY = normalize(rotorY.coord - rotorX.coord);
 
 			// Now the parent of the following frame is the parent of current frame.
 			current = f->parent;
@@ -400,7 +400,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 	{
 		const interacting_pair& p = interacting_pairs[i];
 		const vec3 r = coordinates[p.i2] - coordinates[p.i1];
-		const float r2 = r.norm_sqr();
+		const float r2 = norm_sqr(r);
 		if (r2 < scoring_function::cutoff_sqr)
 		{
 			const size_t o = sf.o(p.type_pair_index, r2);
