@@ -364,7 +364,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 
 		// Retrieve the grid map in need.
 		const array3d<float>& grid_map = rec.grid_maps[heavy_atoms[i].xs];
-		assert(grid_map.initialized());
+		assert(grid_map.size());
 
 		// Find the index and fraction of the current coordinates.
 		const array<size_t, 3> index = rec.grid_index(coordinates[i]);
@@ -535,7 +535,7 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	c0[1] = rec.center[1] + uniform_11(rng) * rec.span[1];
 	c0[2] = rec.center[2] + uniform_11(rng) * rec.span[2];
 	const qtn4 c0orientation = normalize(qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)));
-	assert(is_normalized(c0orientation));
+	assert(normalized(c0orientation));
 	c0[3] = c0orientation[0];
 	c0[4] = c0orientation[1];
 	c0[5] = c0orientation[2];
