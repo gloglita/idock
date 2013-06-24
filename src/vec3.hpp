@@ -21,13 +21,14 @@ public:
 		(*this)[1] = d1;
 		(*this)[2] = d2;
 	}
-
-	/// Returns true is the vector is (0, 0, 0).
-	bool zero() const
-	{
-		return (*this)[0] < 1e-5f && (*this)[1] < 1e-5f && (*this)[2] < 1e-5f;
-	}
 };
+
+/// Returns true is the vector is (0, 0, 0).
+inline bool zero(const array<float, 3>& a)
+{
+	return a[0] < 1e-5f && a[1] < 1e-5f && a[2] < 1e-5f;
+}
+
 
 /// Returns the result of pairwise multiplication of the current vector and the given vector.
 inline vec3 operator*(const vec3& a, const array<size_t, 3>& b)

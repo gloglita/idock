@@ -104,7 +104,7 @@ inline array<float, 4> vec4_to_qtn4(const vec3& axis, const float angle)
 /// Constructs a quaternion by a rotation vector.
 inline array<float, 4> vec3_to_qtn4(const vec3& rotation)
 {
-	if (rotation.zero())
+	if (zero(rotation))
 	{
 		const array<float, 4> r = { 1, 0, 0, 0 };
 		return r;
