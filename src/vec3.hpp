@@ -27,12 +27,6 @@ public:
 	{
 		return (*this)[0] < 1e-5f && (*this)[1] < 1e-5f && (*this)[2] < 1e-5f;
 	}
-
-	/// Returns the dot product of the current vector and the given vector.
-	float operator*(const vec3& v) const
-	{
-		return (*this)[0] * v[0] + (*this)[1] * v[1] + (*this)[2] * v[2];
-	}
 };
 
 /// Returns the result of pairwise multiplication of the current vector and the given vector.

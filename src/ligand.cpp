@@ -438,7 +438,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 		if (!f.active) continue;
 
 		// Save the torsion.
-		g[6 + (--t)] = torques[k] * axes[k]; // dot product
+		g[6 + (--t)] = torques[k][0] * axes[k][0] + torques[k][1] * axes[k][1] + torques[k][2] * axes[k][2]; // dot product
 	}
 
 	// Calculate and aggregate the force and torque of ROOT frame.
