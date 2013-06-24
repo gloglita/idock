@@ -238,7 +238,11 @@ int main(int argc, char* argv[])
 			bool representative = true;
 			for (size_t j = 0; j < i; ++j)
 			{
-				const float this_square_error = distance_sqr(r.heavy_atoms, results[j].heavy_atoms);
+				float this_square_error = 0.0f;
+				for (size_t k = 0; k < lig.num_heavy_atoms; ++k)
+				{
+					this_square_error += distance_sqr(r.heavy_atoms[k], results[j].heavy_atoms[k]);
+				}
 				if (this_square_error < required_square_error)
 				{
 					representative = false;

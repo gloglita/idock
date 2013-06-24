@@ -94,14 +94,4 @@ inline float distance_sqr(const vec3& a, const vec3& b)
 	return d0 * d0 + d1 * d1 + d2 * d2;
 }
 
-/// Returns the accumulated square distance between two vectors of vectors.
-inline float distance_sqr(const vector<vec3>& a, const vector<vec3>& b)
-{
-	const size_t n = a.size();
-	float sum = 0.0f;
-	for (size_t i = 0; i < n; ++i)
-		sum += distance_sqr(a[i], b[i]);
-	return sum;
-}
-
 #endif
