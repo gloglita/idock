@@ -51,25 +51,23 @@ public:
 	{
 		return vec3((*this)[0] - v[0], (*this)[1] - v[1], (*this)[2] - v[2]);
 	}
-
-	/// Pairwise add a given vector to the current vector.
-	const vec3& operator+=(const vec3& v)
-	{
-		(*this)[0] += v[0];
-		(*this)[1] += v[1];
-		(*this)[2] += v[2];
-		return *this;
-	}
-
-	/// Pairwise subtract a given vector from the current vector.
-	const vec3& operator-=(const vec3& v)
-	{
-		(*this)[0] -= v[0];
-		(*this)[1] -= v[1];
-		(*this)[2] -= v[2];
-		return *this;
-	}
 };
+
+/// Pairwise add a given vector to the current vector.
+inline void operator+=(vec3& a, const vec3& b)
+{
+	a[0] += b[0];
+	a[1] += b[1];
+	a[2] += b[2];
+}
+
+/// Pairwise subtract a given vector from the current vector.
+inline void operator-=(vec3& a, const vec3& b)
+{
+	a[0] -= b[0];
+	a[1] -= b[1];
+	a[2] -= b[2];
+}
 
 const vec3 zero3(0, 0, 0); ///< Constant vector with all the 3 elements of zero.
 
