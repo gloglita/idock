@@ -33,25 +33,40 @@ public:
 	{
 		return (*this)[0] * v[0] + (*this)[1] * v[1] + (*this)[2] * v[2];
 	}
-
-	/// Returns the result of pairwise multiplication of the current vector and the given vector.
-	vec3 operator*(const array<size_t, 3>& v) const
-	{
-		return vec3((*this)[0] * v[0], (*this)[1] * v[1], (*this)[2] * v[2]);
-	}
-
-	/// Returns the result of pairwise addition of the current vector and the given vector.
-	vec3 operator+(const vec3& v) const
-	{
-		return vec3((*this)[0] + v[0], (*this)[1] + v[1], (*this)[2] + v[2]);
-	}
-
-	/// Returns the result of pairwise subtraction of the current vector and the given vector.
-	vec3 operator-(const vec3& v) const
-	{
-		return vec3((*this)[0] - v[0], (*this)[1] - v[1], (*this)[2] - v[2]);
-	}
 };
+
+/// Returns the result of pairwise multiplication of the current vector and the given vector.
+inline vec3 operator*(const vec3& a, const array<size_t, 3>& b)
+{
+	return vec3
+	(
+		a[0] * b[0],
+		a[1] * b[1],
+		a[2] * b[2]
+	);
+}
+
+/// Returns the result of pairwise addition of the current vector and the given vector.
+inline vec3 operator+(const vec3& a, const vec3& b)
+{
+	return vec3
+	(
+		a[0] + b[0],
+		a[1] + b[1],
+		a[2] + b[2]
+	);
+}
+
+/// Returns the result of pairwise subtraction of the current vector and the given vector.
+inline vec3 operator-(const vec3& a, const vec3& b)
+{
+	return vec3
+	(
+		a[0] - b[0],
+		a[1] - b[1],
+		a[2] - b[2]
+	);
+}
 
 /// Pairwise add a given vector to the current vector.
 inline void operator+=(vec3& a, const vec3& b)
