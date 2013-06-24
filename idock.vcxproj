@@ -29,6 +29,7 @@
     <ClInclude Include="src\scoring_function.hpp" />
     <ClInclude Include="src\receptor.hpp" />
     <ClInclude Include="src\thread_pool.hpp" />
+    <ClInclude Include="src\utility.hpp" />
     <ClInclude Include="src\vec3.hpp" />
   </ItemGroup>
   <ItemGroup>
