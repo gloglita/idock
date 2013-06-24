@@ -102,34 +102,36 @@ inline array<float, 9> qtn4_to_mat3(const qtn4& q)
 
 	// http://www.boost.org/doc/libs/1_46_1/libs/math/quaternion/TQE.pdf
 	// http://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
-	return
+	const array<float, 9> r =
 	{
 		aa+bb-cc-dd, 2*(-ad+bc), 2*(ac+bd),
 		2*(ad+bc), aa-bb+cc-dd, 2*(-ab+cd),
 		2*(-ac+bd), 2*(ab+cd), aa-bb-cc+dd
 	};
+	return r;
 }
 
 /// Transforms a vector by a 3x3 matrix.
 inline vec3 mat3_mul_vec3(const array<float, 9>& m, const vec3& v)
 {
-	return
-	{
+	return vec3
+	(
 		m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
 		m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
 		m[6] * v[0] + m[7] * v[1] + m[8] * v[2]
-	};
+	);
 }
 
 /// Transforms a vector by a 3x3 matrix.
 inline array<float, 3> mat3_mul_vec3(const array<float, 9>& m, const array<float, 3>& v)
 {
-	return
+	const array<float, 3> r =
 	{
 		m[0] * v[0] + m[1] * v[1] + m[2] * v[2],
 		m[3] * v[0] + m[4] * v[1] + m[5] * v[2],
 		m[6] * v[0] + m[7] * v[1] + m[8] * v[2]
 	};
+	return r;
 }
 
 #endif
