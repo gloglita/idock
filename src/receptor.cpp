@@ -113,8 +113,10 @@ receptor::receptor(const path& p, const vec3& center, const vec3& span_, const f
 	{
 		vector<size_t>& p = partitions(x, y, z);
 		p.reserve(100);
-		const vec3 corner0 = partition_corner0({x  , y  , z  });
-		const vec3 corner1 = partition_corner0({x+1, y+1, z+1});
+		const array<size_t, 3> corner0_index = {x  , y  , z  };
+		const array<size_t, 3> corner1_index = {x+1, y+1, z+1};
+		const vec3 corner0 = partition_corner0(corner0_index);
+		const vec3 corner1 = partition_corner0(corner1_index);
 		for (size_t i = 0; i < atoms.size(); ++i)
 		{
 			if (project_distance_sqr(corner0, corner1, atoms[i].coord) < scoring_function::cutoff_sqr)
