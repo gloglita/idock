@@ -24,30 +24,18 @@
   <ItemGroup>
     <ClInclude Include="src\array3d.hpp" />
     <ClInclude Include="src\atom.hpp" />
-    <ClInclude Include="src\box.hpp" />
-    <ClInclude Include="src\common.hpp" />
-    <ClInclude Include="src\conformation.hpp" />
-    <ClInclude Include="src\grid_map_task.hpp" />
     <ClInclude Include="src\ligand.hpp" />
-    <ClInclude Include="src\mat3.hpp" />
-    <ClInclude Include="src\matrix.hpp" />
-    <ClInclude Include="src\monte_carlo_task.hpp" />
-    <ClInclude Include="src\result.hpp" />
+    <ClInclude Include="src\qtn4.hpp" />
     <ClInclude Include="src\scoring_function.hpp" />
-    <ClInclude Include="src\quaternion.hpp" />
     <ClInclude Include="src\receptor.hpp" />
-    <ClInclude Include="src\summary.hpp" />
     <ClInclude Include="src\thread_pool.hpp" />
     <ClInclude Include="src\vec3.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\box.cpp" />
-    <ClCompile Include="src\grid_map_task.cpp" />
     <ClCompile Include="src\ligand.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\monte_carlo_task.cpp" />
+    <ClCompile Include="src\qtn4.cpp" />
     <ClCompile Include="src\scoring_function.cpp" />
-    <ClCompile Include="src\quaternion.cpp" />
     <ClCompile Include="src\receptor.cpp" />
     <ClCompile Include="src\thread_pool.cpp" />
   </ItemGroup>
@@ -111,7 +99,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_VARIADIC_MAX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(BOOST_ROOT)</AdditionalIncludeDirectories>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAsManaged>false</CompileAsManaged>
@@ -126,7 +114,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_VARIADIC_MAX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(BOOST_ROOT)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -141,7 +129,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_VARIADIC_MAX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(BOOST_ROOT)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -159,7 +147,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;_CONSOLE;_VARIADIC_MAX=10;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(BOOST_ROOT)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
