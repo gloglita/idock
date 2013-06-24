@@ -276,7 +276,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 	// Initialize frame-wide conformational variables.
 	vector<vec3> origins(num_frames); ///< Origin coordinate, which is rotorY.
 	vector<vec3> axes(num_frames); ///< Vector pointing from rotor Y to rotor X.
-	vector<qtn4> orientations_q(num_frames); ///< Orientation in the form of quaternion.
+	vector<array<float, 4>> orientations_q(num_frames); ///< Orientation in the form of quaternion.
 	vector<array<float, 9>> orientations_m(num_frames); ///< Orientation in the form of 3x3 matrix.
 	vector<vec3> forces(num_frames, zero3); ///< Aggregated derivatives of heavy atoms.
 	vector<vec3> torques(num_frames, zero3); /// Torque of the force.
@@ -462,7 +462,7 @@ bool ligand::evaluate(const vector<float>& conf, const scoring_function& sf, con
 result ligand::compose_result(const float e, const vector<float>& conf) const
 {
 	vector<vec3> origins(num_frames);
-	vector<qtn4> orientations_q(num_frames);
+	vector<array<float, 4>> orientations_q(num_frames);
 	vector<array<float, 9>> orientations_m(num_frames);
 	vector<vec3> heavy_atoms(num_heavy_atoms);
 	vector<vec3> hydrogens(num_hydrogens);
@@ -534,7 +534,8 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 	c0[0] = rec.center[0] + uniform_11(rng) * rec.span[0];
 	c0[1] = rec.center[1] + uniform_11(rng) * rec.span[1];
 	c0[2] = rec.center[2] + uniform_11(rng) * rec.span[2];
-	const qtn4 c0orientation = normalize(qtn4(uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)));
+	const array<float, 4> rnorientation = {uniform_11(rng), uniform_11(rng), uniform_11(rng), uniform_11(rng)};
+	const array<float, 4> c0orientation = normalize(rnorientation);
 	assert(normalized(c0orientation));
 	c0[3] = c0orientation[0];
 	c0[4] = c0orientation[1];
@@ -595,9 +596,9 @@ int ligand::bfgs(result& r, const scoring_function& sf, const receptor& rec, con
 				c2[0] = c1[0] + alpha * p[0];
 				c2[1] = c1[1] + alpha * p[1];
 				c2[2] = c1[2] + alpha * p[2];
-				const qtn4 c1orientation(c1[3], c1[4], c1[5], c1[6]);
+				const array<float, 4> c1orientation = { c1[3], c1[4], c1[5], c1[6] };
 				assert(normalized(c1orientation));
-				const qtn4 c2orientation = qtn4_mul_qtn4(vec3_to_qtn4(alpha * vec3(p[3], p[4], p[5])), c1orientation);
+				const array<float, 4> c2orientation = qtn4_mul_qtn4(vec3_to_qtn4(alpha * vec3(p[3], p[4], p[5])), c1orientation);
 				assert(normalized(c2orientation));
 				c2[3] = c2orientation[0];
 				c2[4] = c2orientation[1];

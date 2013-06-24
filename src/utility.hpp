@@ -4,7 +4,6 @@
 
 #include <array>
 #include "vec3.hpp"
-#include "qtn4.hpp"
 using namespace std;
 
 /// Returns the flattened 1D index of a 2D index (i, j) where j is the lowest dimension.
@@ -20,50 +19,59 @@ inline size_t mp(const size_t i, const size_t j)
 }
 
 /// Returns the square norm of current quaternion.
-inline float norm_sqr(const qtn4& q)
+inline float norm_sqr(const array<float, 4>& q)
 {
 	return q[0] * q[0] + q[1] * q[1] + q[2] * q[2] + q[3] * q[3];
 }
 
 /// Returns the norm of current quaternion.
-inline float norm(const qtn4& q)
+inline float norm(const array<float, 4>& q)
 {
 	return sqrt(norm_sqr(q));
 }
 
 /// Returns true if the current quaternion is normalized.
-inline bool normalized(const qtn4& q)
+inline bool normalized(const array<float, 4>& q)
 {
 	return norm_sqr(q) - 1.0f < 1e-5f;
 }
 
 /// Returns a normalized quaternion of current quaternion.
-inline qtn4 normalize(const qtn4& q)
+inline array<float, 4> normalize(const array<float, 4>& q)
 {
 	const float norm_inv = 1.0f / norm(q);
-	return qtn4(q[0] * norm_inv, q[1] * norm_inv, q[2] * norm_inv, q[3] * norm_inv);
+	const array<float, 4> r =
+	{
+		q[0] * norm_inv,
+		q[1] * norm_inv,
+		q[2] * norm_inv,
+		q[3] * norm_inv
+	};
+	return r;
 }
 
 /// Constructs a quaternion by a normalized axis and a rotation angle.
-inline qtn4 vec4_to_qtn4(const vec3& axis, const float angle)
+inline array<float, 4> vec4_to_qtn4(const vec3& axis, const float angle)
 {
 //	assert(axis.normalized());
 	const float s = sin(angle * 0.5f);
-	return qtn4
-	(
+	const array<float, 4> r =
+	{
 		cos(angle * 0.5f),
 		s * axis[0],
 		s * axis[1],
 		s * axis[2]
-	);
+	};
+	return r;
 }
 
 /// Constructs a quaternion by a rotation vector.
-inline qtn4 vec3_to_qtn4(const vec3& rotation)
+inline array<float, 4> vec3_to_qtn4(const vec3& rotation)
 {
 	if (rotation.zero())
 	{
-		return qtn4(1, 0, 0, 0);
+		const array<float, 4> r = { 1, 0, 0, 0 };
+		return r;
 	}
 	else
 	{
@@ -74,19 +82,20 @@ inline qtn4 vec3_to_qtn4(const vec3& rotation)
 }
 
 /// Returns the product of two quaternions.
-inline qtn4 qtn4_mul_qtn4(const qtn4& q1, const qtn4& q2)
+inline array<float, 4> qtn4_mul_qtn4(const array<float, 4>& q1, const array<float, 4>& q2)
 {
-    return qtn4
-	(
+    const array<float, 4> r =
+	{
 		q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2] - q1[3] * q2[3],
 		q1[0] * q2[1] + q1[1] * q2[0] + q1[2] * q2[3] - q1[3] * q2[2],
 		q1[0] * q2[2] - q1[1] * q2[3] + q1[2] * q2[0] + q1[3] * q2[1],
 		q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1] + q1[3] * q2[0]
-	);
+	};
+	return r;
 }
 
 /// Transforms the current quaternion into a 3x3 transformation matrix, e.g. quaternion(1, 0, 0, 0) => identity matrix.
-inline array<float, 9> qtn4_to_mat3(const qtn4& q)
+inline array<float, 9> qtn4_to_mat3(const array<float, 4>& q)
 {
 //	assert(is_normalized());
 	const float aa = q[0]*q[0];
