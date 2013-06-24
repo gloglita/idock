@@ -32,7 +32,7 @@ inline float norm(const qtn4& q)
 }
 
 /// Returns true if the current quaternion is normalized.
-inline bool is_normalized(const qtn4& q)
+inline bool normalized(const qtn4& q)
 {
 	return norm_sqr(q) - 1.0f < 1e-5f;
 }
